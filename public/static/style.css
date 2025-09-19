@@ -1,1 +1,205 @@
-h1 { font-family: Arial, Helvetica, sans-serif; }
+/* تطبيق آل سعيدان - ملف الأنماط المخصص */
+
+/* الخط العربي */
+body {
+  font-family: 'Noto Sans Arabic', Arial, sans-serif;
+}
+
+/* تحسينات RTL */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* تأثيرات التحويم والانتقالات */
+.hover-scale:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease-in-out;
+}
+
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+/* تحسين الظلال */
+.shadow-soft {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-soft-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* تدرجات مخصصة */
+.bg-gradient-family {
+  background: linear-gradient(135deg, #1e40af 0%, #059669 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* تحسينات الأزرار */
+.btn-primary {
+  background: linear-gradient(135deg, #1e40af 0%, #059669 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(30, 64, 175, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(30, 64, 175, 0.35);
+}
+
+/* تحسينات البطاقات */
+.card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+/* تحسينات التنقل */
+.nav-link {
+  position: relative;
+  color: #374151;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #1e40af;
+  background-color: #eff6ff;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: linear-gradient(135deg, #1e40af 0%, #059669 100%);
+  border-radius: 1.5px;
+}
+
+/* تحسينات الأيقونات */
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.icon-container:hover {
+  transform: rotate(5deg) scale(1.1);
+}
+
+/* تحسينات النماذج */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+/* تحسينات للهواتف المحمولة */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .text-responsive {
+    font-size: 1.25rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+}
+
+/* تحسينات الحركات */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* تحسينات اللودنغ */
+.loading-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #1e40af;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* تحسينات التنبيهات */
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.alert-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
