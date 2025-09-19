@@ -247,13 +247,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// تحميل شجرة العائلة
+// متغيرات عامة لإدارة العائلة
+let isEditMode = false;
+let familyMembers = [];
+let memberToDelete = null;
+
+// تحميل شجرة العائلة مع إدارة الأعضاء
 async function loadFamilyTree() {
   try {
     const response = await axios.get('/api/family-members');
-    const members = response.data.data;
+    familyMembers = response.data.data;
     
-    displayFamilyTree(members);
+    displayFamilyTree(familyMembers);
+    setupFamilyManagement();
     document.getElementById('family-loading').classList.add('hidden');
     document.getElementById('family-tree').classList.remove('hidden');
   } catch (error) {
@@ -267,7 +273,7 @@ async function loadFamilyTree() {
   }
 }
 
-// عرض شجرة العائلة
+// عرض شجرة العائلة مع أيقونات الإدارة
 function displayFamilyTree(members) {
   const container = document.getElementById('family-tree');
   
@@ -286,15 +292,33 @@ function displayFamilyTree(members) {
   Object.keys(membersByGeneration).sort().forEach(generation => {
     html += `
       <div class="mb-8">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
-          ${generation == 1 ? 'الجيل الأول - المؤسس' : `الجيل ${generation}`}
-        </h3>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-800">
+            ${generation == 1 ? 'الجيل الأول - المؤسس' : `الجيل ${generation}`}
+          </h3>
+          <span class="text-sm text-gray-500">${membersByGeneration[generation].length} أعضاء</span>
+        </div>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
     `;
     
     membersByGeneration[generation].forEach(member => {
+      const editButtonsHtml = isEditMode ? `
+        <div class="mt-3 pt-3 border-t border-gray-200 flex justify-end space-x-2 space-x-reverse">
+          <button onclick="editMember(${member.id})" 
+                  class="text-blue-600 hover:text-blue-800 text-sm transition-colors" 
+                  title="تعديل">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button onclick="deleteMember(${member.id})" 
+                  class="text-red-600 hover:text-red-800 text-sm transition-colors" 
+                  title="حذف">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      ` : '';
+      
       html += `
-        <div class="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+        <div class="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow relative">
           <div class="flex items-start space-x-4 space-x-reverse">
             <div class="flex-shrink-0">
               <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
@@ -303,10 +327,25 @@ function displayFamilyTree(members) {
             </div>
             <div class="flex-1">
               <h4 class="font-semibold text-gray-800 mb-1">${member.full_name}</h4>
-              ${member.field_of_excellence ? `<p class="text-sm text-blue-600 mb-1">${member.field_of_excellence}</p>` : ''}
+              ${member.field_of_excellence ? `<p class="text-sm text-blue-600 mb-1"><i class="fas fa-star ml-1"></i> ${member.field_of_excellence}</p>` : ''}
               ${member.phone ? `<p class="text-sm text-gray-600"><i class="fas fa-phone ml-1"></i> ${member.phone}</p>` : ''}
               ${member.email ? `<p class="text-sm text-gray-600"><i class="fas fa-envelope ml-1"></i> ${member.email}</p>` : ''}
               ${member.achievements ? `<p class="text-xs text-gray-500 mt-2">${member.achievements}</p>` : ''}
+              
+              <div class="flex items-center space-x-3 space-x-reverse mt-2">
+                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                  <i class="fas fa-layer-group ml-1"></i>
+                  ${getRelationshipLevelText(member.relationship_level)}
+                </span>
+                ${member.birth_date ? `
+                  <span class="text-xs text-gray-500">
+                    <i class="fas fa-birthday-cake ml-1"></i>
+                    ${formatDate(member.birth_date)}
+                  </span>
+                ` : ''}
+              </div>
+              
+              ${editButtonsHtml}
             </div>
           </div>
         </div>
@@ -329,6 +368,7 @@ async function loadEvents() {
     const events = response.data.data;
     
     displayEvents(events);
+    setupEventManagement();
     document.getElementById('events-loading').classList.add('hidden');
     document.getElementById('events-list').classList.remove('hidden');
   } catch (error) {
@@ -342,18 +382,13 @@ async function loadEvents() {
   }
 }
 
-// عرض الفعاليات
+// عرض الفعاليات مع نظام الدعوات
 function displayEvents(events) {
   const container = document.getElementById('events-list');
   
   if (events.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-12">
-        <i class="fas fa-calendar-times text-gray-400 text-4xl mb-4"></i>
-        <p class="text-gray-600">لا توجد فعاليات محددة حالياً</p>
-        <p class="text-sm text-gray-500">تابعونا لمعرفة الفعاليات القادمة</p>
-      </div>
-    `;
+    document.getElementById('events-list').classList.add('hidden');
+    document.getElementById('events-empty').classList.remove('hidden');
     return;
   }
   
@@ -370,7 +405,7 @@ function displayEvents(events) {
     });
     
     html += `
-      <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-gray-200">
+      <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
         <div class="flex justify-between items-start mb-4">
           <div class="flex-1">
             <h4 class="text-xl font-semibold text-gray-800 mb-2">${event.title}</h4>
@@ -384,7 +419,7 @@ function displayEvents(events) {
           </div>
         </div>
         
-        <div class="grid md:grid-cols-3 gap-4 text-sm">
+        <div class="grid md:grid-cols-3 gap-4 text-sm mb-4">
           ${event.location ? `
             <div class="flex items-center">
               <i class="fas fa-map-marker-alt text-red-500 ml-2"></i>
@@ -405,10 +440,31 @@ function displayEvents(events) {
           </div>
         </div>
         
-        <div class="mt-4 pt-4 border-t border-gray-200">
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(event.status)}">
-            ${getStatusText(event.status)}
-          </span>
+        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+          <div class="flex items-center space-x-3 space-x-reverse">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(event.status)}">
+              ${getStatusText(event.status)}
+            </span>
+            ${event.target_audience ? `
+              <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <i class="fas fa-users ml-1"></i>
+                ${getTargetAudienceText(event.target_audience)}
+              </span>
+            ` : ''}
+          </div>
+          
+          <div class="flex items-center space-x-2 space-x-reverse">
+            <button onclick="viewEventInvitations(${event.id})" 
+                    class="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors flex items-center">
+              <i class="fas fa-envelope ml-1"></i>
+              الدعوات
+            </button>
+            <button onclick="manageEventInvitations(${event.id})" 
+                    class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all flex items-center">
+              <i class="fas fa-paper-plane ml-1"></i>
+              إدارة الدعوات
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -916,6 +972,657 @@ function updateDateTime() {
   if (dateElement) {
     dateElement.textContent = arabicDate;
   }
+}
+
+// ================= نظام الدعوات =================
+
+// إعداد إدارة الفعاليات والدعوات
+function setupEventManagement() {
+  // أزرار إنشاء فعالية جديدة
+  const createEventBtn = document.getElementById('create-event-btn');
+  const manageInvitationsBtn = document.getElementById('manage-invitations-btn');
+  
+  // مودال إنشاء الفعالية
+  const eventModal = document.getElementById('event-modal');
+  const closeEventModal = document.getElementById('close-event-modal');
+  const createEventForm = document.getElementById('create-event-form');
+  
+  // مودال إدارة الدعوات
+  const invitationModal = document.getElementById('invitation-modal');
+  const closeInvitationModal = document.getElementById('close-invitation-modal');
+  const selectedEventSelect = document.getElementById('selected-event');
+  const sendInvitationsBtn = document.getElementById('send-invitations-btn');
+  
+  // إعداد أحداث المودال
+  if (createEventBtn) {
+    createEventBtn.addEventListener('click', () => {
+      eventModal.classList.remove('hidden');
+    });
+  }
+  
+  if (manageInvitationsBtn) {
+    manageInvitationsBtn.addEventListener('click', () => {
+      loadEventsForInvitation();
+      invitationModal.classList.remove('hidden');
+    });
+  }
+  
+  if (closeEventModal) {
+    closeEventModal.addEventListener('click', () => {
+      eventModal.classList.add('hidden');
+    });
+  }
+  
+  if (closeInvitationModal) {
+    closeInvitationModal.addEventListener('click', () => {
+      invitationModal.classList.add('hidden');
+    });
+  }
+  
+  // إغلاق المودال عند النقر خارجه
+  eventModal?.addEventListener('click', (e) => {
+    if (e.target === eventModal) {
+      eventModal.classList.add('hidden');
+    }
+  });
+  
+  invitationModal?.addEventListener('click', (e) => {
+    if (e.target === invitationModal) {
+      invitationModal.classList.add('hidden');
+    }
+  });
+  
+  // إعداد نموذج إنشاء الفعالية
+  if (createEventForm) {
+    createEventForm.addEventListener('submit', handleCreateEvent);
+  }
+  
+  // إعداد تحديد الفعالية للدعوات
+  if (selectedEventSelect) {
+    selectedEventSelect.addEventListener('change', handleEventSelection);
+  }
+  
+  // إعداد إرسال الدعوات
+  if (sendInvitationsBtn) {
+    sendInvitationsBtn.addEventListener('click', handleSendInvitations);
+  }
+}
+
+// إنشاء فعالية جديدة
+async function handleCreateEvent(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const eventData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    event_date: formData.get('event_date'),
+    location: formData.get('location'),
+    event_type: formData.get('event_type'),
+    max_attendees: formData.get('max_attendees') ? parseInt(formData.get('max_attendees')) : null,
+    organizer_id: 1 // سيتم تحديثه عند إضافة نظام المصادقة
+  };
+  
+  try {
+    AlSaedanUtils.showLoading(true);
+    
+    const response = await axios.post('/api/events', eventData);
+    
+    if (response.data.success) {
+      AlSaedanUtils.showAlert('success', 'تم إنشاء الفعالية بنجاح!');
+      document.getElementById('event-modal').classList.add('hidden');
+      e.target.reset();
+      
+      // إعادة تحميل الفعاليات
+      setTimeout(() => {
+        loadEvents();
+      }, 1000);
+    } else {
+      AlSaedanUtils.showAlert('error', 'حدث خطأ في إنشاء الفعالية');
+    }
+  } catch (error) {
+    console.error('Error creating event:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في الإرسال، يرجى المحاولة لاحقاً');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+  }
+}
+
+// تحميل الفعاليات لقائمة الدعوات
+async function loadEventsForInvitation() {
+  try {
+    const response = await axios.get('/api/events');
+    const events = response.data.data;
+    
+    const select = document.getElementById('selected-event');
+    select.innerHTML = '<option value="">اختر الفعالية للدعوة...</option>';
+    
+    events.forEach(event => {
+      const eventDate = new Date(event.event_date).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      
+      select.innerHTML += `
+        <option value="${event.id}">${event.title} - ${eventDate}</option>
+      `;
+    });
+    
+  } catch (error) {
+    console.error('Error loading events for invitation:', error);
+  }
+}
+
+// التعامل مع تحديد الفعالية
+async function handleEventSelection() {
+  const eventId = document.getElementById('selected-event').value;
+  const targetingDiv = document.getElementById('invitation-targeting');
+  const statsDiv = document.getElementById('invitation-stats');
+  
+  if (!eventId) {
+    targetingDiv.classList.add('hidden');
+    statsDiv.classList.add('hidden');
+    return;
+  }
+  
+  targetingDiv.classList.remove('hidden');
+  
+  // تحميل الأعضاء للاختيار الفردي
+  await loadMembersForSelection();
+  
+  // تحميل إحصائيات الدعوات إن وجدت
+  await loadInvitationStats(eventId);
+}
+
+// تحميل الأعضاء للاختيار الفردي
+async function loadMembersForSelection() {
+  try {
+    const response = await axios.get('/api/family-members');
+    const members = response.data.data;
+    
+    const container = document.getElementById('individual-members');
+    container.innerHTML = '';
+    
+    members.forEach(member => {
+      container.innerHTML += `
+        <label class="flex items-center text-sm">
+          <input type="checkbox" name="individual_member" value="${member.id}" class="form-checkbox ml-2" />
+          ${member.full_name}
+        </label>
+      `;
+    });
+    
+  } catch (error) {
+    console.error('Error loading members:', error);
+  }
+}
+
+// تحميل إحصائيات الدعوات
+async function loadInvitationStats(eventId) {
+  try {
+    const response = await axios.get(`/api/events/${eventId}/invitation-stats`);
+    
+    if (response.data.success) {
+      const stats = response.data.data;
+      displayInvitationStats(stats);
+      document.getElementById('invitation-stats').classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading invitation stats:', error);
+  }
+}
+
+// عرض إحصائيات الدعوات
+function displayInvitationStats(stats) {
+  const container = document.getElementById('stats-content');
+  
+  container.innerHTML = `
+    <div class="bg-blue-100 rounded-lg p-4 text-center">
+      <div class="text-2xl font-bold text-blue-600">${stats.total}</div>
+      <div class="text-sm text-blue-800">إجمالي الدعوات</div>
+    </div>
+    <div class="bg-yellow-100 rounded-lg p-4 text-center">
+      <div class="text-2xl font-bold text-yellow-600">${stats.pending}</div>
+      <div class="text-sm text-yellow-800">في الانتظار</div>
+    </div>
+    <div class="bg-green-100 rounded-lg p-4 text-center">
+      <div class="text-2xl font-bold text-green-600">${stats.accepted}</div>
+      <div class="text-sm text-green-800">مقبولة</div>
+    </div>
+    <div class="bg-red-100 rounded-lg p-4 text-center">
+      <div class="text-2xl font-bold text-red-600">${stats.declined}</div>
+      <div class="text-sm text-red-800">مرفوضة</div>
+    </div>
+  `;
+}
+
+// إرسال الدعوات
+async function handleSendInvitations() {
+  const eventId = document.getElementById('selected-event').value;
+  const customMessage = document.getElementById('custom-message').value;
+  
+  if (!eventId) {
+    AlSaedanUtils.showAlert('error', 'يرجى اختيار الفعالية أولاً');
+    return;
+  }
+  
+  // جمع مستويات القرابة المحددة
+  const relationshipLevels = Array.from(document.querySelectorAll('input[name="relationship_level"]:checked'))
+    .map(input => input.value);
+  
+  // جمع الأجيال المحددة  
+  const generations = Array.from(document.querySelectorAll('input[name="generation"]:checked'))
+    .map(input => parseInt(input.value));
+  
+  // جمع الأعضاء المحددين فردياً
+  const individualMembers = Array.from(document.querySelectorAll('input[name="individual_member"]:checked'))
+    .map(input => parseInt(input.value));
+  
+  if (relationshipLevels.length === 0 && generations.length === 0 && individualMembers.length === 0) {
+    AlSaedanUtils.showAlert('error', 'يرجى اختيار من سيتم دعوتهم');
+    return;
+  }
+  
+  const invitationData = {
+    target_levels: relationshipLevels,
+    generations: generations,
+    member_ids: individualMembers,
+    custom_message: customMessage
+  };
+  
+  try {
+    AlSaedanUtils.showLoading(true);
+    
+    const response = await axios.post(`/api/events/${eventId}/send-invitations`, invitationData);
+    
+    if (response.data.success) {
+      AlSaedanUtils.showAlert('success', response.data.message);
+      
+      // تنظيف النموذج
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('custom-message').value = '';
+      
+      // إعادة تحميل الإحصائيات
+      await loadInvitationStats(eventId);
+    } else {
+      AlSaedanUtils.showAlert('error', response.data.error || 'حدث خطأ في إرسال الدعوات');
+    }
+  } catch (error) {
+    console.error('Error sending invitations:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في الإرسال، يرجى المحاولة لاحقاً');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+  }
+}
+
+// عرض دعوات فعالية معينة
+async function viewEventInvitations(eventId) {
+  try {
+    const response = await axios.get(`/api/events/${eventId}/invitations`);
+    
+    if (response.data.success) {
+      const invitations = response.data.data;
+      displayInvitationsModal(invitations, eventId);
+    }
+  } catch (error) {
+    console.error('Error loading event invitations:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في تحميل الدعوات');
+  }
+}
+
+// عرض مودال دعوات الفعالية
+function displayInvitationsModal(invitations, eventId) {
+  const modalHtml = `
+    <div id="invitations-view-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800">دعوات الفعالية</h3>
+            <button onclick="document.getElementById('invitations-view-modal').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            ${invitations.length === 0 ? `
+              <div class="text-center py-8">
+                <i class="fas fa-envelope-open text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-600">لم يتم إرسال دعوات لهذه الفعالية بعد</p>
+              </div>
+            ` : invitations.map(invitation => `
+              <div class="bg-gray-50 rounded-lg p-4 border">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800">${invitation.full_name}</h4>
+                    <div class="text-sm text-gray-600 mt-1">
+                      <span class="ml-4"><i class="fas fa-phone ml-1"></i> ${invitation.phone || 'غير متوفر'}</span>
+                      <span><i class="fas fa-envelope ml-1"></i> ${invitation.email || 'غير متوفر'}</span>
+                    </div>
+                    ${invitation.notes ? `<p class="text-sm text-gray-600 mt-2">${invitation.notes}</p>` : ''}
+                  </div>
+                  <div class="text-center">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-medium ${getInvitationStatusClass(invitation.invitation_status)}">
+                      ${getInvitationStatusText(invitation.invitation_status)}
+                    </span>
+                    <div class="text-xs text-gray-500 mt-1">
+                      دُعي: ${formatDate(invitation.invited_at)}
+                    </div>
+                    ${invitation.responded_at ? `
+                      <div class="text-xs text-gray-500">
+                        رد: ${formatDate(invitation.responded_at)}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// إدارة دعوات فعالية معينة (فتح مودال الإدارة مع الفعالية محددة)
+function manageEventInvitations(eventId) {
+  // فتح مودال إدارة الدعوات
+  const modal = document.getElementById('invitation-modal');
+  modal.classList.remove('hidden');
+  
+  // تحديد الفعالية المحددة
+  const select = document.getElementById('selected-event');
+  
+  // تحميل الفعاليات ثم تحديد الفعالية المطلوبة
+  loadEventsForInvitation().then(() => {
+    select.value = eventId;
+    handleEventSelection();
+  });
+}
+
+// دوال مساعدة للدعوات
+function getTargetAudienceText(audience) {
+  const audiences = {
+    'all': 'جميع الأعضاء',
+    'close_family': 'الأسرة المباشرة',
+    'extended_family': 'الأقارب',
+    'council_only': 'مجلس الأسرة فقط'
+  };
+  return audiences[audience] || audience;
+}
+
+function getInvitationStatusText(status) {
+  const statuses = {
+    'pending': 'في الانتظار',
+    'accepted': 'مقبول',
+    'declined': 'مرفوض',
+    'maybe': 'ربما'
+  };
+  return statuses[status] || status;
+}
+
+function getInvitationStatusClass(status) {
+  const classes = {
+    'pending': 'bg-yellow-100 text-yellow-800',
+    'accepted': 'bg-green-100 text-green-800',
+    'declined': 'bg-red-100 text-red-800',
+    'maybe': 'bg-blue-100 text-blue-800'
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800';
+}
+
+// ================= نظام إدارة أفراد العائلة =================
+
+// إعداد نظام إدارة العائلة
+function setupFamilyManagement() {
+  const addMemberBtn = document.getElementById('add-member-btn');
+  const toggleEditModeBtn = document.getElementById('toggle-edit-mode');
+  const memberModal = document.getElementById('member-modal');
+  const closeMemberModal = document.getElementById('close-member-modal');
+  const memberForm = document.getElementById('member-form');
+  const cancelMemberBtn = document.getElementById('cancel-member-btn');
+  const confirmModal = document.getElementById('confirm-modal');
+  const confirmDeleteBtn = document.getElementById('confirm-delete');
+  const cancelDeleteBtn = document.getElementById('cancel-delete');
+  
+  // أحداث فتح وإغلاق المودال
+  if (addMemberBtn) {
+    addMemberBtn.addEventListener('click', () => {
+      openMemberModal();
+    });
+  }
+  
+  if (toggleEditModeBtn) {
+    toggleEditModeBtn.addEventListener('click', toggleEditMode);
+  }
+  
+  if (closeMemberModal) {
+    closeMemberModal.addEventListener('click', closeMemberModalHandler);
+  }
+  
+  if (cancelMemberBtn) {
+    cancelMemberBtn.addEventListener('click', closeMemberModalHandler);
+  }
+  
+  if (memberForm) {
+    memberForm.addEventListener('submit', handleMemberFormSubmit);
+  }
+  
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', confirmDeleteMember);
+  }
+  
+  if (cancelDeleteBtn) {
+    cancelDeleteBtn.addEventListener('click', () => {
+      confirmModal.classList.add('hidden');
+      memberToDelete = null;
+    });
+  }
+  
+  // إغلاق المودال عند النقر خارجه
+  memberModal?.addEventListener('click', (e) => {
+    if (e.target === memberModal) {
+      closeMemberModalHandler();
+    }
+  });
+  
+  confirmModal?.addEventListener('click', (e) => {
+    if (e.target === confirmModal) {
+      confirmModal.classList.add('hidden');
+      memberToDelete = null;
+    }
+  });
+  
+  // تحميل قائمة الآباء في النموذج
+  loadFathersForSelect();
+}
+
+// تبديل وضع التعديل
+function toggleEditMode() {
+  isEditMode = !isEditMode;
+  const editModeText = document.getElementById('edit-mode-text');
+  
+  if (isEditMode) {
+    editModeText.textContent = 'إنهاء التعديل';
+    document.getElementById('toggle-edit-mode').classList.add('bg-yellow-500');
+    document.getElementById('toggle-edit-mode').classList.remove('bg-white');
+  } else {
+    editModeText.textContent = 'وضع التعديل';
+    document.getElementById('toggle-edit-mode').classList.remove('bg-yellow-500');
+    document.getElementById('toggle-edit-mode').classList.add('bg-white');
+  }
+  
+  // إعادة عرض شجرة العائلة
+  displayFamilyTree(familyMembers);
+}
+
+// فتح مودال إضافة/تعديل عضو
+function openMemberModal(member = null) {
+  const modal = document.getElementById('member-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const memberForm = document.getElementById('member-form');
+  
+  if (member) {
+    modalTitle.textContent = 'تعديل بيانات العضو';
+    populateFormWithMember(member);
+  } else {
+    modalTitle.textContent = 'إضافة عضو جديد';
+    memberForm.reset();
+    document.getElementById('member-id').value = '';
+  }
+  
+  modal.classList.remove('hidden');
+}
+
+// إغلاق مودال العضو
+function closeMemberModalHandler() {
+  const modal = document.getElementById('member-modal');
+  modal.classList.add('hidden');
+}
+
+// تحميل قائمة الآباء في النموذج
+function loadFathersForSelect() {
+  const fatherSelect = document.querySelector('select[name="father_id"]');
+  if (!fatherSelect) return;
+  
+  // تنظيف وإعادة إضافة الخيار الافتراضي
+  fatherSelect.innerHTML = '<option value="">بدون والد (للمؤسس)</option>';
+  
+  // إضافة جميع الأعضاء كخيارات للوالد
+  familyMembers.forEach(member => {
+    fatherSelect.innerHTML += `
+      <option value="${member.id}">${member.full_name} (الجيل ${member.generation})</option>
+    `;
+  });
+}
+
+// ملء النموذج ببيانات العضو للتعديل
+function populateFormWithMember(member) {
+  document.getElementById('member-id').value = member.id;
+  document.querySelector('input[name="full_name"]').value = member.full_name || '';
+  document.querySelector('select[name="father_id"]').value = member.father_id || '';
+  document.querySelector('select[name="generation"]').value = member.generation || 3;
+  document.querySelector('select[name="relationship_level"]').value = member.relationship_level || 'family';
+  document.querySelector('input[name="birth_date"]').value = member.birth_date || '';
+  document.querySelector('input[name="national_id"]').value = member.national_id || '';
+  document.querySelector('input[name="phone"]').value = member.phone || '';
+  document.querySelector('input[name="email"]').value = member.email || '';
+  document.querySelector('input[name="field_of_excellence"]').value = member.field_of_excellence || '';
+  document.querySelector('textarea[name="achievements"]').value = member.achievements || '';
+}
+
+// معالجة إرسال نموذج العضو
+async function handleMemberFormSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const memberId = formData.get('member_id');
+  const isEditing = memberId && memberId !== '';
+  
+  const memberData = {
+    full_name: formData.get('full_name'),
+    father_id: formData.get('father_id') || null,
+    generation: parseInt(formData.get('generation')),
+    relationship_level: formData.get('relationship_level'),
+    birth_date: formData.get('birth_date') || null,
+    national_id: formData.get('national_id') || null,
+    phone: formData.get('phone') || null,
+    email: formData.get('email') || null,
+    field_of_excellence: formData.get('field_of_excellence') || null,
+    achievements: formData.get('achievements') || null
+  };
+  
+  try {
+    AlSaedanUtils.showLoading(true);
+    
+    let response;
+    if (isEditing) {
+      response = await axios.put(`/api/family-members/${memberId}`, memberData);
+    } else {
+      response = await axios.post('/api/family-members', memberData);
+    }
+    
+    if (response.data.success) {
+      AlSaedanUtils.showAlert('success', response.data.message);
+      closeMemberModalHandler();
+      
+      // إعادة تحميل شجرة العائلة
+      setTimeout(() => {
+        loadFamilyTree();
+      }, 1000);
+    } else {
+      AlSaedanUtils.showAlert('error', response.data.error);
+    }
+  } catch (error) {
+    console.error('Error saving member:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في الحفظ، يرجى المحاولة لاحقاً');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+  }
+}
+
+// تعديل عضو
+async function editMember(memberId) {
+  try {
+    const response = await axios.get(`/api/family-members/${memberId}`);
+    
+    if (response.data.success) {
+      openMemberModal(response.data.data);
+    } else {
+      AlSaedanUtils.showAlert('error', 'لم يتم العثور على بيانات العضو');
+    }
+  } catch (error) {
+    console.error('Error loading member for editing:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في تحميل بيانات العضو');
+  }
+}
+
+// حذف عضو
+function deleteMember(memberId) {
+  memberToDelete = memberId;
+  const confirmModal = document.getElementById('confirm-modal');
+  confirmModal.classList.remove('hidden');
+}
+
+// تأكيد حذف العضو
+async function confirmDeleteMember() {
+  if (!memberToDelete) return;
+  
+  try {
+    AlSaedanUtils.showLoading(true);
+    
+    const response = await axios.delete(`/api/family-members/${memberToDelete}`);
+    
+    if (response.data.success) {
+      AlSaedanUtils.showAlert('success', response.data.message);
+      
+      // إعادة تحميل شجرة العائلة
+      setTimeout(() => {
+        loadFamilyTree();
+      }, 1000);
+    } else {
+      AlSaedanUtils.showAlert('error', response.data.error);
+    }
+  } catch (error) {
+    console.error('Error deleting member:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في حذف العضو، يرجى المحاولة لاحقاً');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+    document.getElementById('confirm-modal').classList.add('hidden');
+    memberToDelete = null;
+  }
+}
+
+// دوال مساعدة لإدارة العائلة
+function getRelationshipLevelText(level) {
+  const levels = {
+    'family': 'عائلة مباشرة',
+    'close': 'قرابة قريبة',
+    'extended': 'قرابة بعيدة'
+  };
+  return levels[level] || level;
 }
 
 // تحديث الوقت كل دقيقة
