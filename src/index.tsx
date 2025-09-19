@@ -332,7 +332,9 @@ app.get('/', (c) => {
           <h2 class="text-4xl font-bold text-gray-800 mb-4">أهلاً وسهلاً بعائلة آل سعيدان</h2>
           <p class="text-xl text-gray-600 mb-6">منصة تفاعلية لربط أفراد العائلة الكريمة وتنظيم الفعاليات العائلية</p>
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p class="text-blue-800"><i class="fas fa-info-circle ml-2"></i> بإشراف مجلس الأسرة: سلمان، خالد، هشام، وبدر</p>
+            <p class="text-blue-800 mb-2"><i class="fas fa-info-circle ml-2"></i> <strong>مجلس الأسرة الحالي (الجيل الثالث):</strong></p>
+            <p class="text-blue-700 text-sm">رئيس المجلس: سلمان عبدالعزيز آل سعيدان</p>
+            <p class="text-blue-700 text-sm">الأعضاء: خالد، هشام، وبدر من الجيل الثالث</p>
           </div>
         </div>
 
