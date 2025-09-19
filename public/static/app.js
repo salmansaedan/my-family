@@ -241,6 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (currentPath === '/suggestions') {
     loadSuggestions();
     setupSuggestionForm();
+  } else if (currentPath === '/library') {
+    loadLibraryContent();
+    setupLibraryFilters();
   }
 });
 
@@ -589,6 +592,303 @@ function getPriorityBadgeClass(priority) {
     'high': 'bg-red-100 text-red-800'
   };
   return classes[priority] || 'bg-gray-100 text-gray-800';
+}
+
+// =================== مكتبة التجارب والخبرات ===================
+
+// تحميل محتوى المكتبة
+async function loadLibraryContent() {
+  try {
+    // تحميل المحتوى المميز
+    const featuredResponse = await axios.get('/api/library/featured');
+    if (featuredResponse.data.success) {
+      displayFeaturedContent(featuredResponse.data.data);
+      document.getElementById('featured-loading').classList.add('hidden');
+      document.getElementById('featured-content').classList.remove('hidden');
+    }
+
+    // تحميل جميع المحتوى
+    const allResponse = await axios.get('/api/library');
+    if (allResponse.data.success) {
+      displayLibraryContent(allResponse.data.data);
+      document.getElementById('content-loading').classList.add('hidden');
+      document.getElementById('content-list').classList.remove('hidden');
+    }
+
+    // تحميل إحصائيات الفئات
+    const categoriesResponse = await axios.get('/api/library/categories');
+    if (categoriesResponse.data.success) {
+      displayCategoryStats(categoriesResponse.data.data);
+    }
+
+  } catch (error) {
+    console.error('Error loading library content:', error);
+    document.getElementById('featured-loading').innerHTML = `
+      <div class="text-center py-8">
+        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+        <p class="text-red-600">حدث خطأ في تحميل محتوى المكتبة</p>
+      </div>
+    `;
+    document.getElementById('content-loading').innerHTML = `
+      <div class="text-center py-8">
+        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+        <p class="text-red-600">حدث خطأ في تحميل المحتوى</p>
+      </div>
+    `;
+  }
+}
+
+// عرض المحتوى المميز
+function displayFeaturedContent(content) {
+  const container = document.getElementById('featured-content');
+  
+  if (content.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full text-center py-8">
+        <i class="fas fa-star text-gray-400 text-4xl mb-4"></i>
+        <p class="text-gray-600">لا يوجد محتوى مميز حالياً</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  
+  content.forEach(item => {
+    html += `
+      <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200 hover:shadow-lg transition-all cursor-pointer" onclick="viewContent(${item.id})">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center ml-3">
+              <i class="fas ${getContentIcon(item.content_type)} text-white"></i>
+            </div>
+            <div>
+              <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full mb-1">
+                ${getCategoryText(item.category)}
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center text-xs text-gray-500">
+            <i class="fas fa-eye ml-1"></i>
+            <span>${item.views || 0}</span>
+          </div>
+        </div>
+        
+        <h4 class="text-lg font-semibold text-gray-800 mb-2 leading-tight">${item.title}</h4>
+        <p class="text-gray-600 text-sm mb-4 line-clamp-3">${item.description}</p>
+        
+        <div class="flex items-center justify-between text-xs text-gray-500">
+          <div class="flex items-center">
+            <i class="fas fa-user ml-1"></i>
+            <span>${item.author_name || 'مجهول'}</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-calendar ml-1"></i>
+            <span>${formatDate(item.published_at)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// عرض جميع المحتوى
+function displayLibraryContent(content) {
+  const container = document.getElementById('content-list');
+  
+  if (content.length === 0) {
+    document.getElementById('content-list').classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+    return;
+  }
+
+  let html = '';
+  
+  content.forEach(item => {
+    html += `
+      <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="viewContent(${item.id})">
+        <div class="flex items-start space-x-4 space-x-reverse">
+          <div class="flex-shrink-0">
+            <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <i class="fas ${getContentIcon(item.content_type)} text-white text-xl"></i>
+            </div>
+          </div>
+          
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2 space-x-reverse">
+                <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                  ${getCategoryText(item.category)}
+                </span>
+                <span class="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                  ${getContentTypeText(item.content_type)}
+                </span>
+                ${item.is_featured ? '<span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"><i class="fas fa-star mr-1"></i>مميز</span>' : ''}
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="fas fa-eye ml-1"></i>
+                <span>${item.views || 0}</span>
+              </div>
+            </div>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
+            <p class="text-gray-600 mb-4 line-clamp-2">${item.description}</p>
+            
+            <div class="flex items-center justify-between text-sm text-gray-500">
+              <div class="flex items-center space-x-4 space-x-reverse">
+                <div class="flex items-center">
+                  <i class="fas fa-user ml-1"></i>
+                  <span>${item.author_name || 'مجهول'}</span>
+                </div>
+                <div class="flex items-center">
+                  <i class="fas fa-calendar ml-1"></i>
+                  <span>${formatDate(item.published_at)}</span>
+                </div>
+                ${item.duration ? `
+                  <div class="flex items-center">
+                    <i class="fas fa-clock ml-1"></i>
+                    <span>${item.duration} دقيقة</span>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <button class="text-purple-600 hover:text-purple-800 font-medium transition-colors">
+                ${item.content_type === 'video' ? 'مشاهدة' : item.content_type === 'audio' ? 'استماع' : 'قراءة'}
+                <i class="fas fa-arrow-left mr-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// عرض إحصائيات الفئات
+function displayCategoryStats(stats) {
+  const container = document.getElementById('category-stats');
+  
+  let html = '';
+  
+  stats.forEach(stat => {
+    html += `
+      <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+        <div class="text-2xl font-bold text-blue-600 mb-1">${stat.count}</div>
+        <div class="text-sm text-gray-600">${getCategoryText(stat.category)}</div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// إعداد فلاتر المكتبة
+function setupLibraryFilters() {
+  const categoryFilter = document.getElementById('category-filter');
+  const contentTypeFilter = document.getElementById('content-type-filter');
+
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', filterLibraryContent);
+  }
+  
+  if (contentTypeFilter) {
+    contentTypeFilter.addEventListener('change', filterLibraryContent);
+  }
+}
+
+// فلترة محتوى المكتبة
+async function filterLibraryContent() {
+  const category = document.getElementById('category-filter').value;
+  const contentType = document.getElementById('content-type-filter').value;
+  
+  try {
+    AlSaedanUtils.showLoading(true);
+    
+    let url = '/api/library';
+    const params = new URLSearchParams();
+    
+    if (category !== 'all') params.append('category', category);
+    if (contentType !== 'all') params.append('content_type', contentType);
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    const response = await axios.get(url);
+    
+    if (response.data.success) {
+      displayLibraryContent(response.data.data);
+    }
+    
+  } catch (error) {
+    console.error('Error filtering content:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في تطبيق الفلتر');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+  }
+}
+
+// عرض محتوى معين
+async function viewContent(contentId) {
+  try {
+    // تحديث عدد المشاهدات
+    await axios.post(`/api/library/view/${contentId}`);
+    
+    // في التطبيق الحقيقي، هنا سنفتح صفحة المحتوى أو modal
+    AlSaedanUtils.showAlert('info', 'سيتم فتح المحتوى قريباً...');
+    
+  } catch (error) {
+    console.error('Error viewing content:', error);
+  }
+}
+
+// دوال مساعدة لمكتبة التجارب
+function getContentIcon(contentType) {
+  const icons = {
+    'article': 'fa-file-alt',
+    'video': 'fa-play-circle',
+    'audio': 'fa-headphones',
+    'document': 'fa-file-pdf'
+  };
+  return icons[contentType] || 'fa-file';
+}
+
+function getCategoryText(category) {
+  const categories = {
+    'business': 'الأعمال والتجارة',
+    'education': 'التعليم والتطوير',
+    'personal_development': 'التطوير الشخصي',
+    'family_values': 'القيم العائلية',
+    'leadership': 'القيادة والإدارة',
+    'general': 'عام'
+  };
+  return categories[category] || category;
+}
+
+function getContentTypeText(contentType) {
+  const types = {
+    'article': 'مقال',
+    'video': 'فيديو',
+    'audio': 'صوتي',
+    'document': 'وثيقة'
+  };
+  return types[contentType] || contentType;
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric'
+  };
+  return date.toLocaleDateString('ar-SA', options);
 }
 
 // وظائف مساعدة إضافية

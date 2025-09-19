@@ -89,6 +89,77 @@ app.post('/api/suggestions', async (c) => {
   }
 });
 
+// API لمكتبة التجارب والخبرات
+app.get('/api/library', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT lc.*, fm.full_name as author_name
+      FROM library_content lc
+      LEFT JOIN family_members fm ON lc.created_by = fm.id
+      WHERE lc.published_at IS NOT NULL
+      ORDER BY lc.is_featured DESC, lc.published_at DESC
+      LIMIT 50
+    `).all();
+    
+    return c.json({ success: true, data: results });
+  } catch (error) {
+    return c.json({ success: false, error: 'فشل في جلب محتوى المكتبة' }, 500);
+  }
+});
+
+app.get('/api/library/categories', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT category, COUNT(*) as count
+      FROM library_content 
+      WHERE published_at IS NOT NULL
+      GROUP BY category
+      ORDER BY count DESC
+    `).all();
+    
+    return c.json({ success: true, data: results });
+  } catch (error) {
+    return c.json({ success: false, error: 'فشل في جلب فئات المحتوى' }, 500);
+  }
+});
+
+app.get('/api/library/featured', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT lc.*, fm.full_name as author_name
+      FROM library_content lc
+      LEFT JOIN family_members fm ON lc.created_by = fm.id
+      WHERE lc.is_featured = TRUE AND lc.published_at IS NOT NULL
+      ORDER BY lc.published_at DESC
+      LIMIT 6
+    `).all();
+    
+    return c.json({ success: true, data: results });
+  } catch (error) {
+    return c.json({ success: false, error: 'فشل في جلب المحتوى المميز' }, 500);
+  }
+});
+
+app.post('/api/library/view/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    
+    const { success } = await c.env.DB.prepare(`
+      UPDATE library_content 
+      SET views = views + 1 
+      WHERE id = ?
+    `).bind(id).run();
+
+    if (success) {
+      return c.json({ success: true });
+    } else {
+      return c.json({ success: false, error: 'فشل في تحديث عدد المشاهدات' }, 500);
+    }
+  } catch (error) {
+    return c.json({ success: false, error: 'خطأ في تحديث المشاهدات' }, 500);
+  }
+});
+
 // صفحة شجرة العائلة
 app.get('/family', (c) => {
   return c.render(
@@ -111,6 +182,7 @@ app.get('/family', (c) => {
               <a href="/family" class="text-blue-600 font-semibold">شجرة العائلة</a>
               <a href="/events" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الفعاليات</a>
               <a href="/suggestions" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شاركنا أفكارك</a>
+              <a href="/library" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">مكتبة التجارب</a>
             </nav>
           </div>
         </div>
@@ -196,6 +268,157 @@ app.get('/events', (c) => {
       </main>
     </div>,
     { title: 'الفعاليات - تطبيق آل سعيدان' }
+  )
+});
+
+// صفحة مكتبة التجارب والخبرات
+app.get('/library', (c) => {
+  return c.render(
+    <div class="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      {/* Header */}
+      <header class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center py-4">
+            <div class="flex items-center space-x-4 space-x-reverse">
+              <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full p-3">
+                <i class="fas fa-book-open text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-2xl font-bold text-gray-800">مكتبة التجارب</h1>
+                <p class="text-gray-600">خبرات وتجارب أعضاء العائلة المتميزين</p>
+              </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-6 space-x-reverse">
+              <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الرئيسية</a>
+              <a href="/family" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شجرة العائلة</a>
+              <a href="/events" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الفعاليات</a>
+              <a href="/suggestions" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شاركنا أفكارك</a>
+              <a href="/library" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">مكتبة التجارب</a>
+              <a href="/library" class="text-purple-600 font-semibold">مكتبة التجارب</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 mb-8 text-white text-center">
+          <div class="mb-6">
+            <i class="fas fa-lightbulb text-4xl mb-4 opacity-90"></i>
+          </div>
+          <h2 class="text-3xl font-bold mb-4">مكتبة تجارب وخبرات آل سعيدان</h2>
+          <p class="text-xl opacity-90 mb-6">نستلهم من تجارب الماضي لنبني مستقبلاً أفضل</p>
+          <div class="bg-white bg-opacity-20 rounded-lg p-4 max-w-2xl mx-auto">
+            <p class="text-lg">"المعرفة تزداد بالمشاركة، والحكمة تنمو بالتجربة، والنجاح يتحقق بالتعلم من الآخرين"</p>
+          </div>
+        </div>
+
+        {/* Filter and Categories */}
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div class="flex flex-wrap items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-800">تصفح حسب الفئة</h3>
+            <div class="flex items-center space-x-4 space-x-reverse">
+              <select id="category-filter" class="form-input text-sm">
+                <option value="all">جميع الفئات</option>
+                <option value="business">الأعمال والتجارة</option>
+                <option value="education">التعليم والتطوير</option>
+                <option value="personal_development">التطوير الشخصي</option>
+                <option value="family_values">القيم العائلية</option>
+                <option value="leadership">القيادة والإدارة</option>
+              </select>
+              <select id="content-type-filter" class="form-input text-sm">
+                <option value="all">جميع الأنواع</option>
+                <option value="article">مقالات</option>
+                <option value="video">فيديوهات</option>
+                <option value="audio">صوتيات</option>
+                <option value="document">وثائق</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Category Statistics */}
+          <div id="category-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {/* Will be populated by JavaScript */}
+          </div>
+        </div>
+
+        {/* Featured Content */}
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+              <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-2 ml-3">
+                <i class="fas fa-star text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">المحتوى المميز</h3>
+            </div>
+          </div>
+
+          {/* Featured Content Loading */}
+          <div id="featured-loading" class="text-center py-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">جاري تحميل المحتوى المميز...</p>
+          </div>
+
+          {/* Featured Content Grid */}
+          <div id="featured-content" class="hidden grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Will be populated by JavaScript */}
+          </div>
+        </div>
+
+        {/* All Content */}
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+              <div class="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-2 ml-3">
+                <i class="fas fa-archive text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">جميع التجارب والخبرات</h3>
+            </div>
+            <div class="flex items-center space-x-2 space-x-reverse text-sm text-gray-600">
+              <i class="fas fa-sort"></i>
+              <span>مرتبة حسب الأحدث</span>
+            </div>
+          </div>
+
+          {/* Content Loading */}
+          <div id="content-loading" class="text-center py-12">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">جاري تحميل محتوى المكتبة...</p>
+          </div>
+
+          {/* Content List */}
+          <div id="content-list" class="hidden space-y-6">
+            {/* Will be populated by JavaScript */}
+          </div>
+
+          {/* Empty State */}
+          <div id="empty-state" class="hidden text-center py-12">
+            <i class="fas fa-book-open text-gray-400 text-4xl mb-4"></i>
+            <p class="text-gray-600">لا يوجد محتوى متاح حالياً</p>
+            <p class="text-sm text-gray-500">تابعونا لإضافة المزيد من التجارب والخبرات</p>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 mt-8 text-white text-center">
+          <div class="mb-4">
+            <i class="fas fa-handshake text-3xl mb-4 opacity-90"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">شارك تجربتك مع العائلة</h3>
+          <p class="text-lg opacity-90 mb-6">هل لديك تجربة أو خبرة تود مشاركتها؟ ساهم في إثراء مكتبة العائلة</p>
+          <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <p class="text-sm">للمساهمة بمحتوى جديد، يرجى التواصل مع مجلس الأسرة</p>
+            <div class="mt-3">
+              <a href="tel:0533361154" class="text-yellow-300 hover:text-yellow-100 font-medium">
+                <i class="fas fa-phone ml-1"></i>
+                0533361154
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>,
+    { title: 'مكتبة التجارب - تطبيق آل سعيدان' }
   )
 });
 
@@ -315,6 +538,7 @@ app.get('/', (c) => {
               <a href="/family" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شجرة العائلة</a>
               <a href="/events" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الفعاليات</a>
               <a href="/suggestions" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شاركنا أفكارك</a>
+              <a href="/library" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">مكتبة التجارب</a>
             </nav>
           </div>
         </div>

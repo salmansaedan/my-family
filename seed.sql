@@ -128,20 +128,65 @@ INSERT OR IGNORE INTO events (
  (SELECT id FROM family_members WHERE full_name = 'بدر إبراهيم آل سعيدان'),
  'planned');
 
--- إضافة محتوى تعريفي للمكتبة
+-- إضافة محتوى مكتبة التجارب والخبرات
 INSERT OR IGNORE INTO library_content (
   title, description, content_type, category, is_featured, 
-  published_at, created_by
+  published_at, created_by, duration, views
 ) VALUES 
+-- محتوى عن القيم العائلية والتراث
 ('مرحباً بكم في تطبيق آل سعيدان',
- 'تطبيق تفاعلي لربط أفراد عائلة آل سعيدان وتنظيم الفعاليات العائلية - بإشراف مجلس الأسرة',
+ 'تطبيق تفاعلي لربط أفراد عائلة آل سعيدان وتنظيم الفعاليات العائلية - بإشراف مجلس الأسرة الحالي من الجيل الثالث',
  'article', 'family_values', TRUE, datetime('now'),
- (SELECT id FROM family_members WHERE full_name = 'سلمان عبدالله آل سعيدان')),
+ (SELECT id FROM family_members WHERE full_name = 'سلمان عبدالله آل سعيدان'), NULL, 156),
 
 ('تراث الشيخ محمد بن عبدالله بن سعيدان',
- 'رحلة عبر تاريخ العائلة العريق وإنجازات الأجيال المتعاقبة الثلاثة',
- 'article', 'family_values', TRUE, datetime('now'),
- (SELECT id FROM family_members WHERE full_name = 'سلمان عبدالله آل سعيدان'));
+ 'رحلة عبر تاريخ العائلة العريق وإنجازات الأجيال المتعاقبة الثلاثة - من تأسيس العائلة وحتى مجلس الأسرة الحالي',
+ 'article', 'family_values', TRUE, datetime('now', '-7 days'),
+ (SELECT id FROM family_members WHERE full_name = 'سلمان عبدالله آل سعيدان'), NULL, 234),
+
+-- تجارب في الأعمال والتجارة
+('رحلة النجاح في التطوير العقاري',
+ 'تجربة شخصية في عالم التطوير العقاري من البداية حتى النجاح - دروس مستفادة ونصائح عملية للشباب الطموح',
+ 'article', 'business', TRUE, datetime('now', '-14 days'),
+ (SELECT id FROM family_members WHERE full_name = 'سلمان عبدالله آل سعيدان'), NULL, 189),
+
+('أسرار النجاح في التجارة',
+ 'خبرات متراكمة في عالم التجارة والأعمال - كيفية بناء علاقات تجارية ناجحة وإدارة المخاطر',
+ 'video', 'business', TRUE, datetime('now', '-21 days'),
+ (SELECT id FROM family_members WHERE full_name = 'خالد فهد آل سعيدان'), 45, 98),
+
+-- تجارب في القيادة والإدارة
+('فن الإدارة الحديثة',
+ 'مبادئ الإدارة الفعالة والقيادة الناجحة - تجربة في قيادة الفرق وإدارة المشاريع الكبيرة',
+ 'document', 'leadership', FALSE, datetime('now', '-30 days'),
+ (SELECT id FROM family_members WHERE full_name = 'هشام حمد آل سعيدان'), NULL, 67),
+
+('القيادة العائلية والمجتمعية',
+ 'كيفية الموازنة بين القيادة في الأسرة والمجتمع - دروس من الخبرة العملية في إدارة المسؤوليات المختلفة',
+ 'audio', 'leadership', TRUE, datetime('now', '-35 days'),
+ (SELECT id FROM family_members WHERE full_name = 'بدر إبراهيم آل سعيدان'), 30, 123),
+
+-- محتوى تعليمي وتطوير شخصي  
+('التعلم المستمر طريق النجاح',
+ 'أهمية التعلم مدى الحياة والتطوير المستمر للمهارات - قصص وتجارب عملية في رحلة التعلم',
+ 'article', 'education', FALSE, datetime('now', '-42 days'),
+ (SELECT id FROM family_members WHERE full_name = 'عبدالله محمد آل سعيدان'), NULL, 45),
+
+('بناء الشخصية القيادية',
+ 'خطوات عملية لتطوير الشخصية القيادية والمهارات الاجتماعية - تجربة شخصية في التطوير الذاتي',
+ 'video', 'personal_development', FALSE, datetime('now', '-49 days'),
+ (SELECT id FROM family_members WHERE full_name = 'فهد محمد آل سعيدان'), 38, 78),
+
+('حكم وتجارب من الحياة',
+ 'مجموعة من الحكم والدروس المستفادة من تجارب الحياة - نصائح من جيل الآباء للأجيال الجديدة',
+ 'audio', 'personal_development', TRUE, datetime('now', '-56 days'),
+ (SELECT id FROM family_members WHERE full_name = 'حمد محمد آل سعيدان'), 25, 167),
+
+-- محتوى عن قيم الأسرة
+('قيم آل سعيدان عبر الأجيال',
+ 'القيم الأساسية التي تميز عائلة آل سعيدان وكيف تنتقل من جيل إلى جيل - أهمية الحفاظ على التراث',
+ 'article', 'family_values', FALSE, datetime('now', '-63 days'),
+ (SELECT id FROM family_members WHERE full_name = 'إبراهيم محمد آل سعيدان'), NULL, 201);
 
 -- إضافة مقترحات تجريبية محدثة
 INSERT OR IGNORE INTO suggestions (
