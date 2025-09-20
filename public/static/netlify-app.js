@@ -778,22 +778,6 @@ class AlSaedanNetlifyApp {
     };
     return date.toLocaleDateString('ar-SA', options);
   }
-}
-
-// تهيئة التطبيق عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-  new AlSaedanNetlifyApp();
-});
-
-// إضافة alert utility للتوافق
-window.AlSaedanUtils = {
-  showAlert: (type, message) => {
-    alert(message);
-  },
-  showLoading: (show) => {
-    // يمكن تحسينه لاحقاً
-    console.log('Loading:', show);
-  }
 
   // دوال إضافة البيانات الجديدة
   addFamilyMember(memberData) {
@@ -866,6 +850,22 @@ window.AlSaedanUtils = {
     URL.revokeObjectURL(url);
   }
 }
+
+// تهيئة التطبيق عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+  new AlSaedanNetlifyApp();
+});
+
+// إضافة alert utility للتوافق
+window.AlSaedanUtils = {
+  showAlert: (type, message) => {
+    alert(message);
+  },
+  showLoading: (show) => {
+    // يمكن تحسينه لاحقاً
+    console.log('Loading:', show);
+  }
+};
 
 // جعل الفئات متاحة عالمياً
 window.AlSaedanNetlifyApp = AlSaedanNetlifyApp;
