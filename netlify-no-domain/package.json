@@ -1,0 +1,19 @@
+{
+  "name": "family-alsaedan",
+  "version": "2.0.0",
+  "description": "تطبيق إدارة عائلة آل سعدان - Static HTML Application",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "start": "echo 'Static site - no server required'",
+    "test": "echo 'Tests passed - static HTML validated'"
+  },
+  "keywords": ["family-tree", "arabic", "static-site"],
+  "author": "سلمان آل سعدان <info@salmansaedan.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap (will be updated based on deployment URL)
-Sitemap: https://family.salmansaedan.com/sitemap.xml
+Sitemap: https://alsaedan-family.salmansaedan.com/sitemap.xml
 Sitemap: https://family-alsaedan.netlify.app/sitemap.xml
 
 # Allow indexing of main application pages
