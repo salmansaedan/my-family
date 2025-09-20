@@ -79,8 +79,8 @@ README.md                  # هذا الملف
 
 ## روابط الوصول
 - **المعاينة المباشرة**: https://39029-isvb57g3ae2i9g8x3xn7i-6532622b.e2b.dev
+- **GitHub Repository**: https://github.com/salmansaedan/my-family
 - **الإنتاج**: [جاهز للنشر على Netlify]
-- **GitHub**: [يتم تحديثها عند الربط مع GitHub]
 - **الاتصال**: info@salmansaedan.com | 0533361154
 
 ## حالة النشر
