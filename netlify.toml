@@ -1,6 +1,6 @@
 [build]
   # Static site deployment - no build process needed
-  command = "echo 'Static HTML deployment - ready to serve'"
+  command = ""
   publish = "."
   
 [build.environment]
