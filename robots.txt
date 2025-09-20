@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://family.salmansaedan.com/sitemap.xml
+
+# Allow indexing of main application pages
+Allow: /app-complete.html
+Allow: /family.html
+Allow: /index.html
+
+# Disallow backup and test files
+Disallow: /app-complete-backup.html
+Disallow: /test-*.html
+Disallow: /*.log
+Disallow: /node_modules/
+Disallow: /.git/
