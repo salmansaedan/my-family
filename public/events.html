@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفعاليات - عائلة آل سعدان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+        
+        /* RTL Support */
+        .rtl-text {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        /* Custom animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hover-scale {
+            transition: transform 0.2s;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Event cards styling */
+        .event-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .event-card.past {
+            background: linear-gradient(135deg, #a8a8a8 0%, #7a7a7a 100%);
+        }
+        
+        .event-card.upcoming {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-level-small { background-color: #10b981; }
+        .badge-level-medium { background-color: #f59e0b; }
+        .badge-level-large { background-color: #ef4444; }
+        
+        /* Demo notice */
+        .demo-notice {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            border-right: 5px solid #e11d48;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 rtl-text">
+    <!-- Navigation -->
+    <nav class="bg-blue-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-reverse space-x-8">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-users text-2xl ml-2"></i>
+                        <span class="font-bold text-xl">عائلة آل سعدان</span>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="mr-10 flex items-baseline space-x-reverse space-x-4">
+                            <a href="index.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">الرئيسية</a>
+                            <a href="family.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">شجرة العائلة</a>
+                            <a href="events.html" class="bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">الفعاليات</a>
+                            <a href="suggestions.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">الاقتراحات</a>
+                            <a href="library.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">المكتبة</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-white hover:text-gray-300">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-blue-800">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 text-white hover:bg-blue-700">الرئيسية</a>
+                <a href="family.html" class="block px-3 py-2 text-white hover:bg-blue-700">شجرة العائلة</a>
+                <a href="events.html" class="block px-3 py-2 text-white bg-blue-700">الفعاليات</a>
+                <a href="suggestions.html" class="block px-3 py-2 text-white hover:bg-blue-700">الاقتراحات</a>
+                <a href="library.html" class="block px-3 py-2 text-white hover:bg-blue-700">المكتبة</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Demo Notice -->
+        <div class="demo-notice">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-pink-600 ml-3 text-xl"></i>
+                <div>
+                    <h3 class="text-pink-800 font-semibold">نسخة تجريبية للعرض</h3>
+                    <p class="text-pink-700 text-sm mt-1">
+                        هذه نسخة ثابتة من التطبيق تعمل ببيانات تجريبية لأغراض العرض على Netlify. 
+                        للحصول على النسخة الكاملة مع قاعدة البيانات، يرجى التواصل على: <strong>0533361154</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-calendar-alt ml-3 text-blue-600"></i>
+                        الفعاليات
+                    </h1>
+                    <p class="text-gray-600 mt-2">إدارة ومتابعة فعاليات العائلة والمناسبات</p>
+                </div>
+                <button onclick="showCreateEventForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                    <i class="fas fa-plus ml-2"></i>
+                    إضافة فعالية
+                </button>
+            </div>
+        </div>
+
+        <!-- Events Filter -->
+        <div class="bg-white shadow rounded-lg p-4 mb-6">
+            <div class="flex flex-wrap gap-4">
+                <button onclick="filterEvents('all')" class="filter-btn active bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-list ml-2"></i>
+                    جميع الفعاليات
+                </button>
+                <button onclick="filterEvents('upcoming')" class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                    <i class="fas fa-clock ml-2"></i>
+                    القادمة
+                </button>
+                <button onclick="filterEvents('past')" class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                    <i class="fas fa-history ml-2"></i>
+                    المنتهية
+                </button>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div id="eventsContainer" class="space-y-6">
+            <!-- Events will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Create Event Modal -->
+        <div id="createEventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">إضافة فعالية جديدة</h3>
+                    <button onclick="hideCreateEventForm()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="createEventForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اسم الفعالية</label>
+                        <input type="text" name="title" required class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الوصف</label>
+                        <textarea name="description" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
+                        <input type="datetime-local" name="event_date" required class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الموقع</label>
+                        <input type="text" name="location" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">مستوى الدعوة</label>
+                        <select name="invitation_level" class="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="صغير">صغير - الأسرة المباشرة</option>
+                            <option value="متوسط">متوسط - الجيل الثاني والثالث</option>
+                            <option value="كبير">كبير - جميع أفراد العائلة</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-4">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                            إنشاء الفعالية
+                        </button>
+                        <button type="button" onclick="hideCreateEventForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                            إلغاء
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Event Details Modal -->
+        <div id="eventDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold" id="eventTitle">تفاصيل الفعالية</h3>
+                    <button onclick="hideEventDetails()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="eventDetailsContent">
+                    <!-- Event details will be loaded here -->
+                </div>
+                
+                <div class="flex gap-2 pt-4">
+                    <button onclick="hideEventDetails()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                        إغلاق
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="/static/netlify-app.js"></script>
+    <script>
+        let currentFilter = 'all';
+        
+        // Initialize the events page
+        document.addEventListener('DOMContentLoaded', function() {
+            const app = new AlSaedanNetlifyApp();
+            app.displayEvents();
+            loadEvents();
+        });
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        function loadEvents() {
+            const eventsContainer = document.getElementById('eventsContainer');
+            
+            // Get mock events data
+            const app = new AlSaedanNetlifyApp();
+            const allEvents = app.mockEventsData;
+            
+            // Filter events based on current filter
+            let filteredEvents = allEvents;
+            if (currentFilter === 'upcoming') {
+                filteredEvents = allEvents.filter(event => new Date(event.event_date) > new Date());
+            } else if (currentFilter === 'past') {
+                filteredEvents = allEvents.filter(event => new Date(event.event_date) <= new Date());
+            }
+            
+            eventsContainer.innerHTML = '';
+            
+            filteredEvents.forEach(event => {
+                const eventDate = new Date(event.event_date);
+                const isUpcoming = eventDate > new Date();
+                const eventCard = createEventCard(event, isUpcoming);
+                eventsContainer.appendChild(eventCard);
+            });
+            
+            if (filteredEvents.length === 0) {
+                eventsContainer.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-lg shadow">
+                        <i class="fas fa-calendar-times text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600">لا توجد فعاليات في هذه الفئة</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function createEventCard(event, isUpcoming) {
+            const card = document.createElement('div');
+            card.className = `event-card fade-in hover-scale ${isUpcoming ? 'upcoming' : 'past'}`;
+            
+            const eventDate = new Date(event.event_date);
+            const formattedDate = eventDate.toLocaleDateString('ar-SA', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const levelColors = {
+                'صغير': 'badge-level-small',
+                'متوسط': 'badge-level-medium',
+                'كبير': 'badge-level-large'
+            };
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="text-xl font-bold mb-1">${event.title}</h3>
+                        <span class="badge ${levelColors[event.invitation_level] || 'badge-level-medium'}">${event.invitation_level}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="showEventDetails(${event.id})" class="bg-white bg-opacity-20 px-3 py-1 rounded text-sm hover:bg-opacity-30 transition">
+                            <i class="fas fa-eye ml-1"></i>
+                            التفاصيل
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar ml-2"></i>
+                        ${formattedDate}
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-clock ml-2"></i>
+                        ${eventDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    ${event.location ? `
+                    <div class="flex items-center">
+                        <i class="fas fa-map-marker-alt ml-2"></i>
+                        ${event.location}
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${event.description ? `
+                <div class="mt-3 pt-3 border-t border-white border-opacity-20">
+                    <p class="text-sm opacity-90">${event.description}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+        
+        function filterEvents(filter) {
+            currentFilter = filter;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = btn.className.replace('bg-blue-600 text-white', 'bg-gray-200 text-gray-700');
+                btn.className = btn.className.replace('active', '');
+            });
+            
+            event.target.className = event.target.className.replace('bg-gray-200 text-gray-700', 'bg-blue-600 text-white');
+            event.target.classList.add('active');
+            
+            loadEvents();
+        }
+        
+        function showCreateEventForm() {
+            document.getElementById('createEventModal').classList.remove('hidden');
+        }
+        
+        function hideCreateEventForm() {
+            document.getElementById('createEventModal').classList.add('hidden');
+            document.getElementById('createEventForm').reset();
+        }
+        
+        function showEventDetails(eventId) {
+            const app = new AlSaedanNetlifyApp();
+            const event = app.mockEventsData.find(e => e.id === eventId);
+            
+            if (!event) return;
+            
+            const modal = document.getElementById('eventDetailsModal');
+            const title = document.getElementById('eventTitle');
+            const content = document.getElementById('eventDetailsContent');
+            
+            title.textContent = event.title;
+            
+            const eventDate = new Date(event.event_date);
+            const formattedDate = eventDate.toLocaleDateString('ar-SA', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-1">التاريخ والوقت</h4>
+                        <p class="text-gray-600">${formattedDate} - ${eventDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    
+                    ${event.location ? `
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-1">المكان</h4>
+                        <p class="text-gray-600">${event.location}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-1">مستوى الدعوة</h4>
+                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">${event.invitation_level}</span>
+                    </div>
+                    
+                    ${event.description ? `
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-1">الوصف</h4>
+                        <p class="text-gray-600">${event.description}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-1">حالة الفعالية</h4>
+                        <span class="inline-block px-3 py-1 ${new Date(event.event_date) > new Date() ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} rounded-full text-sm">
+                            ${new Date(event.event_date) > new Date() ? 'قادمة' : 'منتهية'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function hideEventDetails() {
+            document.getElementById('eventDetailsModal').classList.add('hidden');
+        }
+        
+        // Handle create event form submission
+        document.getElementById('createEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // In a real application, this would send data to server
+            alert('تم إنشاء الفعالية بنجاح! (هذه نسخة تجريبية)');
+            hideCreateEventForm();
+        });
+    </script>
+</body>
+</html>

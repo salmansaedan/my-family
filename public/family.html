@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شجرة العائلة - تطبيق آل سعيدان</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="static/style.css" rel="stylesheet" />
+    
+    <!-- Arabic Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind RTL Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'arabic': ['Noto Sans Arabic', 'Arial', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <div id="app">
+        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+            <!-- Header -->
+            <header class="bg-white shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-4">
+                        <div class="flex items-center space-x-4 space-x-reverse">
+                            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full p-3">
+                                <i class="fas fa-sitemap text-2xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">شجرة العائلة</h1>
+                                <p class="text-gray-600">أفراد عائلة آل سعيدان</p>
+                            </div>
+                        </div>
+                        <nav class="hidden md:flex items-center space-x-6 space-x-reverse">
+                            <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الرئيسية</a>
+                            <a href="family.html" class="text-blue-600 font-semibold">شجرة العائلة</a>
+                            <a href="events.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الفعاليات</a>
+                            <a href="suggestions.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">شاركنا أفكارك</a>
+                            <a href="library.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">مكتبة التجارب</a>
+                        </nav>
+                        
+                        <!-- Mobile menu button -->
+                        <div class="md:hidden">
+                            <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-600">
+                                <i class="fas fa-bars text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile menu -->
+                    <div id="mobile-menu" class="hidden md:hidden pb-4">
+                        <div class="flex flex-col space-y-2">
+                            <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium py-2 transition-colors">الرئيسية</a>
+                            <a href="family.html" class="text-blue-600 font-semibold py-2">شجرة العائلة</a>
+                            <a href="events.html" class="text-gray-700 hover:text-blue-600 font-medium py-2 transition-colors">الفعاليات</a>
+                            <a href="suggestions.html" class="text-gray-700 hover:text-blue-600 font-medium py-2 transition-colors">شاركنا أفكارك</a>
+                            <a href="library.html" class="text-gray-700 hover:text-blue-600 font-medium py-2 transition-colors">مكتبة التجارب</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Demo Notice -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-600 text-lg ml-3"></i>
+                        <p class="text-blue-700">
+                            <strong>نسخة تجريبية:</strong> هذه نسخة عرض تعمل ببيانات وهمية. النسخة الكاملة تحتوي على نظام إدارة متقدم.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Family Tree Container -->
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="mb-8 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-4">
+                            <i class="fas fa-crown text-2xl text-white"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">شجرة عائلة آل سعيدان</h2>
+                        <p class="text-gray-600">نسب وأجيال العائلة الكريمة</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="family-loading" class="text-center py-12">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-600">جاري تحميل شجرة العائلة...</p>
+                    </div>
+
+                    <!-- Family Tree Content -->
+                    <div id="family-tree" class="hidden">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-8 mt-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <div class="flex justify-center items-center mb-4">
+                            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full p-2 ml-3">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span class="text-xl font-semibold">تطبيق آل سعيدان</span>
+                        </div>
+                        <p class="text-gray-400 mb-4">منصة تجمع العائلة وتحافظ على التراث</p>
+                        <div class="border-t border-gray-700 pt-4">
+                            <p class="text-sm text-gray-500">
+                                للتواصل: <a href="tel:0533361154" class="text-blue-400 hover:text-blue-300">0533361154</a> | 
+                                <a href="mailto:info@salmansaedan.com" class="text-blue-400 hover:text-blue-300">info@salmansaedan.com</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script src="static/netlify-app.js"></script>
+</body>
+</html>

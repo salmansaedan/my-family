@@ -1,0 +1,108 @@
+[build]
+  # This is a static site, no build needed
+  command = "echo 'Static site - no build required'"
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover.
+  for = "/*"
+  
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Content Security Policy
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
+      style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;
+      img-src 'self' data: https:;
+      connect-src 'self';
+      media-src 'self';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+    """
+    
+    # Cache headers for static assets
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirect rules for SPA-like behavior
+[[redirects]]
+  from = "/api/*"
+  to = "/index.html"
+  status = 200
+  force = true
+
+# Custom error pages
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404
+
+# Arabic language support
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Language = "ar"
+    
+# MIME types for Arabic fonts and assets
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Content-Type = "font/woff2"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.woff"
+  [headers.values]
+    Content-Type = "font/woff"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Edge functions (if needed in future)
+# [functions]
+#   directory = "netlify/functions"
+
+# Form handling (for future contact forms)
+[forms]
+  settings = { error_page = "/form-error.html", success_page = "/form-success.html" }
+
+# Performance optimizations
+[build.processing]
+  skip_processing = false
+  
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true

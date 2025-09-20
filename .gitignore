@@ -1,26 +1,20 @@
-# prod
-dist/
-
-# dev
-.yarn/
-!.yarn/releases
-.vscode/*
-!.vscode/launch.json
-!.vscode/*.code-snippets
-.idea/workspace.xml
-.idea/usage.statistics.xml
-.idea/shelf
-
-# deps
+# Dependencies
 node_modules/
-.wrangler
+*.lock
+package-lock.json
+yarn.lock
 
-# env
+# Production builds
+dist/
+.wrangler/
+
+# Environment files
 .env
+.env.local
 .env.production
 .dev.vars
 
-# logs
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -29,5 +23,35 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# misc
+# PM2
+.pm2/
+pids/
+ecosystem.config.cjs.backup
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Backup files
+*.backup
+*.bak
+*.tar.gz
+*.zip
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
