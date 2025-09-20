@@ -215,7 +215,7 @@
         <section id="events-section" class="section">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold text-white">إدارة الأحداث</h2>
-                <button onclick="showAddEventModal()" class="btn-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                <button onclick="showAddEventForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center">
                     <i class="fas fa-plus ml-2"></i>إضافة حدث جديد
                 </button>
             </div>
@@ -249,7 +249,7 @@
         <section id="suggestions-section" class="section">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold text-white">إدارة الاقتراحات</h2>
-                <button onclick="showAddSuggestionModal()" class="btn-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                <button onclick="showAddSuggestionForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center">
                     <i class="fas fa-plus ml-2"></i>إضافة اقتراح جديد
                 </button>
             </div>
@@ -283,7 +283,7 @@
         <section id="library-section" class="section">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold text-white">إدارة المكتبة</h2>
-                <button onclick="showAddLibraryModal()" class="btn-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                <button onclick="showAddLibraryForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center">
                     <i class="fas fa-plus ml-2"></i>إضافة محتوى جديد
                 </button>
             </div>
@@ -1278,6 +1278,77 @@
                     fatherSelect.appendChild(option);
                 });
             }
+            
+            // وظائف مساعدة للألوان والحالات
+            getStatusColor(status) {
+                const colors = {
+                    'pending': 'bg-yellow-100 text-yellow-700',
+                    'approved': 'bg-green-100 text-green-700',
+                    'rejected': 'bg-red-100 text-red-700',
+                    'under_review': 'bg-blue-100 text-blue-700'
+                };
+                return colors[status] || 'bg-gray-100 text-gray-700';
+            }
+            
+            getStatusText(status) {
+                const texts = {
+                    'pending': 'قيد الانتظار',
+                    'approved': 'مقبول',
+                    'rejected': 'مرفوض',
+                    'under_review': 'قيد المراجعة'
+                };
+                return texts[status] || 'غير محدد';
+            }
+            
+            getFileIcon(type) {
+                const icons = {
+                    'pdf': 'fas fa-file-pdf',
+                    'doc': 'fas fa-file-word',
+                    'image': 'fas fa-file-image',
+                    'video': 'fas fa-file-video',
+                    'audio': 'fas fa-file-audio',
+                    'book': 'fas fa-book',
+                    'article': 'fas fa-newspaper',
+                    'research': 'fas fa-microscope'
+                };
+                return icons[type] || 'fas fa-file';
+            }
+            
+            // إضافة حدث جديد
+            addEvent(eventData) {
+                const newEvent = this.dataManager.addItem('events', {
+                    ...eventData,
+                    created_at: new Date().toISOString(),
+                    attendees: 0
+                });
+                this.displayEvents();
+                return newEvent;
+            }
+            
+            // إضافة اقتراح جديد
+            addSuggestion(suggestionData) {
+                const newSuggestion = this.dataManager.addItem('suggestions', {
+                    ...suggestionData,
+                    created_at: new Date().toISOString(),
+                    upvotes: 0,
+                    downvotes: 0,
+                    comments: 0,
+                    status: 'pending'
+                });
+                this.displaySuggestions();
+                return newSuggestion;
+            }
+            
+            // إضافة عنصر مكتبة جديد
+            addLibraryItem(itemData) {
+                const newItem = this.dataManager.addItem('library', {
+                    ...itemData,
+                    created_at: new Date().toISOString(),
+                    tags: itemData.tags ? itemData.tags.split(',').map(tag => tag.trim()) : []
+                });
+                this.displayLibrary();
+                return newItem;
+            }
         }
 
         // Initialize app when page loads
@@ -1740,6 +1811,484 @@
                 }
             }
         }
+        
+        // وظائف إدارة الأحداث
+        function showAddEventForm() {
+            document.getElementById('addEventModal').classList.remove('hidden');
+        }
+        
+        function hideAddEventForm() {
+            document.getElementById('addEventModal').classList.add('hidden');
+            const form = document.getElementById('addEventForm');
+            if (form) {
+                form.reset();
+                form.removeAttribute('data-edit-id');
+                document.querySelector('#addEventModal h3').textContent = 'إضافة حدث جديد';
+            }
+        }
+        
+        function submitEvent() {
+            const form = document.getElementById('addEventForm');
+            const formData = new FormData(form);
+            const editId = form.getAttribute('data-edit-id');
+            
+            const eventData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                type: formData.get('type'),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                location: formData.get('location'),
+                status: formData.get('status') || 'upcoming'
+            };
+            
+            if (editId) {
+                // تحرير حدث موجود
+                let events = JSON.parse(localStorage.getItem('events') || '[]');
+                const index = events.findIndex(e => e.id === editId);
+                if (index !== -1) {
+                    events[index] = { ...events[index], ...eventData };
+                    localStorage.setItem('events', JSON.stringify(events));
+                }
+            } else {
+                // إضافة حدث جديد
+                if (app) app.addEvent(eventData);
+            }
+            
+            if (app) app.displayEvents();
+            hideAddEventForm();
+            showNotification('تم ' + (editId ? 'تحديث' : 'إضافة') + ' الحدث بنجاح!', 'success');
+        }
+        
+        function editEvent(eventId) {
+            const events = JSON.parse(localStorage.getItem('events') || '[]');
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            const form = document.getElementById('addEventForm');
+            form.title.value = event.title;
+            form.description.value = event.description;
+            form.type.value = event.type;
+            form.date.value = event.date;
+            form.time.value = event.time || '';
+            form.location.value = event.location;
+            form.status.value = event.status;
+            
+            form.setAttribute('data-edit-id', eventId);
+            document.getElementById('addEventModal').classList.remove('hidden');
+            document.querySelector('#addEventModal h3').textContent = 'تحرير الحدث';
+        }
+        
+        function deleteEvent(eventId) {
+            if (confirm('هل أنت متأكد من حذف هذا الحدث؟')) {
+                let events = JSON.parse(localStorage.getItem('events') || '[]');
+                events = events.filter(e => e.id !== eventId);
+                localStorage.setItem('events', JSON.stringify(events));
+                if (app) app.displayEvents();
+                showNotification('تم حذف الحدث بنجاح!', 'success');
+            }
+        }
+        
+        // وظائف إدارة الاقتراحات
+        function showAddSuggestionForm() {
+            document.getElementById('addSuggestionModal').classList.remove('hidden');
+        }
+        
+        function hideAddSuggestionForm() {
+            document.getElementById('addSuggestionModal').classList.add('hidden');
+            const form = document.getElementById('addSuggestionForm');
+            if (form) {
+                form.reset();
+                form.removeAttribute('data-edit-id');
+                document.querySelector('#addSuggestionModal h3').textContent = 'إضافة اقتراح جديد';
+            }
+        }
+        
+        function submitSuggestion() {
+            const form = document.getElementById('addSuggestionForm');
+            const formData = new FormData(form);
+            const editId = form.getAttribute('data-edit-id');
+            
+            const suggestionData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                submitted_by: formData.get('submitted_by')
+            };
+            
+            if (editId) {
+                let suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+                const index = suggestions.findIndex(s => s.id === editId);
+                if (index !== -1) {
+                    suggestions[index] = { ...suggestions[index], ...suggestionData };
+                    localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                }
+            } else {
+                if (app) app.addSuggestion(suggestionData);
+            }
+            
+            if (app) app.displaySuggestions();
+            hideAddSuggestionForm();
+            showNotification('تم ' + (editId ? 'تحديث' : 'إضافة') + ' الاقتراح بنجاح!', 'success');
+        }
+        
+        function editSuggestion(suggestionId) {
+            const suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+            const suggestion = suggestions.find(s => s.id === suggestionId);
+            if (!suggestion) return;
+            
+            const form = document.getElementById('addSuggestionForm');
+            form.title.value = suggestion.title;
+            form.description.value = suggestion.description;
+            form.category.value = suggestion.category;
+            form.submitted_by.value = suggestion.submitted_by;
+            
+            form.setAttribute('data-edit-id', suggestionId);
+            document.getElementById('addSuggestionModal').classList.remove('hidden');
+            document.querySelector('#addSuggestionModal h3').textContent = 'تحرير الاقتراح';
+        }
+        
+        function deleteSuggestion(suggestionId) {
+            if (confirm('هل أنت متأكد من حذف هذا الاقتراح؟')) {
+                let suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+                suggestions = suggestions.filter(s => s.id !== suggestionId);
+                localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                if (app) app.displaySuggestions();
+                showNotification('تم حذف الاقتراح بنجاح!', 'success');
+            }
+        }
+        
+        function voteSuggestion(suggestionId, voteType) {
+            let suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+            const suggestion = suggestions.find(s => s.id === suggestionId);
+            if (!suggestion) return;
+            
+            if (voteType === 'up') {
+                suggestion.upvotes = (suggestion.upvotes || 0) + 1;
+            } else if (voteType === 'down') {
+                suggestion.downvotes = (suggestion.downvotes || 0) + 1;
+            }
+            
+            localStorage.setItem('suggestions', JSON.stringify(suggestions));
+            if (app) app.displaySuggestions();
+            showNotification('تم تسجيل تصويتك!', 'success');
+        }
+        
+        // وظائف إدارة المكتبة
+        function showAddLibraryForm() {
+            document.getElementById('addLibraryModal').classList.remove('hidden');
+        }
+        
+        function hideAddLibraryForm() {
+            document.getElementById('addLibraryModal').classList.add('hidden');
+            const form = document.getElementById('addLibraryForm');
+            if (form) {
+                form.reset();
+                form.removeAttribute('data-edit-id');
+                document.querySelector('#addLibraryModal h3').textContent = 'إضافة عنصر للمكتبة';
+            }
+        }
+        
+        function submitLibraryItem() {
+            const form = document.getElementById('addLibraryForm');
+            const formData = new FormData(form);
+            const editId = form.getAttribute('data-edit-id');
+            
+            const itemData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                type: formData.get('type'),
+                author: formData.get('author'),
+                tags: formData.get('tags'),
+                file_url: formData.get('file_url')
+            };
+            
+            if (editId) {
+                let library = JSON.parse(localStorage.getItem('library') || '[]');
+                const index = library.findIndex(i => i.id === editId);
+                if (index !== -1) {
+                    library[index] = { ...library[index], ...itemData, tags: itemData.tags ? itemData.tags.split(',').map(tag => tag.trim()) : [] };
+                    localStorage.setItem('library', JSON.stringify(library));
+                }
+            } else {
+                if (app) app.addLibraryItem(itemData);
+            }
+            
+            if (app) app.displayLibrary();
+            hideAddLibraryForm();
+            showNotification('تم ' + (editId ? 'تحديث' : 'إضافة') + ' عنصر المكتبة بنجاح!', 'success');
+        }
+        
+        function editLibraryItem(itemId) {
+            const library = JSON.parse(localStorage.getItem('library') || '[]');
+            const item = library.find(i => i.id === itemId);
+            if (!item) return;
+            
+            const form = document.getElementById('addLibraryForm');
+            form.title.value = item.title;
+            form.description.value = item.description;
+            form.category.value = item.category;
+            form.type.value = item.type;
+            form.author.value = item.author;
+            form.tags.value = item.tags ? item.tags.join(', ') : '';
+            form.file_url.value = item.file_url || '';
+            
+            form.setAttribute('data-edit-id', itemId);
+            document.getElementById('addLibraryModal').classList.remove('hidden');
+            document.querySelector('#addLibraryModal h3').textContent = 'تحرير عنصر المكتبة';
+        }
+        
+        function deleteLibraryItem(itemId) {
+            if (confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+                let library = JSON.parse(localStorage.getItem('library') || '[]');
+                library = library.filter(i => i.id !== itemId);
+                localStorage.setItem('library', JSON.stringify(library));
+                if (app) app.displayLibrary();
+                showNotification('تم حذف العنصر بنجاح!', 'success');
+            }
+        }
+        
+        // وظيفة إظهار الإشعارات
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="mr-2 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+        
     </script>
+    
+    <!-- نماذج إضافة وتحرير الأحداث -->
+    <div id="addEventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">إضافة حدث جديد</h3>
+                <button onclick="hideAddEventForm()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="addEventForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الحدث *</label>
+                        <input type="text" name="title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع الحدث *</label>
+                        <select name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- اختر نوع الحدث --</option>
+                            <option value="مناسبة عائلية">مناسبة عائلية</option>
+                            <option value="اجتماع">اجتماع</option>
+                            <option value="احتفال">احتفال</option>
+                            <option value="رحلة">رحلة</option>
+                            <option value="مؤتمر">مؤتمر</option>
+                            <option value="ورشة عمل">ورشة عمل</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">وصف الحدث *</label>
+                    <textarea name="description" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الحدث *</label>
+                        <input type="date" name="date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">وقت الحدث</label>
+                        <input type="time" name="time" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">مكان الحدث *</label>
+                        <input type="text" name="location" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة الحدث</label>
+                        <select name="status" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="upcoming">قادم</option>
+                            <option value="past">انتهى</option>
+                            <option value="cancelled">ملغي</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4">
+                    <button type="button" onclick="hideAddEventForm()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="submitEvent()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        حفظ الحدث
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- نماذج إضافة وتحرير الاقتراحات -->
+    <div id="addSuggestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">إضافة اقتراح جديد</h3>
+                <button onclick="hideAddSuggestionForm()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="addSuggestionForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الاقتراح *</label>
+                        <input type="text" name="title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">فئة الاقتراح *</label>
+                        <select name="category" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- اختر الفئة --</option>
+                            <option value="تحسين">تحسين</option>
+                            <option value="فعالية">فعالية</option>
+                            <option value="خدمة">خدمة</option>
+                            <option value="مشروع">مشروع</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">تفاصيل الاقتراح *</label>
+                    <textarea name="description" rows="5" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="اشرح اقتراحك بالتفصيل..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">اسم مقدم الاقتراح *</label>
+                    <input type="text" name="submitted_by" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4">
+                    <button type="button" onclick="hideAddSuggestionForm()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="submitSuggestion()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        إرسال الاقتراح
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- نماذج إضافة وتحرير المكتبة -->
+    <div id="addLibraryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">إضافة عنصر للمكتبة</h3>
+                <button onclick="hideAddLibraryForm()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="addLibraryForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">عنوان المادة *</label>
+                        <input type="text" name="title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">فئة المادة *</label>
+                        <select name="category" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- اختر الفئة --</option>
+                            <option value="كتاب">كتاب</option>
+                            <option value="مقال">مقال</option>
+                            <option value="بحث">بحث</option>
+                            <option value="وثيقة">وثيقة</option>
+                            <option value="صورة">صورة</option>
+                            <option value="فيديو">فيديو</option>
+                            <option value="صوت">تسجيل صوتي</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع الملف *</label>
+                        <select name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- اختر نوع الملف --</option>
+                            <option value="pdf">PDF</option>
+                            <option value="doc">Word Document</option>
+                            <option value="image">صورة</option>
+                            <option value="video">فيديو</option>
+                            <option value="audio">ملف صوتي</option>
+                            <option value="book">كتاب</option>
+                            <option value="article">مقال</option>
+                            <option value="research">بحث</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">اسم المؤلف *</label>
+                        <input type="text" name="author" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">وصف المادة *</label>
+                    <textarea name="description" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="اكتب وصفاً مختصراً للمادة..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">رابط الملف (اختياري)</label>
+                    <input type="url" name="file_url" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="https://example.com/file.pdf">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">العلامات (اختياري)</label>
+                    <input type="text" name="tags" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="علامة1, علامة2, علامة3">
+                    <p class="text-sm text-gray-500 mt-1">افصل بين العلامات بفاصلة</p>
+                </div>
+                
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4">
+                    <button type="button" onclick="hideAddLibraryForm()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="submitLibraryItem()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        حفظ العنصر
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
 </body>
 </html>
