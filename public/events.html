@@ -438,9 +438,23 @@
         document.getElementById('createEventForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // In a real application, this would send data to server
+            const formData = new FormData(e.target);
+            const eventData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                event_date: formData.get('event_date'),
+                location: formData.get('location'),
+                invitation_level: formData.get('invitation_level'),
+                status: 'active'
+            };
+            
+            // إضافة الفعالية الجديدة
+            const app = new AlSaedanNetlifyApp();
+            app.addEvent(eventData);
+            
             alert('تم إنشاء الفعالية بنجاح!');
             hideCreateEventForm();
+            loadEvents(); // إعادة تحميل القائمة
         });
     </script>
 </body>

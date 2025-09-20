@@ -580,9 +580,25 @@
         document.getElementById('createSuggestionForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // In a real application, this would send data to server
+            const formData = new FormData(e.target);
+            const suggestionData = {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                category: formData.get('category'),
+                priority: formData.get('priority'),
+                status: 'جديد',
+                author_name: 'مستخدم جديد', // يمكن تحديثه لاحقاً مع نظام المصادقة
+                rating: null
+            };
+            
+            // إضافة الاقتراح الجديد
+            const app = new AlSaedanNetlifyApp();
+            app.addSuggestion(suggestionData);
+            
             alert('تم إرسال الاقتراح بنجاح! سيتم مراجعته قريباً.');
             hideCreateSuggestionForm();
+            loadSuggestions(); // إعادة تحميل القائمة
+            updateStatistics(); // تحديث الإحصائيات
         });
     </script>
 </body>

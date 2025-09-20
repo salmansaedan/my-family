@@ -1,7 +1,82 @@
-// تطبيق آل سعيدان - نسخة Netlify مع بيانات محاكاة
+// تطبيق آل سعيدان - نسخة Netlify مع بيانات محاكاة وحفظ محلي
 
-// بيانات محاكاة للعائلة
-const mockFamilyData = [
+// نظام إدارة البيانات المحلية
+class DataManager {
+  constructor() {
+    this.storageKey = 'alsaedan-app-data';
+    this.initializeData();
+  }
+
+  initializeData() {
+    const savedData = localStorage.getItem(this.storageKey);
+    if (!savedData) {
+      // حفظ البيانات الأولية إذا لم تكن موجودة
+      this.saveInitialData();
+    }
+  }
+
+  saveInitialData() {
+    const initialData = {
+      familyMembers: [...mockFamilyDataOriginal],
+      events: [...mockEventsDataOriginal], 
+      suggestions: [...mockSuggestionsDataOriginal],
+      library: [...mockLibraryDataOriginal],
+      lastUpdate: new Date().toISOString()
+    };
+    localStorage.setItem(this.storageKey, JSON.stringify(initialData));
+  }
+
+  getData(type) {
+    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    return savedData[type] || [];
+  }
+
+  saveData(type, data) {
+    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    savedData[type] = data;
+    savedData.lastUpdate = new Date().toISOString();
+    localStorage.setItem(this.storageKey, JSON.stringify(savedData));
+  }
+
+  addItem(type, item) {
+    const currentData = this.getData(type);
+    const newId = Math.max(...currentData.map(item => item.id), 0) + 1;
+    item.id = newId;
+    item.created_at = new Date().toISOString();
+    currentData.push(item);
+    this.saveData(type, currentData);
+    return item;
+  }
+
+  updateItem(type, id, updatedItem) {
+    const currentData = this.getData(type);
+    const index = currentData.findIndex(item => item.id === id);
+    if (index !== -1) {
+      currentData[index] = { ...currentData[index], ...updatedItem };
+      this.saveData(type, currentData);
+      return currentData[index];
+    }
+    return null;
+  }
+
+  deleteItem(type, id) {
+    const currentData = this.getData(type);
+    const filteredData = currentData.filter(item => item.id !== id);
+    this.saveData(type, filteredData);
+    return true;
+  }
+
+  resetData() {
+    localStorage.removeItem(this.storageKey);
+    this.saveInitialData();
+  }
+}
+
+// إنشاء مدير البيانات
+const dataManager = new DataManager();
+
+// البيانات الأصلية للعائلة (للاستخدام عند الإعادة التعيين)
+const mockFamilyDataOriginal = [
   {
     id: 1,
     full_name: "الشيخ محمد بن عبدالله بن سعيدان",
@@ -112,8 +187,8 @@ const mockFamilyData = [
   }
 ];
 
-// بيانات محاكاة للفعاليات
-const mockEventsData = [
+// البيانات الأصلية للفعاليات
+const mockEventsDataOriginal = [
   {
     id: 1,
     title: "اجتماع مجلس الأسرة الشهري",
@@ -138,8 +213,8 @@ const mockEventsData = [
   }
 ];
 
-// بيانات محاكاة للمقترحات
-const mockSuggestionsData = [
+// البيانات الأصلية للاقتراحات
+const mockSuggestionsDataOriginal = [
   {
     id: 1,
     title: "إنشاء صندوق استثماري عائلي",
@@ -162,8 +237,8 @@ const mockSuggestionsData = [
   }
 ];
 
-// بيانات محاكاة لمكتبة التجارب
-const mockLibraryData = [
+// البيانات الأصلية لمكتبة التجارب
+const mockLibraryDataOriginal = [
   {
     id: 1,
     title: "تجربتي في التطوير العقاري",
@@ -195,7 +270,26 @@ let familyMembers = [...mockFamilyData];
 // فئة التطبيق الرئيسية
 class AlSaedanNetlifyApp {
   constructor() {
+    // ربط مع مدير البيانات
+    this.dataManager = dataManager;
     this.init();
+  }
+
+  // خصائص البيانات التي تستخدم مدير البيانات
+  get mockFamilyData() {
+    return this.dataManager.getData('familyMembers');
+  }
+
+  get mockEventsData() {
+    return this.dataManager.getData('events');
+  }
+
+  get mockSuggestionsData() {
+    return this.dataManager.getData('suggestions');
+  }
+
+  get mockLibraryData() {
+    return this.dataManager.getData('library');
   }
 
   init() {
@@ -700,4 +794,79 @@ window.AlSaedanUtils = {
     // يمكن تحسينه لاحقاً
     console.log('Loading:', show);
   }
-};
+
+  // دوال إضافة البيانات الجديدة
+  addFamilyMember(memberData) {
+    const newMember = this.dataManager.addItem('familyMembers', memberData);
+    this.displayFamilyTree(); // إعادة عرض الشجرة
+    return newMember;
+  }
+
+  updateFamilyMember(id, memberData) {
+    const updatedMember = this.dataManager.updateItem('familyMembers', id, memberData);
+    this.displayFamilyTree(); // إعادة عرض الشجرة
+    return updatedMember;
+  }
+
+  deleteFamilyMember(id) {
+    this.dataManager.deleteItem('familyMembers', id);
+    this.displayFamilyTree(); // إعادة عرض الشجرة
+  }
+
+  addEvent(eventData) {
+    const newEvent = this.dataManager.addItem('events', eventData);
+    // إعادة تحميل صفحة الفعاليات إذا كانت مفتوحة
+    if (window.loadEvents) window.loadEvents();
+    return newEvent;
+  }
+
+  addSuggestion(suggestionData) {
+    const newSuggestion = this.dataManager.addItem('suggestions', suggestionData);
+    // إعادة تحميل صفحة الاقتراحات إذا كانت مفتوحة
+    if (window.loadSuggestions) window.loadSuggestions();
+    if (window.updateStatistics) window.updateStatistics();
+    return newSuggestion;
+  }
+
+  addLibraryContent(contentData) {
+    const newContent = this.dataManager.addItem('library', contentData);
+    // إعادة تحميل صفحة المكتبة إذا كانت مفتوحة
+    if (window.loadContent) window.loadContent();
+    if (window.updateStatistics) window.updateStatistics();
+    return newContent;
+  }
+
+  // دالة إعادة تعيين البيانات للافتراضية
+  resetAllData() {
+    this.dataManager.resetData();
+    // إعادة تحميل جميع الصفحات
+    this.displayFamilyTree();
+    if (window.loadEvents) window.loadEvents();
+    if (window.loadSuggestions) window.loadSuggestions();
+    if (window.loadContent) window.loadContent();
+    if (window.updateStatistics) window.updateStatistics();
+    alert('تم إعادة تعيين جميع البيانات إلى الحالة الافتراضية');
+  }
+
+  // دالة تصدير البيانات
+  exportData() {
+    const data = {
+      familyMembers: this.mockFamilyData,
+      events: this.mockEventsData,
+      suggestions: this.mockSuggestionsData,
+      library: this.mockLibraryData,
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `alsaedan-family-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// جعل الفئات متاحة عالمياً
+window.AlSaedanNetlifyApp = AlSaedanNetlifyApp;
+window.dataManager = dataManager;

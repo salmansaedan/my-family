@@ -704,9 +704,24 @@
         document.getElementById('addContentForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // In a real application, this would send data to server
+            const formData = new FormData(e.target);
+            const contentData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                content_type: formData.get('content_type'),
+                category: formData.get('category'),
+                file_url: formData.get('file_url'),
+                author_name: 'مستخدم جديد' // يمكن تحديثه لاحقاً مع نظام المصادقة
+            };
+            
+            // إضافة المحتوى الجديد
+            const app = new AlSaedanNetlifyApp();
+            app.addLibraryContent(contentData);
+            
             alert('تم إضافة المحتوى بنجاح!');
             hideAddContentForm();
+            loadContent(); // إعادة تحميل القائمة
+            updateStatistics(); // تحديث الإحصائيات
         });
     </script>
 </body>

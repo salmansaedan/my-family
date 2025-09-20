@@ -140,6 +140,18 @@
                     <div class="bg-white bg-opacity-20 rounded-lg p-4 max-w-2xl mx-auto">
                         <p class="text-lg">"العائلة المتماسكة قوة، والتراث المحفوظ هوية، والمستقبل المشترك أمل"</p>
                     </div>
+                    
+                    <!-- أزرار إدارة البيانات -->
+                    <div class="mt-6 flex justify-center gap-4">
+                        <button onclick="exportData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-download ml-2"></i>
+                            تصدير البيانات
+                        </button>
+                        <button onclick="resetAllData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-undo ml-2"></i>
+                            إعادة التعيين
+                        </button>
+                    </div>
                 </div>
 
 
@@ -171,5 +183,25 @@
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="static/netlify-app.js"></script>
+    
+    <script>
+        // دوال إدارة البيانات
+        function exportData() {
+            const app = new AlSaedanNetlifyApp();
+            app.exportData();
+        }
+        
+        function resetAllData() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم فقدان جميع الإضافات الجديدة.')) {
+                const app = new AlSaedanNetlifyApp();
+                app.resetAllData();
+            }
+        }
+        
+        // تفعيل التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            const app = new AlSaedanNetlifyApp();
+        });
+    </script>
 </body>
 </html>
