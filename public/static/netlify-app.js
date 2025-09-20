@@ -1,79 +1,6 @@
 // تطبيق آل سعيدان - نسخة Netlify مع بيانات محاكاة وحفظ محلي
 
-// نظام إدارة البيانات المحلية
-class DataManager {
-  constructor() {
-    this.storageKey = 'alsaedan-app-data';
-    this.initializeData();
-  }
 
-  initializeData() {
-    const savedData = localStorage.getItem(this.storageKey);
-    if (!savedData) {
-      // حفظ البيانات الأولية إذا لم تكن موجودة
-      this.saveInitialData();
-    }
-  }
-
-  saveInitialData() {
-    const initialData = {
-      familyMembers: [...mockFamilyDataOriginal],
-      events: [...mockEventsDataOriginal], 
-      suggestions: [...mockSuggestionsDataOriginal],
-      library: [...mockLibraryDataOriginal],
-      lastUpdate: new Date().toISOString()
-    };
-    localStorage.setItem(this.storageKey, JSON.stringify(initialData));
-  }
-
-  getData(type) {
-    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-    return savedData[type] || [];
-  }
-
-  saveData(type, data) {
-    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-    savedData[type] = data;
-    savedData.lastUpdate = new Date().toISOString();
-    localStorage.setItem(this.storageKey, JSON.stringify(savedData));
-  }
-
-  addItem(type, item) {
-    const currentData = this.getData(type);
-    const newId = Math.max(...currentData.map(item => item.id), 0) + 1;
-    item.id = newId;
-    item.created_at = new Date().toISOString();
-    currentData.push(item);
-    this.saveData(type, currentData);
-    return item;
-  }
-
-  updateItem(type, id, updatedItem) {
-    const currentData = this.getData(type);
-    const index = currentData.findIndex(item => item.id === id);
-    if (index !== -1) {
-      currentData[index] = { ...currentData[index], ...updatedItem };
-      this.saveData(type, currentData);
-      return currentData[index];
-    }
-    return null;
-  }
-
-  deleteItem(type, id) {
-    const currentData = this.getData(type);
-    const filteredData = currentData.filter(item => item.id !== id);
-    this.saveData(type, filteredData);
-    return true;
-  }
-
-  resetData() {
-    localStorage.removeItem(this.storageKey);
-    this.saveInitialData();
-  }
-}
-
-// إنشاء مدير البيانات
-const dataManager = new DataManager();
 
 // البيانات الأصلية للعائلة (للاستخدام عند الإعادة التعيين)
 const mockFamilyDataOriginal = [
@@ -263,9 +190,84 @@ const mockLibraryDataOriginal = [
   }
 ];
 
+// نظام إدارة البيانات المحلية
+class DataManager {
+  constructor() {
+    this.storageKey = 'alsaedan-app-data';
+    this.initializeData();
+  }
+
+  initializeData() {
+    const savedData = localStorage.getItem(this.storageKey);
+    if (!savedData) {
+      // حفظ البيانات الأولية إذا لم تكن موجودة
+      this.saveInitialData();
+    }
+  }
+
+  saveInitialData() {
+    const initialData = {
+      familyMembers: [...mockFamilyDataOriginal],
+      events: [...mockEventsDataOriginal], 
+      suggestions: [...mockSuggestionsDataOriginal],
+      library: [...mockLibraryDataOriginal],
+      lastUpdate: new Date().toISOString()
+    };
+    localStorage.setItem(this.storageKey, JSON.stringify(initialData));
+  }
+
+  getData(type) {
+    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    return savedData[type] || [];
+  }
+
+  saveData(type, data) {
+    const savedData = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    savedData[type] = data;
+    savedData.lastUpdate = new Date().toISOString();
+    localStorage.setItem(this.storageKey, JSON.stringify(savedData));
+  }
+
+  addItem(type, item) {
+    const currentData = this.getData(type);
+    const newId = Math.max(...currentData.map(item => item.id), 0) + 1;
+    item.id = newId;
+    item.created_at = new Date().toISOString();
+    currentData.push(item);
+    this.saveData(type, currentData);
+    return item;
+  }
+
+  updateItem(type, id, updatedItem) {
+    const currentData = this.getData(type);
+    const index = currentData.findIndex(item => item.id === id);
+    if (index !== -1) {
+      currentData[index] = { ...currentData[index], ...updatedItem };
+      this.saveData(type, currentData);
+      return currentData[index];
+    }
+    return null;
+  }
+
+  deleteItem(type, id) {
+    const currentData = this.getData(type);
+    const filteredData = currentData.filter(item => item.id !== id);
+    this.saveData(type, filteredData);
+    return true;
+  }
+
+  resetData() {
+    localStorage.removeItem(this.storageKey);
+    this.saveInitialData();
+  }
+}
+
+// إنشاء مدير البيانات
+const dataManager = new DataManager();
+
 // متغيرات عامة
 let isEditMode = false;
-let familyMembers = [...mockFamilyData];
+let familyMembers = [...mockFamilyDataOriginal];
 
 // فئة التطبيق الرئيسية
 class AlSaedanNetlifyApp {
