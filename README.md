@@ -78,7 +78,7 @@ README.md                  # هذا الملف
 - **المكتبة**: 10 عناصر متنوعة بأنواع مختلفة
 
 ## روابط الوصول
-- **المعاينة المباشرة**: https://39029-isvb57g3ae2i9g8x3xn7i-6532622b.e2b.dev
+- **المعاينة المباشرة**: https://3000-isvb57g3ae2i9g8x3xn7i-6532622b.e2b.dev
 - **GitHub Repository**: https://github.com/salmansaedan/my-family
 - **الإنتاج**: [جاهز للنشر على Netlify]
 - **الاتصال**: info@salmansaedan.com | 0533361154
