@@ -418,6 +418,216 @@
                     </form>
                 </div>
             </div>
+            
+            <!-- نافذة إضافة/تحرير الأحداث -->
+            <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="eventModalTitle" class="text-xl font-bold">إضافة حدث جديد</h3>
+                        <button onclick="hideEventForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="eventForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الحدث</label>
+                            <input type="text" name="title" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">وصف الحدث</label>
+                            <textarea name="description" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الحدث</label>
+                                <input type="date" name="date" required class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">وقت الحدث</label>
+                                <input type="time" name="time" class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">موقع الحدث</label>
+                            <input type="text" name="location" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">نوع الحدث</label>
+                                <select name="type" required class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="">— اختر النوع —</option>
+                                    <option value="اجتماع">اجتماع</option>
+                                    <option value="مناسبة">مناسبة</option>
+                                    <option value="مؤتمر">مؤتمر</option>
+                                    <option value="ورشة عمل">ورشة عمل</option>
+                                    <option value="فعالية ثقافية">فعالية ثقافية</option>
+                                    <option value="فعالية اجتماعية">فعالية اجتماعية</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">حالة الحدث</label>
+                                <select name="status" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="upcoming">قادم</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="cancelled">ملغي</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات إضافية</label>
+                            <textarea name="notes" rows="2" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                حفظ الحدث
+                            </button>
+                            <button type="button" onclick="hideEventForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- نافذة إضافة/تحرير الاقتراحات -->
+            <div id="suggestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="suggestionModalTitle" class="text-xl font-bold">إضافة اقتراح جديد</h3>
+                        <button onclick="hideSuggestionForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="suggestionForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الاقتراح</label>
+                            <input type="text" name="title" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">وصف الاقتراح</label>
+                            <textarea name="description" rows="4" required class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">فئة الاقتراح</label>
+                                <select name="category" required class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="">— اختر الفئة —</option>
+                                    <option value="تطوير التطبيق">تطوير التطبيق</option>
+                                    <option value="فعاليات عائلية">فعاليات عائلية</option>
+                                    <option value="مشاريع خيرية">مشاريع خيرية</option>
+                                    <option value="تحسينات عامة">تحسينات عامة</option>
+                                    <option value="أخرى">أخرى</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاقتراح</label>
+                                <select name="status" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="pending">قيد المراجعة</option>
+                                    <option value="under_review">تحت المراجعة</option>
+                                    <option value="approved">مقبول</option>
+                                    <option value="rejected">مرفوض</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                حفظ الاقتراح
+                            </button>
+                            <button type="button" onclick="hideSuggestionForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- نافذة إضافة/تحرير عناصر المكتبة -->
+            <div id="libraryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="libraryModalTitle" class="text-xl font-bold">إضافة عنصر جديد للمكتبة</h3>
+                        <button onclick="hideLibraryForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="libraryForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">عنوان العنصر</label>
+                            <input type="text" name="title" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">وصف العنصر</label>
+                            <textarea name="description" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">فئة العنصر</label>
+                                <select name="category" required class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="">— اختر الفئة —</option>
+                                    <option value="وثائق تاريخية">وثائق تاريخية</option>
+                                    <option value="صور عائلية">صور عائلية</option>
+                                    <option value="مقالات">مقالات</option>
+                                    <option value="كتب">كتب</option>
+                                    <option value="ملفات صوتية">ملفات صوتية</option>
+                                    <option value="فيديوهات">فيديوهات</option>
+                                    <option value="مجلات">مجلات</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">نوع الملف</label>
+                                <select name="type" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="document">وثيقة</option>
+                                    <option value="image">صورة</option>
+                                    <option value="video">فيديو</option>
+                                    <option value="audio">ملف صوتي</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="spreadsheet">جدول بيانات</option>
+                                    <option value="presentation">عرض تقديمي</option>
+                                    <option value="archive">ملف مضغوط</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">اسم المؤلف</label>
+                            <input type="text" name="author" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">رابط الملف (اختياري)</label>
+                            <input type="url" name="file_url" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://example.com/file.pdf">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">علامات (مفصولة بفاصلة)</label>
+                            <input type="text" name="tags" class="w-full p-2 border border-gray-300 rounded-md" placeholder="تاريخ, عائلة, وثائق">
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                حفظ العنصر
+                            </button>
+                            <button type="button" onclick="hideLibraryForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <!-- Footer -->
             <footer class="bg-white shadow-lg mt-12">
@@ -758,19 +968,33 @@
                 if (!container) return;
                 
                 container.innerHTML = events.map(event => `
-                    <div class="card p-6">
+                    <div class="card p-6 relative group">
+                        <div class="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="editEvent('${event.id}')" class="bg-blue-500 text-white p-2 rounded-full text-xs mr-2 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteEvent('${event.id}')" class="bg-red-500 text-white p-2 rounded-full text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                         <div class="flex justify-between items-start mb-3">
                             <h3 class="text-xl font-semibold text-gray-800">${event.title}</h3>
-                            <span class="px-2 py-1 text-xs rounded-full ${event.status === 'upcoming' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
-                                ${event.status === 'upcoming' ? 'قادمة' : 'سابقة'}
-                            </span>
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-1 text-xs rounded-full ${event.status === 'upcoming' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                                    ${event.status === 'upcoming' ? 'قادمة' : 'سابقة'}
+                                </span>
+                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full text-center">
+                                    ${event.type}
+                                </span>
+                            </div>
                         </div>
                         <p class="text-gray-600 mb-4">${event.description}</p>
                         <div class="space-y-2 text-sm text-gray-500">
-                            <div><i class="fas fa-calendar ml-2"></i>${event.date}</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${event.date} - ${event.time || 'غير محدد'}</div>
                             <div><i class="fas fa-map-marker-alt ml-2"></i>${event.location}</div>
-                            <div><i class="fas fa-tag ml-2"></i>${event.type}</div>
+                            <div><i class="fas fa-users ml-2"></i>${event.attendees || 0} مشارك</div>
                         </div>
+                        ${event.notes ? `<div class="mt-3 p-2 bg-gray-50 rounded text-sm text-gray-600">${event.notes}</div>` : ''}
                     </div>
                 `).join('');
             }
@@ -782,22 +1006,46 @@
                 if (!container) return;
                 
                 container.innerHTML = suggestions.map(suggestion => `
-                    <div class="card p-6">
+                    <div class="card p-6 relative group">
+                        <div class="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="editSuggestion('${suggestion.id}')" class="bg-blue-500 text-white p-2 rounded-full text-xs mr-2 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteSuggestion('${suggestion.id}')" class="bg-red-500 text-white p-2 rounded-full text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                         <div class="flex justify-between items-start mb-3">
                             <h3 class="text-xl font-semibold text-gray-800">${suggestion.title}</h3>
-                            <div class="flex items-center space-x-2 space-x-reverse">
-                                <span class="px-2 py-1 text-xs rounded-full ${suggestion.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                    ${suggestion.status === 'approved' ? 'مقبول' : 'قيد المراجعة'}
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-1 text-xs rounded-full ${this.getStatusColor(suggestion.status)}">
+                                    ${this.getStatusText(suggestion.status)}
                                 </span>
-                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full text-center">
                                     ${suggestion.category}
                                 </span>
                             </div>
                         </div>
                         <p class="text-gray-600 mb-4">${suggestion.description}</p>
-                        <div class="flex justify-between items-center text-sm text-gray-500">
+                        <div class="flex justify-between items-center text-sm text-gray-500 mb-3">
                             <div><i class="fas fa-user ml-2"></i>${suggestion.submitted_by}</div>
-                            <div><i class="fas fa-thumbs-up ml-2"></i>${suggestion.votes} تصويت</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${new Date(suggestion.created_at).toLocaleDateString('ar-SA')}</div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                                <button onclick="voteSuggestion('${suggestion.id}', 'up')" class="flex items-center text-green-600 hover:text-green-700 transition">
+                                    <i class="fas fa-thumbs-up ml-1"></i> ${suggestion.upvotes || 0}
+                                </button>
+                                <button onclick="voteSuggestion('${suggestion.id}', 'down')" class="flex items-center text-red-600 hover:text-red-700 transition">
+                                    <i class="fas fa-thumbs-down ml-1"></i> ${suggestion.downvotes || 0}
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-3 rtl:space-x-reverse text-sm text-gray-500">
+                                <span><i class="fas fa-comments ml-1"></i>${suggestion.comments || 0}</span>
+                                <button onclick="showSuggestionComments('${suggestion.id}')" class="text-blue-600 hover:text-blue-700">
+                                    عرض التعليقات
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -810,16 +1058,47 @@
                 if (!container) return;
                 
                 container.innerHTML = library.map(item => `
-                    <div class="card p-6">
-                        <div class="mb-3">
-                            <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">${item.category}</span>
+                    <div class="card p-6 relative group">
+                        <div class="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="editLibraryItem('${item.id}')" class="bg-blue-500 text-white p-2 rounded-full text-xs mr-2 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteLibraryItem('${item.id}')" class="bg-red-500 text-white p-2 rounded-full text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
-                        <p class="text-gray-600 mb-4">${item.summary}</p>
+                        <div class="flex items-start mb-4">
+                            <div class="text-4xl text-gray-400 mr-4 flex-shrink-0">
+                                <i class="${this.getFileIcon(item.type)}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="mb-3">
+                                    <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">${item.category}</span>
+                                    <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full mr-2">${item.type}</span>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
+                                <p class="text-gray-600 mb-3">${item.description}</p>
+                                ${item.file_url ? `
+                                <div class="mb-3">
+                                    <a href="${item.file_url}" target="_blank" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                        <i class="fas fa-download ml-2"></i>تحميل الملف
+                                    </a>
+                                    <span class="text-gray-500 text-xs mr-3">${item.file_size || 'غير معروف'}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
                         <div class="flex justify-between items-center text-sm text-gray-500">
                             <div><i class="fas fa-user ml-2"></i>${item.author}</div>
-                            <div><i class="fas fa-calendar ml-2"></i>${new Date(item.published_at).toLocaleDateString('ar-SA')}</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${new Date(item.created_at).toLocaleDateString('ar-SA')}</div>
                         </div>
+                        ${item.tags && item.tags.length > 0 ? `
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <div class="flex flex-wrap gap-2">
+                                ${item.tags.map(tag => `<span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 `).join('');
             }
@@ -847,6 +1126,228 @@
                     option.textContent = member.full_name + ' (الجيل ' + member.generation + ')';
                     fatherSelect.appendChild(option);
                 });
+            }
+            
+            // وظائف مساعدة
+            getStatusColor(status) {
+                const colors = {
+                    'pending': 'bg-yellow-100 text-yellow-700',
+                    'approved': 'bg-green-100 text-green-700',
+                    'rejected': 'bg-red-100 text-red-700',
+                    'under_review': 'bg-blue-100 text-blue-700'
+                };
+                return colors[status] || 'bg-gray-100 text-gray-700';
+            }
+            
+            getStatusText(status) {
+                const texts = {
+                    'pending': 'قيد المراجعة',
+                    'approved': 'مقبول',
+                    'rejected': 'مرفوض',
+                    'under_review': 'تحت المراجعة'
+                };
+                return texts[status] || 'غير محدد';
+            }
+            
+            getFileIcon(type) {
+                const icons = {
+                    'document': 'fas fa-file-alt',
+                    'image': 'fas fa-image',
+                    'video': 'fas fa-video',
+                    'audio': 'fas fa-music',
+                    'pdf': 'fas fa-file-pdf',
+                    'spreadsheet': 'fas fa-file-excel',
+                    'presentation': 'fas fa-file-powerpoint',
+                    'archive': 'fas fa-file-archive'
+                };
+                return icons[type] || 'fas fa-file';
+            }
+            
+            // وظائف CRUD للأحداث
+            addEvent(eventData) {
+                const newEvent = {
+                    id: this.generateId(),
+                    ...eventData,
+                    created_at: new Date().toISOString(),
+                    attendees: 0
+                };
+                this.dataManager.addItem('events', newEvent);
+                this.displayEvents();
+                return newEvent;
+            }
+            
+            updateEvent(id, eventData) {
+                this.dataManager.updateItem('events', id, eventData);
+                this.displayEvents();
+            }
+            
+            deleteEventById(id) {
+                this.dataManager.deleteItem('events', id);
+                this.displayEvents();
+            }
+            
+            // وظائف CRUD للاقتراحات
+            addSuggestion(suggestionData) {
+                const newSuggestion = {
+                    id: this.generateId(),
+                    ...suggestionData,
+                    created_at: new Date().toISOString(),
+                    status: 'pending',
+                    upvotes: 0,
+                    downvotes: 0,
+                    comments: 0
+                };
+                this.dataManager.addItem('suggestions', newSuggestion);
+                this.displaySuggestions();
+                return newSuggestion;
+            }
+            
+            updateSuggestion(id, suggestionData) {
+                this.dataManager.updateItem('suggestions', id, suggestionData);
+                this.displaySuggestions();
+            }
+            
+            deleteSuggestionById(id) {
+                this.dataManager.deleteItem('suggestions', id);
+                this.displaySuggestions();
+            }
+            
+            voteSuggestionById(id, voteType) {
+                const suggestions = this.dataManager.getData('suggestions');
+                const suggestion = suggestions.find(s => s.id === id);
+                if (suggestion) {
+                    if (voteType === 'up') {
+                        suggestion.upvotes = (suggestion.upvotes || 0) + 1;
+                    } else {
+                        suggestion.downvotes = (suggestion.downvotes || 0) + 1;
+                    }
+                    this.dataManager.updateItem('suggestions', id, suggestion);
+                    this.displaySuggestions();
+                }
+            }
+            
+            // وظائف CRUD للمكتبة
+            addLibraryItem(itemData) {
+                const newItem = {
+                    id: this.generateId(),
+                    ...itemData,
+                    created_at: new Date().toISOString()
+                };
+                this.dataManager.addItem('library', newItem);
+                this.displayLibrary();
+                return newItem;
+            }
+            
+            updateLibraryItem(id, itemData) {
+                this.dataManager.updateItem('library', id, itemData);
+                this.displayLibrary();
+            }
+            
+            deleteLibraryItemById(id) {
+                this.dataManager.deleteItem('library', id);
+                this.displayLibrary();
+            }
+            
+            generateId() {
+                return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            }
+            
+            // وظائف مساعدة للتصفية
+            displayFilteredSuggestions(suggestions) {
+                const container = document.getElementById('suggestions-grid');
+                if (!container) return;
+                
+                container.innerHTML = suggestions.map(suggestion => `
+                    <div class="card p-6 relative group">
+                        <div class="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="editSuggestion('${suggestion.id}')" class="bg-blue-500 text-white p-2 rounded-full text-xs mr-2 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteSuggestion('${suggestion.id}')" class="bg-red-500 text-white p-2 rounded-full text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-semibold text-gray-800">${suggestion.title}</h3>
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-1 text-xs rounded-full ${this.getStatusColor(suggestion.status)}">
+                                    ${this.getStatusText(suggestion.status)}
+                                </span>
+                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full text-center">
+                                    ${suggestion.category}
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">${suggestion.description}</p>
+                        <div class="flex justify-between items-center text-sm text-gray-500 mb-3">
+                            <div><i class="fas fa-user ml-2"></i>${suggestion.submitted_by}</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${new Date(suggestion.created_at).toLocaleDateString('ar-SA')}</div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                                <button onclick="voteSuggestion('${suggestion.id}', 'up')" class="flex items-center text-green-600 hover:text-green-700 transition">
+                                    <i class="fas fa-thumbs-up ml-1"></i> ${suggestion.upvotes || 0}
+                                </button>
+                                <button onclick="voteSuggestion('${suggestion.id}', 'down')" class="flex items-center text-red-600 hover:text-red-700 transition">
+                                    <i class="fas fa-thumbs-down ml-1"></i> ${suggestion.downvotes || 0}
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-3 rtl:space-x-reverse text-sm text-gray-500">
+                                <span><i class="fas fa-comments ml-1"></i>${suggestion.comments || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            displayFilteredLibrary(library) {
+                const container = document.getElementById('library-grid');
+                if (!container) return;
+                
+                container.innerHTML = library.map(item => `
+                    <div class="card p-6 relative group">
+                        <div class="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onclick="editLibraryItem('${item.id}')" class="bg-blue-500 text-white p-2 rounded-full text-xs mr-2 hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteLibraryItem('${item.id}')" class="bg-red-500 text-white p-2 rounded-full text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-start mb-4">
+                            <div class="text-4xl text-gray-400 mr-4 flex-shrink-0">
+                                <i class="${this.getFileIcon(item.type)}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="mb-3">
+                                    <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">${item.category}</span>
+                                    <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full mr-2">${item.type}</span>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
+                                <p class="text-gray-600 mb-3">${item.description}</p>
+                                ${item.file_url ? `
+                                <div class="mb-3">
+                                    <a href="${item.file_url}" target="_blank" class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                        <i class="fas fa-download ml-2"></i>تحميل الملف
+                                    </a>
+                                    <span class="text-gray-500 text-xs mr-3">${item.file_size || 'غير معروف'}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <div><i class="fas fa-user ml-2"></i>${item.author}</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${new Date(item.created_at).toLocaleDateString('ar-SA')}</div>
+                        </div>
+                        ${item.tags && item.tags.length > 0 ? `
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <div class="flex flex-wrap gap-2">
+                                ${item.tags.map(tag => `<span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `).join('');
             }
         }
 
@@ -947,23 +1448,215 @@
             document.getElementById('addMemberModal').classList.add('hidden');
             document.getElementById('addMemberForm').reset();
         }
+        
+        // وظائف إدارة الأحداث
+        function showAddEventForm() {
+            document.getElementById('eventModal').classList.remove('hidden');
+            document.getElementById('eventModalTitle').textContent = 'إضافة حدث جديد';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventForm').dataset.mode = 'add';
+        }
+        
+        function hideEventForm() {
+            document.getElementById('eventModal').classList.add('hidden');
+            document.getElementById('eventForm').reset();
+        }
+        
+        function editEvent(id) {
+            const events = app.dataManager.getData('events');
+            const event = events.find(e => e.id === id);
+            if (!event) return;
+            
+            document.getElementById('eventModal').classList.remove('hidden');
+            document.getElementById('eventModalTitle').textContent = 'تحرير الحدث';
+            
+            const form = document.getElementById('eventForm');
+            form.dataset.mode = 'edit';
+            form.dataset.eventId = id;
+            
+            form.querySelector('[name="title"]').value = event.title;
+            form.querySelector('[name="description"]').value = event.description;
+            form.querySelector('[name="date"]').value = event.date;
+            form.querySelector('[name="time"]').value = event.time || '';
+            form.querySelector('[name="location"]').value = event.location;
+            form.querySelector('[name="type"]').value = event.type;
+            form.querySelector('[name="status"]').value = event.status;
+            form.querySelector('[name="notes"]').value = event.notes || '';
+        }
+        
+        function deleteEvent(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الحدث؟')) {
+                app.deleteEventById(id);
+            }
+        }
+        
+        // وظائف إدارة الاقتراحات
+        function showAddSuggestionForm() {
+            document.getElementById('suggestionModal').classList.remove('hidden');
+            document.getElementById('suggestionModalTitle').textContent = 'إضافة اقتراح جديد';
+            document.getElementById('suggestionForm').reset();
+            document.getElementById('suggestionForm').dataset.mode = 'add';
+        }
+        
+        function hideSuggestionForm() {
+            document.getElementById('suggestionModal').classList.add('hidden');
+            document.getElementById('suggestionForm').reset();
+        }
+        
+        function editSuggestion(id) {
+            const suggestions = app.dataManager.getData('suggestions');
+            const suggestion = suggestions.find(s => s.id === id);
+            if (!suggestion) return;
+            
+            document.getElementById('suggestionModal').classList.remove('hidden');
+            document.getElementById('suggestionModalTitle').textContent = 'تحرير الاقتراح';
+            
+            const form = document.getElementById('suggestionForm');
+            form.dataset.mode = 'edit';
+            form.dataset.suggestionId = id;
+            
+            form.querySelector('[name="title"]').value = suggestion.title;
+            form.querySelector('[name="description"]').value = suggestion.description;
+            form.querySelector('[name="category"]').value = suggestion.category;
+            form.querySelector('[name="status"]').value = suggestion.status;
+        }
+        
+        function deleteSuggestion(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الاقتراح؟')) {
+                app.deleteSuggestionById(id);
+            }
+        }
+        
+        function voteSuggestion(id, voteType) {
+            app.voteSuggestionById(id, voteType);
+        }
+        
+        // وظائف إدارة المكتبة
+        function showAddLibraryForm() {
+            document.getElementById('libraryModal').classList.remove('hidden');
+            document.getElementById('libraryModalTitle').textContent = 'إضافة عنصر جديد للمكتبة';
+            document.getElementById('libraryForm').reset();
+            document.getElementById('libraryForm').dataset.mode = 'add';
+        }
+        
+        function hideLibraryForm() {
+            document.getElementById('libraryModal').classList.add('hidden');
+            document.getElementById('libraryForm').reset();
+        }
+        
+        function editLibraryItem(id) {
+            const library = app.dataManager.getData('library');
+            const item = library.find(l => l.id === id);
+            if (!item) return;
+            
+            document.getElementById('libraryModal').classList.remove('hidden');
+            document.getElementById('libraryModalTitle').textContent = 'تحرير عنصر المكتبة';
+            
+            const form = document.getElementById('libraryForm');
+            form.dataset.mode = 'edit';
+            form.dataset.libraryId = id;
+            
+            form.querySelector('[name="title"]').value = item.title;
+            form.querySelector('[name="description"]').value = item.description;
+            form.querySelector('[name="category"]').value = item.category;
+            form.querySelector('[name="type"]').value = item.type;
+            form.querySelector('[name="author"]').value = item.author;
+            form.querySelector('[name="tags"]').value = item.tags ? item.tags.join(', ') : '';
+        }
+        
+        function deleteLibraryItem(id) {
+            if (confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+                app.deleteLibraryItemById(id);
+            }
+        }
 
         function showMembershipFilter() {
             alert('ميزة التصفية ستتوفر قريباً');
         }
 
-        // وظائف وهمية للأقسام الأخرى
-        function showAddEventForm() {
-            alert('ميزة إضافة فعالية ستتوفر قريباً');
-        }
-
-        function showAddSuggestionForm() {
-            alert('ميزة إضافة اقتراح ستتوفر قريباً');
-        }
-
-        function showAddLibraryForm() {
-            alert('ميزة إضافة تجربة ستتوفر قريباً');
-        }
+        // معالجات النماذج (Event Handlers)
+        document.addEventListener('DOMContentLoaded', function() {
+            // معالج نموذج الأحداث
+            const eventForm = document.getElementById('eventForm');
+            if (eventForm) {
+                eventForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const eventData = {};
+                    
+                    for (let [key, value] of formData.entries()) {
+                        eventData[key] = value;
+                    }
+                    
+                    eventData.submitted_by = 'مستخدم النظام';
+                    
+                    if (e.target.dataset.mode === 'edit') {
+                        const id = e.target.dataset.eventId;
+                        app.updateEvent(id, eventData);
+                    } else {
+                        app.addEvent(eventData);
+                    }
+                    
+                    hideEventForm();
+                });
+            }
+            
+            // معالج نموذج الاقتراحات
+            const suggestionForm = document.getElementById('suggestionForm');
+            if (suggestionForm) {
+                suggestionForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const suggestionData = {};
+                    
+                    for (let [key, value] of formData.entries()) {
+                        suggestionData[key] = value;
+                    }
+                    
+                    suggestionData.submitted_by = 'مستخدم النظام';
+                    
+                    if (e.target.dataset.mode === 'edit') {
+                        const id = e.target.dataset.suggestionId;
+                        app.updateSuggestion(id, suggestionData);
+                    } else {
+                        app.addSuggestion(suggestionData);
+                    }
+                    
+                    hideSuggestionForm();
+                });
+            }
+            
+            // معالج نموذج المكتبة
+            const libraryForm = document.getElementById('libraryForm');
+            if (libraryForm) {
+                libraryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const libraryData = {};
+                    
+                    for (let [key, value] of formData.entries()) {
+                        if (key === 'tags' && value) {
+                            libraryData[key] = value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        } else {
+                            libraryData[key] = value;
+                        }
+                    }
+                    
+                    if (!libraryData.author) {
+                        libraryData.author = 'مستخدم النظام';
+                    }
+                    
+                    if (e.target.dataset.mode === 'edit') {
+                        const id = e.target.dataset.libraryId;
+                        app.updateLibraryItem(id, libraryData);
+                    } else {
+                        app.addLibraryItem(libraryData);
+                    }
+                    
+                    hideLibraryForm();
+                });
+            }
+        });
 
         function filterEvents(type) {
             // تحديث أزرار التصفية
@@ -982,7 +1675,17 @@
             });
             event.target.className = 'suggestion-filter active px-4 py-2 rounded-lg bg-yellow-600 text-white';
             
-            console.log('تصفية الاقتراحات:', category);
+            // تطبيق التصفية
+            if (app) {
+                const suggestions = app.dataManager.getData('suggestions');
+                let filteredSuggestions = suggestions;
+                
+                if (category !== 'all') {
+                    filteredSuggestions = suggestions.filter(suggestion => suggestion.category === category);
+                }
+                
+                app.displayFilteredSuggestions(filteredSuggestions);
+            }
         }
 
         function filterLibrary(category) {
@@ -991,7 +1694,17 @@
             });
             event.target.className = 'library-filter active px-4 py-2 rounded-lg bg-green-600 text-white';
             
-            console.log('تصفية المكتبة:', category);
+            // تطبيق التصفية
+            if (app) {
+                const library = app.dataManager.getData('library');
+                let filteredLibrary = library;
+                
+                if (category !== 'all') {
+                    filteredLibrary = library.filter(item => item.category === category);
+                }
+                
+                app.displayFilteredLibrary(filteredLibrary);
+            }
         }
 
         // معالجة نموذج إضافة عضو
