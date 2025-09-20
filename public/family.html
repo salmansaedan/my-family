@@ -85,6 +85,11 @@
                             </div>
                         </div>
                         
+                        <!-- إحصائيات العضوية -->
+                        <div id="membershipStats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                        
                         <!-- إدارة العائلة -->
                         <div class="flex justify-center gap-3 mb-6">
                             <button onclick="toggleEditMode()" id="editModeBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
@@ -94,6 +99,10 @@
                             <button onclick="showAddMemberForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
                                 <i class="fas fa-user-plus ml-2"></i>
                                 إضافة عضو
+                            </button>
+                            <button onclick="showMembershipFilter()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center">
+                                <i class="fas fa-filter ml-2"></i>
+                                تصفية العضوية
                             </button>
                         </div>
                     </div>
@@ -138,6 +147,32 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
                             <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع العضوية</label>
+                            <select name="membership_type" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">— اختر نوع العضوية —</option>
+                                <option value="chairman">رئيس مجلس الإدارة</option>
+                                <option value="board_member">عضو مجلس إدارة</option>
+                                <option value="general_assembly">عضو جمعية عمومية</option>
+                                <option value="family_member">عضو عائلة</option>
+                                <option value="honorary">عضو شرف</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حالة العضوية</label>
+                            <select name="membership_status" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="pending">قيد المراجعة</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">مجال التميز (اختياري)</label>
+                            <input type="text" name="field_of_excellence" placeholder="مثال: أعمال، تعليم، طب" class="w-full p-2 border border-gray-300 rounded-md">
                         </div>
                         
                         <div>
@@ -191,6 +226,32 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
                             <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع العضوية</label>
+                            <select name="membership_type" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">— اختر نوع العضوية —</option>
+                                <option value="chairman">رئيس مجلس الإدارة</option>
+                                <option value="board_member">عضو مجلس إدارة</option>
+                                <option value="general_assembly">عضو جمعية عمومية</option>
+                                <option value="family_member">عضو عائلة</option>
+                                <option value="honorary">عضو شرف</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حالة العضوية</label>
+                            <select name="membership_status" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="pending">قيد المراجعة</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">مجال التميز (اختياري)</label>
+                            <input type="text" name="field_of_excellence" placeholder="مثال: أعمال، تعليم، طب" class="w-full p-2 border border-gray-300 rounded-md">
                         </div>
                         
                         <div>
@@ -274,7 +335,93 @@
             app = new AlSaedanNetlifyApp();
             app.displayFamilyTree();
             populateParentDropdowns();
+            updateMembershipStatistics();
         });
+        
+        // تحديث إحصائيات العضوية
+        function updateMembershipStatistics() {
+            const stats = app.getMembershipStatistics();
+            const container = document.getElementById('membershipStats');
+            
+            container.innerHTML = `
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-purple-600">${stats.founder}</div>
+                    <div class="text-sm text-purple-700">مؤسس</div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-red-600">${stats.chairman}</div>
+                    <div class="text-sm text-red-700">رئيس مجلس</div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-blue-600">${stats.board_members}</div>
+                    <div class="text-sm text-blue-700">أعضاء مجلس</div>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-green-600">${stats.general_assembly}</div>
+                    <div class="text-sm text-green-700">جمعية عمومية</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-gray-600">${stats.total}</div>
+                    <div class="text-sm text-gray-700">المجموع</div>
+                </div>
+            `;
+        }
+        
+        // متغير لتتبع التصفية الحالية
+        let currentMembershipFilter = 'all';
+        
+        // إظهار تصفية العضوية
+        function showMembershipFilter() {
+            const filterOptions = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="membershipFilterModal">
+                    <div class="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                        <h3 class="text-xl font-bold mb-4">تصفية حسب نوع العضوية</h3>
+                        <div class="space-y-2">
+                            <button onclick="filterByMembershipType('all')" class="w-full text-right p-2 rounded hover:bg-gray-100">جميع الأعضاء</button>
+                            <button onclick="filterByMembershipType('founder')" class="w-full text-right p-2 rounded hover:bg-purple-100">المؤسس</button>
+                            <button onclick="filterByMembershipType('chairman')" class="w-full text-right p-2 rounded hover:bg-red-100">رئيس مجلس الإدارة</button>
+                            <button onclick="filterByMembershipType('board_member')" class="w-full text-right p-2 rounded hover:bg-blue-100">أعضاء مجلس الإدارة</button>
+                            <button onclick="filterByMembershipType('general_assembly')" class="w-full text-right p-2 rounded hover:bg-green-100">الجمعية العمومية</button>
+                            <button onclick="filterByMembershipType('family_member')" class="w-full text-right p-2 rounded hover:bg-gray-100">أعضاء العائلة</button>
+                            <button onclick="filterByMembershipType('honorary')" class="w-full text-right p-2 rounded hover:bg-yellow-100">الأعضاء الشرفيون</button>
+                        </div>
+                        <button onclick="closeMembershipFilter()" class="w-full mt-4 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">إغلاق</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', filterOptions);
+        }
+        
+        // إغلاق تصفية العضوية
+        function closeMembershipFilter() {
+            const modal = document.getElementById('membershipFilterModal');
+            if (modal) modal.remove();
+        }
+        
+        // تصفية حسب نوع العضوية
+        function filterByMembershipType(membershipType) {
+            currentMembershipFilter = membershipType;
+            
+            // تطبيق التصفية على عرض الشجرة
+            let filteredMembers = app.mockFamilyData;
+            
+            if (membershipType !== 'all') {
+                filteredMembers = app.mockFamilyData.filter(member => 
+                    member.membership_type === membershipType
+                );
+            }
+            
+            app.displayFamilyTree(filteredMembers);
+            closeMembershipFilter();
+            
+            // تحديث نص زر التصفية
+            const filterBtn = document.querySelector('[onclick="showMembershipFilter()"]');
+            if (membershipType === 'all') {
+                filterBtn.innerHTML = '<i class="fas fa-filter ml-2"></i>تصفية العضوية';
+            } else {
+                filterBtn.innerHTML = `<i class="fas fa-filter ml-2"></i>${app.getMembershipTypeText(membershipType)}`;
+            }
+        }
         
         // تبديل وضع التحرير
         function toggleEditMode() {
@@ -315,6 +462,9 @@
             form.full_name.value = member.full_name;
             form.father_id.value = member.father_id || '';
             form.generation.value = member.generation;
+            form.membership_type.value = member.membership_type || 'family_member';
+            form.membership_status.value = member.membership_status || 'active';
+            form.field_of_excellence.value = member.field_of_excellence || '';
             form.phone.value = member.phone || '';
             form.email.value = member.email || '';
             
@@ -345,6 +495,7 @@
                 app.deleteFamilyMember(selectedMemberId);
                 hideDeleteMemberModal();
                 populateParentDropdowns(); // تحديث قوائم الآباء
+                updateMembershipStatistics(); // تحديث الإحصائيات
                 alert('تم حذف العضو بنجاح');
             }
         }
@@ -375,13 +526,19 @@
                 full_name: formData.get('full_name'),
                 father_id: formData.get('father_id') || null,
                 generation: parseInt(formData.get('generation')),
+                membership_type: formData.get('membership_type'),
+                membership_status: formData.get('membership_status'),
+                field_of_excellence: formData.get('field_of_excellence') || null,
                 phone: formData.get('phone') || null,
-                email: formData.get('email') || null
+                email: formData.get('email') || null,
+                relationship_level: 'family',
+                achievements: formData.get('field_of_excellence') ? `متخصص في ${formData.get('field_of_excellence')}` : null
             };
             
             app.addFamilyMember(memberData);
             hideAddMemberForm();
             populateParentDropdowns(); // تحديث قوائم الآباء
+            updateMembershipStatistics(); // تحديث الإحصائيات
             alert('تم إضافة العضو بنجاح!');
         });
         
@@ -395,13 +552,18 @@
                 full_name: formData.get('full_name'),
                 father_id: formData.get('father_id') || null,
                 generation: parseInt(formData.get('generation')),
+                membership_type: formData.get('membership_type'),
+                membership_status: formData.get('membership_status'),
+                field_of_excellence: formData.get('field_of_excellence') || null,
                 phone: formData.get('phone') || null,
-                email: formData.get('email') || null
+                email: formData.get('email') || null,
+                achievements: formData.get('field_of_excellence') ? `متخصص في ${formData.get('field_of_excellence')}` : null
             };
             
             app.updateFamilyMember(memberId, memberData);
             hideEditMemberForm();
             populateParentDropdowns(); // تحديث قوائم الآباء
+            updateMembershipStatistics(); // تحديث الإحصائيات
             alert('تم تحديث بيانات العضو بنجاح!');
         });
         

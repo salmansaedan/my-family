@@ -14,6 +14,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "قيادي ومؤسس",
     achievements: "مؤسس العائلة وراعي التقاليد العائلية الأصيلة",
     relationship_level: "family",
+    membership_type: "founder", // مؤسس
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -26,6 +28,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "أعمال",
     achievements: "رجل أعمال وأحد أبناء المؤسس",
     relationship_level: "family",
+    membership_type: "board_member", // عضو مجلس إدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -38,6 +42,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "تجاري",
     achievements: "تاجر متميز وأحد أبناء المؤسس",
     relationship_level: "family",
+    membership_type: "general_assembly", // عضو جمعية عمومية
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -50,6 +56,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "إداري",
     achievements: "إداري قيادي وأحد أبناء المؤسس",
     relationship_level: "family",
+    membership_type: "board_member", // عضو مجلس إدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -62,6 +70,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "مهني",
     achievements: "مهني متخصص وأحد أبناء المؤسس",
     relationship_level: "family",
+    membership_type: "general_assembly", // عضو جمعية عمومية
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -74,6 +84,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "تطوير عقاري",
     achievements: "مطور عقاري متميز ورائد أعمال - رئيس مجلس الأسرة الحالي",
     relationship_level: "family",
+    membership_type: "chairman", // رئيس مجلس الإدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -86,6 +98,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "أعمال",
     achievements: "رجل أعمال وعضو مجلس الأسرة الحالي",
     relationship_level: "family",
+    membership_type: "board_member", // عضو مجلس إدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -98,6 +112,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "إداري",
     achievements: "إداري متميز وعضو مجلس الأسرة الحالي",
     relationship_level: "family",
+    membership_type: "board_member", // عضو مجلس إدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   },
   {
@@ -110,6 +126,8 @@ const mockFamilyDataOriginal = [
     field_of_excellence: "قيادي",
     achievements: "قيادي عائلي وعضو مجلس الأسرة الحالي",
     relationship_level: "family",
+    membership_type: "board_member", // عضو مجلس إدارة
+    membership_status: "active",
     created_at: "2024-01-01"
   }
 ];
@@ -479,7 +497,15 @@ class AlSaedanNetlifyApp {
                 ${member.email ? `<p class="text-sm text-gray-600"><i class="fas fa-envelope ml-1"></i> ${member.email}</p>` : ''}
                 ${member.achievements ? `<p class="text-xs text-gray-500 mt-2">${member.achievements}</p>` : ''}
                 
-                <div class="flex items-center space-x-3 space-x-reverse mt-2">
+                <div class="flex items-center flex-wrap gap-2 mt-3">
+                  <span class="inline-flex items-center px-2 py-1 ${this.getMembershipTypeBadgeClass(member.membership_type)} text-xs rounded-full font-medium">
+                    <i class="fas fa-user-tie ml-1"></i>
+                    ${this.getMembershipTypeText(member.membership_type)}
+                  </span>
+                  <span class="inline-flex items-center px-2 py-1 ${this.getMembershipStatusBadgeClass(member.membership_status)} text-xs rounded-full">
+                    <i class="fas fa-circle ml-1 text-xs"></i>
+                    ${this.getMembershipStatusText(member.membership_status)}
+                  </span>
                   <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
                     <i class="fas fa-layer-group ml-1"></i>
                     ${this.getRelationshipLevelText(member.relationship_level)}
@@ -836,6 +862,88 @@ class AlSaedanNetlifyApp {
       day: 'numeric'
     };
     return date.toLocaleDateString('ar-SA', options);
+  }
+
+  // دوال مساعدة لأنواع العضوية
+  getMembershipTypeText(membershipType) {
+    const types = {
+      'founder': 'مؤسس العائلة',
+      'chairman': 'رئيس مجلس الإدارة',
+      'board_member': 'عضو مجلس إدارة',
+      'general_assembly': 'عضو جمعية عمومية',
+      'family_member': 'عضو العائلة',
+      'honorary': 'عضو شرف'
+    };
+    return types[membershipType] || 'عضو العائلة';
+  }
+
+  getMembershipTypeBadgeClass(membershipType) {
+    const classes = {
+      'founder': 'bg-purple-100 text-purple-800 border border-purple-200',
+      'chairman': 'bg-red-100 text-red-800 border border-red-200',
+      'board_member': 'bg-blue-100 text-blue-800 border border-blue-200',
+      'general_assembly': 'bg-green-100 text-green-800 border border-green-200',
+      'family_member': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'honorary': 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+    };
+    return classes[membershipType] || 'bg-gray-100 text-gray-800 border border-gray-200';
+  }
+
+  getMembershipStatusText(membershipStatus) {
+    const statuses = {
+      'active': 'نشط',
+      'inactive': 'غير نشط',
+      'pending': 'قيد المراجعة',
+      'suspended': 'موقوف'
+    };
+    return statuses[membershipStatus] || 'نشط';
+  }
+
+  getMembershipStatusBadgeClass(membershipStatus) {
+    const classes = {
+      'active': 'bg-green-100 text-green-700',
+      'inactive': 'bg-gray-100 text-gray-700',
+      'pending': 'bg-yellow-100 text-yellow-700',
+      'suspended': 'bg-red-100 text-red-700'
+    };
+    return classes[membershipStatus] || 'bg-green-100 text-green-700';
+  }
+
+  // الحصول على إحصائيات أنواع العضوية
+  getMembershipStatistics() {
+    const familyData = this.mockFamilyData;
+    const stats = {
+      total: familyData.length,
+      founder: 0,
+      chairman: 0,
+      board_members: 0,
+      general_assembly: 0,
+      family_members: 0,
+      honorary: 0,
+      active: 0,
+      inactive: 0
+    };
+
+    familyData.forEach(member => {
+      // إحصائيات أنواع العضوية
+      switch(member.membership_type) {
+        case 'founder': stats.founder++; break;
+        case 'chairman': stats.chairman++; break;
+        case 'board_member': stats.board_members++; break;
+        case 'general_assembly': stats.general_assembly++; break;
+        case 'honorary': stats.honorary++; break;
+        default: stats.family_members++; break;
+      }
+
+      // إحصائيات حالة العضوية
+      if (member.membership_status === 'active') {
+        stats.active++;
+      } else {
+        stats.inactive++;
+      }
+    });
+
+    return stats;
   }
 
   // دوال إضافة البيانات الجديدة
