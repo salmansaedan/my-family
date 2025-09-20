@@ -290,6 +290,95 @@
             </div>
         </div>
 
+        <!-- Edit Suggestion Modal -->
+        <div id="editSuggestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">تحرير الاقتراح</h3>
+                    <button onclick="hideEditSuggestionForm()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="editSuggestionForm" class="space-y-4">
+                    <input type="hidden" name="suggestion_id">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الاقتراح</label>
+                        <input type="text" name="title" required class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">التفاصيل</label>
+                        <textarea name="content" rows="4" required class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">التصنيف</label>
+                        <select name="category" class="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="تطوير التطبيق">تطوير التطبيق</option>
+                            <option value="الفعاليات">الفعاليات</option>
+                            <option value="التواصل">التواصل</option>
+                            <option value="التعليم">التعليم</option>
+                            <option value="الخدمات">الخدمات</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الأولوية</label>
+                        <select name="priority" class="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="منخفضة">منخفضة</option>
+                            <option value="متوسطة">متوسطة</option>
+                            <option value="عالية">عالية</option>
+                            <option value="عاجلة">عاجلة</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الحالة</label>
+                        <select name="status" class="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="جديد">جديد</option>
+                            <option value="قيد المراجعة">قيد المراجعة</option>
+                            <option value="تم التنفيذ">تم التنفيذ</option>
+                            <option value="مرفوض">مرفوض</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-4">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                            حفظ التغييرات
+                        </button>
+                        <button type="button" onclick="hideEditSuggestionForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                            إلغاء
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Suggestion Modal -->
+        <div id="deleteSuggestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">تأكيد الحذف</h3>
+                    <p class="text-sm text-gray-500 mb-4">هل أنت متأكد من حذف هذا الاقتراح؟ لا يمكن التراجع عن هذا الإجراء.</p>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="confirmDeleteSuggestion()" class="flex-1 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition">
+                            حذف
+                        </button>
+                        <button onclick="hideDeleteSuggestionModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Suggestion Details Modal -->
         <div id="suggestionDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
             <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-96 overflow-y-auto">
@@ -420,11 +509,19 @@
                             <i class="fas fa-eye ml-1"></i>
                             التفاصيل
                         </button>
+                        <button onclick="showEditSuggestionForm(${suggestion.id})" class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded text-sm hover:bg-yellow-200 transition">
+                            <i class="fas fa-edit ml-1"></i>
+                            تحرير
+                        </button>
+                        <button onclick="showDeleteSuggestionModal(${suggestion.id})" class="bg-red-100 text-red-600 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
+                            <i class="fas fa-trash ml-1"></i>
+                            حذف
+                        </button>
                     </div>
                 </div>
                 
                 <div class="text-gray-700 mb-3 line-clamp-2">
-                    ${suggestion.content.substring(0, 150)}${suggestion.content.length > 150 ? '...' : ''}
+                    ${(suggestion.content || suggestion.description || '').substring(0, 150)}${(suggestion.content || suggestion.description || '').length > 150 ? '...' : ''}
                 </div>
                 
                 <div class="flex justify-between items-center text-sm text-gray-500 pt-2 border-t">
@@ -558,7 +655,7 @@
                     <div>
                         <h4 class="font-semibold text-gray-800 mb-1">المحتوى</h4>
                         <div class="text-gray-600 bg-gray-50 p-3 rounded-md">
-                            ${suggestion.content.replace(/\n/g, '<br>')}
+                            ${(suggestion.content || suggestion.description || '').replace(/\n/g, '<br>')}
                         </div>
                     </div>
                     
@@ -576,6 +673,49 @@
             document.getElementById('suggestionDetailsModal').classList.add('hidden');
         }
         
+        let selectedSuggestionId = null;
+        
+        function showEditSuggestionForm(suggestionId) {
+            const app = new AlSaedanNetlifyApp();
+            const suggestion = app.getSuggestionById(suggestionId);
+            if (!suggestion) return;
+            
+            const form = document.getElementById('editSuggestionForm');
+            form.suggestion_id.value = suggestion.id;
+            form.title.value = suggestion.title;
+            form.content.value = suggestion.description || suggestion.content || '';
+            form.category.value = suggestion.category || 'أخرى';
+            form.priority.value = suggestion.priority || 'متوسطة';
+            form.status.value = suggestion.status || 'جديد';
+            
+            document.getElementById('editSuggestionModal').classList.remove('hidden');
+        }
+        
+        function hideEditSuggestionForm() {
+            document.getElementById('editSuggestionModal').classList.add('hidden');
+        }
+        
+        function showDeleteSuggestionModal(suggestionId) {
+            selectedSuggestionId = suggestionId;
+            document.getElementById('deleteSuggestionModal').classList.remove('hidden');
+        }
+        
+        function hideDeleteSuggestionModal() {
+            selectedSuggestionId = null;
+            document.getElementById('deleteSuggestionModal').classList.add('hidden');
+        }
+        
+        function confirmDeleteSuggestion() {
+            if (selectedSuggestionId) {
+                const app = new AlSaedanNetlifyApp();
+                app.deleteSuggestion(selectedSuggestionId);
+                hideDeleteSuggestionModal();
+                alert('تم حذف الاقتراح بنجاح!');
+                loadSuggestions();
+                updateStatistics();
+            }
+        }
+        
         // Handle create suggestion form submission
         document.getElementById('createSuggestionForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -584,10 +724,12 @@
             const suggestionData = {
                 title: formData.get('title'),
                 content: formData.get('content'),
+                description: formData.get('content'), // Compatibility with existing data structure
                 category: formData.get('category'),
                 priority: formData.get('priority'),
                 status: 'جديد',
                 author_name: 'مستخدم جديد', // يمكن تحديثه لاحقاً مع نظام المصادقة
+                member_name: 'مستخدم جديد',
                 rating: null
             };
             
@@ -597,6 +739,31 @@
             
             alert('تم إرسال الاقتراح بنجاح! سيتم مراجعته قريباً.');
             hideCreateSuggestionForm();
+            loadSuggestions(); // إعادة تحميل القائمة
+            updateStatistics(); // تحديث الإحصائيات
+        });
+        
+        // Handle edit suggestion form submission
+        document.getElementById('editSuggestionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const suggestionId = parseInt(formData.get('suggestion_id'));
+            const suggestionData = {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                description: formData.get('content'), // Compatibility with existing data structure
+                category: formData.get('category'),
+                priority: formData.get('priority'),
+                status: formData.get('status')
+            };
+            
+            // تحديث الاقتراح
+            const app = new AlSaedanNetlifyApp();
+            app.updateSuggestion(suggestionId, suggestionData);
+            
+            alert('تم تحديث الاقتراح بنجاح!');
+            hideEditSuggestionForm();
             loadSuggestions(); // إعادة تحميل القائمة
             updateStatistics(); // تحديث الإحصائيات
         });

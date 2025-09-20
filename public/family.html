@@ -74,12 +74,28 @@
 
                 <!-- Family Tree Container -->
                 <div class="bg-white rounded-2xl shadow-xl p-8">
-                    <div class="mb-8 text-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-4">
-                            <i class="fas fa-crown text-2xl text-white"></i>
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="text-center flex-1">
+                                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-4">
+                                    <i class="fas fa-crown text-2xl text-white"></i>
+                                </div>
+                                <h2 class="text-3xl font-bold text-gray-800 mb-2">شجرة عائلة آل سعيدان</h2>
+                                <p class="text-gray-600">نسب وأجيال العائلة الكريمة</p>
+                            </div>
                         </div>
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">شجرة عائلة آل سعيدان</h2>
-                        <p class="text-gray-600">نسب وأجيال العائلة الكريمة</p>
+                        
+                        <!-- إدارة العائلة -->
+                        <div class="flex justify-center gap-3 mb-6">
+                            <button onclick="toggleEditMode()" id="editModeBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-edit ml-2"></i>
+                                وضع التحرير
+                            </button>
+                            <button onclick="showAddMemberForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
+                                <i class="fas fa-user-plus ml-2"></i>
+                                إضافة عضو
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Loading State -->
@@ -94,6 +110,132 @@
                     </div>
                 </div>
             </main>
+
+            <!-- Add Member Modal -->
+            <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">إضافة عضو جديد</h3>
+                        <button onclick="hideAddMemberForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="addMemberForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" name="full_name" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الأب</label>
+                            <select name="father_id" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">-- اختر الأب --</option>
+                                <!-- سيتم ملؤها بـ JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
+                            <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف (اختياري)</label>
+                            <input type="tel" name="phone" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
+                            <input type="email" name="email" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
+                                إضافة العضو
+                            </button>
+                            <button type="button" onclick="hideAddMemberForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Member Modal -->
+            <div id="editMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">تحرير بيانات العضو</h3>
+                        <button onclick="hideEditMemberForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="editMemberForm" class="space-y-4">
+                        <input type="hidden" name="member_id">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" name="full_name" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الأب</label>
+                            <select name="father_id" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">-- اختر الأب --</option>
+                                <!-- سيتم ملؤها بـ JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
+                            <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف (اختياري)</label>
+                            <input type="tel" name="phone" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
+                            <input type="email" name="email" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                حفظ التغييرات
+                            </button>
+                            <button type="button" onclick="hideEditMemberForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="deleteMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">تأكيد الحذف</h3>
+                        <p class="text-sm text-gray-500 mb-4">هل أنت متأكد من حذف هذا العضو؟ لا يمكن التراجع عن هذا الإجراء.</p>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="confirmDeleteMember()" class="flex-1 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition">
+                                حذف
+                            </button>
+                            <button onclick="hideDeleteMemberModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-8 mt-16">
@@ -121,5 +263,193 @@
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
     <script src="static/netlify-app.js"></script>
+    
+    <script>
+        let isEditMode = false;
+        let selectedMemberId = null;
+        let app;
+        
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            app = new AlSaedanNetlifyApp();
+            app.displayFamilyTree();
+            populateParentDropdowns();
+        });
+        
+        // تبديل وضع التحرير
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            
+            if (isEditMode) {
+                btn.innerHTML = '<i class="fas fa-eye ml-2"></i>وضع العرض';
+                btn.className = 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center';
+            } else {
+                btn.innerHTML = '<i class="fas fa-edit ml-2"></i>وضع التحرير';
+                btn.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center';
+            }
+            
+            // إعادة عرض الشجرة مع أزرار التحرير
+            app.displayFamilyTree();
+        }
+        
+        // إظهار نموذج إضافة عضو
+        function showAddMemberForm() {
+            populateParentDropdowns();
+            document.getElementById('addMemberModal').classList.remove('hidden');
+        }
+        
+        // إخفاء نموذج إضافة عضو
+        function hideAddMemberForm() {
+            document.getElementById('addMemberModal').classList.add('hidden');
+            document.getElementById('addMemberForm').reset();
+        }
+        
+        // إظهار نموذج تحرير عضو
+        function showEditMemberForm(memberId) {
+            const member = app.mockFamilyData.find(m => m.id === memberId);
+            if (!member) return;
+            
+            const form = document.getElementById('editMemberForm');
+            form.member_id.value = member.id;
+            form.full_name.value = member.full_name;
+            form.father_id.value = member.father_id || '';
+            form.generation.value = member.generation;
+            form.phone.value = member.phone || '';
+            form.email.value = member.email || '';
+            
+            populateParentDropdowns('editMemberForm');
+            document.getElementById('editMemberModal').classList.remove('hidden');
+        }
+        
+        // إخفاء نموذج تحرير عضو
+        function hideEditMemberForm() {
+            document.getElementById('editMemberModal').classList.add('hidden');
+        }
+        
+        // إظهار نموذج تأكيد الحذف
+        function showDeleteMemberModal(memberId) {
+            selectedMemberId = memberId;
+            document.getElementById('deleteMemberModal').classList.remove('hidden');
+        }
+        
+        // إخفاء نموذج تأكيد الحذف
+        function hideDeleteMemberModal() {
+            selectedMemberId = null;
+            document.getElementById('deleteMemberModal').classList.add('hidden');
+        }
+        
+        // تأكيد حذف العضو
+        function confirmDeleteMember() {
+            if (selectedMemberId) {
+                app.deleteFamilyMember(selectedMemberId);
+                hideDeleteMemberModal();
+                populateParentDropdowns(); // تحديث قوائم الآباء
+                alert('تم حذف العضو بنجاح');
+            }
+        }
+        
+        // ملء قوائم اختيار الآباء
+        function populateParentDropdowns(formId = 'addMemberForm') {
+            const form = document.getElementById(formId);
+            const fatherSelect = form.querySelector('select[name="father_id"]');
+            
+            // مسح الخيارات الحالية
+            fatherSelect.innerHTML = '<option value="">-- اختر الأب --</option>';
+            
+            // إضافة الأعضاء المناسبين (الذكور عادة)
+            app.mockFamilyData.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.full_name + ' (الجيل ' + member.generation + ')';
+                fatherSelect.appendChild(option);
+            });
+        }
+        
+        // معالجة نموذج إضافة عضو
+        document.getElementById('addMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const memberData = {
+                full_name: formData.get('full_name'),
+                father_id: formData.get('father_id') || null,
+                generation: parseInt(formData.get('generation')),
+                phone: formData.get('phone') || null,
+                email: formData.get('email') || null
+            };
+            
+            app.addFamilyMember(memberData);
+            hideAddMemberForm();
+            populateParentDropdowns(); // تحديث قوائم الآباء
+            alert('تم إضافة العضو بنجاح!');
+        });
+        
+        // معالجة نموذج تحرير عضو
+        document.getElementById('editMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const memberId = parseInt(formData.get('member_id'));
+            const memberData = {
+                full_name: formData.get('full_name'),
+                father_id: formData.get('father_id') || null,
+                generation: parseInt(formData.get('generation')),
+                phone: formData.get('phone') || null,
+                email: formData.get('email') || null
+            };
+            
+            app.updateFamilyMember(memberId, memberData);
+            hideEditMemberForm();
+            populateParentDropdowns(); // تحديث قوائم الآباء
+            alert('تم تحديث بيانات العضو بنجاح!');
+        });
+        
+        // إضافة CSS ديناميكي لوضع التحرير
+        const editModeCSS = `
+            .edit-mode .member-card {
+                border: 2px dashed #3b82f6;
+                position: relative;
+            }
+            .edit-mode .member-actions {
+                display: flex !important;
+            }
+            .member-actions {
+                display: none;
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                gap: 5px;
+            }
+            .member-actions button {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                border: none;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .edit-btn {
+                background: #3b82f6;
+                color: white;
+            }
+            .edit-btn:hover {
+                background: #2563eb;
+            }
+            .delete-btn {
+                background: #ef4444;
+                color: white;
+            }
+            .delete-btn:hover {
+                background: #dc2626;
+            }
+        `;
+        
+        // إضافة CSS للصفحة
+        const style = document.createElement('style');
+        style.textContent = editModeCSS;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

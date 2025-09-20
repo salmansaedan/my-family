@@ -145,22 +145,54 @@ const mockSuggestionsDataOriginal = [
   {
     id: 1,
     title: "إنشاء صندوق استثماري عائلي",
-    description: "اقتراح لإنشاء صندوق استثماري يساهم فيه أفراد العائلة لتحقيق عوائد جماعية",
-    category: "improvement",
-    priority: "high",
-    status: "under_review",
+    description: "اقتراح لإنشاء صندوق استثماري يساهم فيه أفراد العائلة لتحقيق عوائد جماعية وتوسيع الأعمال العائلية",
+    content: "اقتراح لإنشاء صندوق استثماري يساهم فيه أفراد العائلة لتحقيق عوائد جماعية وتوسيع الأعمال العائلية",
+    category: "الاستثمار",
+    priority: "عالية",
+    status: "قيد المراجعة",
     member_name: "خالد فهد آل سعيدان",
+    author_name: "خالد فهد آل سعيدان",
+    rating: 4,
     created_at: "2024-09-01"
   },
   {
     id: 2,
     title: "برنامج منح دراسية للجيل القادم",
-    description: "إنشاء برنامج منح دراسية لدعم تعليم الأجيال الجديدة في الجامعات المتميزة",
-    category: "program",
-    priority: "high",
-    status: "approved",
-    member_name: "هشام حمد آل سعيدان",
+    description: "إنشاء برنامج منح دراسية لدعم تعليم الأجيال الجديدة في الجامعات المتميزة داخلياً وخارجياً",
+    content: "إنشاء برنامج منح دراسية لدعم تعليم الأجيال الجديدة في الجامعات المتميزة داخلياً وخارجياً",
+    category: "التعليم",
+    priority: "عالية",
+    status: "تم التنفيذ",
+    member_name: "هشام حمد آل سعيدان", 
+    author_name: "هشام حمد آل سعيدان",
+    rating: 5,
     created_at: "2024-08-15"
+  },
+  {
+    id: 3,
+    title: "تطوير موقع العائلة الإلكتروني",
+    description: "تطوير موقع إلكتروني متقدم للعائلة مع قاعدة بيانات شاملة وتطبيق جوال",
+    content: "تطوير موقع إلكتروني متقدم للعائلة مع قاعدة بيانات شاملة وتطبيق جوال مصاحب لتحسين التواصل",
+    category: "تطوير التطبيق",
+    priority: "متوسطة",
+    status: "جديد",
+    member_name: "سلمان عبدالله آل سعيدان",
+    author_name: "سلمان عبدالله آل سعيدان",
+    rating: null,
+    created_at: "2024-09-20"
+  },
+  {
+    id: 4,
+    title: "مشروع توثيق تاريخ العائلة",
+    description: "مشروع شامل لتوثيق تاريخ العائلة وإنجازاتها عبر الأجيال بوسائل متعددة",
+    content: "مشروع شامل لتوثيق تاريخ العائلة وإنجازاتها عبر الأجيال باستخدام المقابلات والصور والوثائق التاريخية",
+    category: "التوثيق",
+    priority: "متوسطة",
+    status: "قيد المراجعة",
+    member_name: "بدر إبراهيم آل سعيدان",
+    author_name: "بدر إبراهيم آل سعيدان",
+    rating: 3,
+    created_at: "2024-08-30"
   }
 ];
 
@@ -386,16 +418,27 @@ class AlSaedanNetlifyApp {
     const container = document.getElementById('family-tree');
     if (!container) return;
     
+    // استخدام البيانات من مدير البيانات إذا لم يتم تمرير members
+    const familyData = members || this.mockFamilyData;
+    
     // تجميع الأعضاء حسب الجيل
     const membersByGeneration = {};
-    members.forEach(member => {
+    familyData.forEach(member => {
       if (!membersByGeneration[member.generation]) {
         membersByGeneration[member.generation] = [];
       }
       membersByGeneration[member.generation].push(member);
     });
     
+    // تحديد وضع التحرير (من متغير عام إذا كان متاحاً)
+    const editMode = (typeof isEditMode !== 'undefined') ? isEditMode : false;
+    
     let html = '';
+    
+    // إضافة CSS للتحكم بوضع التحرير
+    if (editMode) {
+      html += '<div class="edit-mode">';
+    }
     
     // عرض كل جيل
     Object.keys(membersByGeneration).sort().forEach(generation => {
@@ -412,7 +455,17 @@ class AlSaedanNetlifyApp {
       
       membersByGeneration[generation].forEach(member => {
         html += `
-          <div class="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+          <div class="member-card bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow relative">
+            ${editMode ? `
+            <div class="member-actions">
+              <button onclick="showEditMemberForm(${member.id})" class="edit-btn" title="تحرير">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button onclick="showDeleteMemberModal(${member.id})" class="delete-btn" title="حذف">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            ` : ''}
             <div class="flex items-start space-x-4 space-x-reverse">
               <div class="flex-shrink-0">
                 <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
@@ -443,6 +496,10 @@ class AlSaedanNetlifyApp {
         </div>
       `;
     });
+    
+    if (editMode) {
+      html += '</div>';
+    }
     
     container.innerHTML = html;
   }
@@ -812,6 +869,25 @@ class AlSaedanNetlifyApp {
     if (window.loadSuggestions) window.loadSuggestions();
     if (window.updateStatistics) window.updateStatistics();
     return newSuggestion;
+  }
+
+  updateSuggestion(id, suggestionData) {
+    const updatedSuggestion = this.dataManager.updateItem('suggestions', id, suggestionData);
+    // إعادة تحميل صفحة الاقتراحات إذا كانت مفتوحة
+    if (window.loadSuggestions) window.loadSuggestions();
+    if (window.updateStatistics) window.updateStatistics();
+    return updatedSuggestion;
+  }
+
+  deleteSuggestion(id) {
+    this.dataManager.deleteItem('suggestions', id);
+    // إعادة تحميل صفحة الاقتراحات إذا كانت مفتوحة
+    if (window.loadSuggestions) window.loadSuggestions();
+    if (window.updateStatistics) window.updateStatistics();
+  }
+
+  getSuggestionById(id) {
+    return this.mockSuggestionsData.find(suggestion => suggestion.id === id);
   }
 
   addLibraryContent(contentData) {
