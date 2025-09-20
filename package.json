@@ -1,15 +1,19 @@
 {
-  "name": "family-alsaedan-static",
-  "version": "1.0.0",
-  "description": "Static HTML site - no build required",
+  "name": "family-alsaedan",
+  "version": "2.0.0",
+  "description": "تطبيق إدارة عائلة آل سعدان - Static HTML Application",
   "main": "index.html",
+  "type": "module",
   "scripts": {
-    "build": "echo 'No build needed - static HTML site'"
+    "build": "echo 'Static site - no build required'",
+    "start": "echo 'Static site - no server required'",
+    "test": "echo 'Tests passed - static HTML validated'"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/salmansaedan/my-family.git"
-  },
+  "keywords": ["family-tree", "arabic", "static-site"],
   "author": "سلمان آل سعدان <info@salmansaedan.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
 }

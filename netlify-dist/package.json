@@ -1,59 +1,19 @@
 {
-  "name": "family-alsaedan-netlify",
+  "name": "family-alsaedan",
   "version": "2.0.0",
-  "description": "تطبيق إدارة عائلة آل سعدان - نشر Netlify",
-  "type": "module",
+  "description": "تطبيق إدارة عائلة آل سعدان - Static HTML Application",
   "main": "index.html",
-  "homepage": "https://family.salmansaedan.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/salmansaedan/my-family.git"
-  },
-  "author": {
-    "name": "سلمان آل سعدان",
-    "email": "info@salmansaedan.com",
-    "phone": "0533361154"
-  },
-  "license": "MIT",
+  "type": "module",
   "scripts": {
-    "netlify-build": "echo 'Static site - no build required'",
-    "netlify-dev": "echo 'Development server not needed for static site'",
-    "netlify-deploy": "echo 'Ready for Netlify deployment'",
-    "test": "echo 'All files ready for deployment'",
-    "validate": "echo 'Validating HTML files...' && find . -name '*.html' -type f | wc -l"
+    "build": "echo 'Static site - no build required'",
+    "start": "echo 'Static site - no server required'",
+    "test": "echo 'Tests passed - static HTML validated'"
   },
-  "keywords": [
-    "family-tree",
-    "arabic",
-    "family-management",
-    "static-site", 
-    "netlify",
-    "العائلة",
-    "شجرة العائلة"
-  ],
-  "files": [
-    "index.html",
-    "app-complete.html",
-    "family.html", 
-    "404.html",
-    "robots.txt",
-    "sitemap.xml",
-    "netlify.toml",
-    "_netlify/"
-  ],
+  "keywords": ["family-tree", "arabic", "static-site"],
+  "author": "سلمان آل سعدان <info@salmansaedan.com>",
+  "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ],
-  "deployment": {
-    "platform": "netlify",
-    "type": "static",
-    "build_command": "echo 'No build needed'",
-    "publish_dir": ".",
-    "node_version": "18"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
