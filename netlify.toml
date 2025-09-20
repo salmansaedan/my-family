@@ -1,103 +1,20 @@
 [build]
-  # Static site deployment - no build process needed
-  command = ""
+  # Fixed build configuration for GitHub integration
+  command = "echo 'Static HTML deployment - no build required'"
   publish = "."
   
 [build.environment]
   NODE_VERSION = "18"
+  NPM_VERSION = "9"
 
-# Main headers for security and performance
-[[headers]]
-  for = "/*"
-  [headers.values]
-    # Security headers
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # Arabic language support
-    Content-Language = "ar"
-    
-    # Content Security Policy for CDN libraries
-    Content-Security-Policy = """
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-        https://cdn.tailwindcss.com 
-        https://cdn.jsdelivr.net
-        https://cdnjs.cloudflare.com;
-      style-src 'self' 'unsafe-inline' 
-        https://cdn.tailwindcss.com 
-        https://cdn.jsdelivr.net 
-        https://fonts.googleapis.com
-        https://cdnjs.cloudflare.com;
-      font-src 'self' 
-        https://fonts.gstatic.com 
-        https://cdn.jsdelivr.net
-        https://cdnjs.cloudflare.com;
-      img-src 'self' data: https:;
-      connect-src 'self' https:;
-      media-src 'self';
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self';
-    """
-
-# HTML files - no cache for dynamic content
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-    Vary = "Accept-Encoding"
-
-# CSS and JS files - long cache
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Font files
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    Content-Type = "font/woff2"
-    Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/*.woff"
-  [headers.values]
-    Content-Type = "font/woff"
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Image optimization
-[[headers]]
-  for = "/*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Custom 404 page
-[[redirects]]
-  from = "/*"
-  to = "/404.html"
-  status = 404
-
-# Root redirect to main app
+# Root redirect to main application
 [[redirects]]
   from = "/"
   to = "/index.html"
   status = 200
+  force = false
 
-# Pretty URLs for main application files
+# Pretty URLs
 [[redirects]]
   from = "/app"
   to = "/app-complete.html"
@@ -108,7 +25,49 @@
   to = "/family.html"
   status = 200
 
-# Performance settings
+# 404 handling
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Language = "ar"
+    
+    # Simplified CSP for CDN compatibility
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+      style-src 'self' 'unsafe-inline' https:;
+      font-src 'self' https:;
+      img-src 'self' data: https:;
+      connect-src 'self' https:;
+    """
+
+# Cache control for different file types
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Performance optimizations
 [build.processing]
   skip_processing = false
   
@@ -125,14 +84,3 @@
 
 [build.processing.images]
   compress = true
-
-# Form handling for future features
-[forms]
-  settings = { 
-    error_page = "/404.html", 
-    success_page = "/index.html" 
-  }
-
-# Edge functions placeholder for future enhancements
-# [functions]
-#   directory = "netlify/functions"
