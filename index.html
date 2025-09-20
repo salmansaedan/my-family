@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شجرة العائلة - تطبيق آل سعيدان</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Arabic Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind RTL Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'arabic': ['Noto Sans Arabic', 'Arial', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Noto Sans Arabic', Arial, sans-serif; }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .edit-mode .member-card {
+            border: 2px dashed #3b82f6;
+            position: relative;
+        }
+        .edit-mode .member-actions {
+            display: flex !important;
+        }
+        .member-actions {
+            display: none;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            gap: 5px;
+        }
+        .member-actions button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+        }
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <div id="app">
+        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+            <!-- Header -->
+            <header class="bg-white shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-4">
+                        <div class="flex items-center space-x-4 space-x-reverse">
+                            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full p-3">
+                                <i class="fas fa-sitemap text-2xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">شجرة العائلة</h1>
+                                <p class="text-gray-600">أفراد عائلة آل سعيدان</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <!-- Hero Section -->
+                    <div class="text-center mb-8">
+                        <div class="flex flex-col items-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-4">
+                                <i class="fas fa-crown text-2xl text-white"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">شجرة عائلة آل سعيدان</h2>
+                            <p class="text-gray-600">نسب وأجيال العائلة الكريمة</p>
+                        </div>
+                    </div>
+                    
+                    <!-- إحصائيات العضوية -->
+                    <div id="membershipStats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                        <!-- سيتم ملؤها بـ JavaScript -->
+                    </div>
+                    
+                    <!-- إدارة العائلة -->
+                    <div class="flex justify-center gap-3 mb-6">
+                        <button onclick="toggleEditMode()" id="editModeBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <i class="fas fa-edit ml-2"></i>
+                            وضع التحرير
+                        </button>
+                        <button onclick="showAddMemberForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
+                            <i class="fas fa-user-plus ml-2"></i>
+                            إضافة عضو
+                        </button>
+                        <button onclick="showMembershipFilter()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center">
+                            <i class="fas fa-filter ml-2"></i>
+                            تصفية العضوية
+                        </button>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="family-loading" class="text-center py-12">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-600">جاري تحميل شجرة العائلة...</p>
+                    </div>
+
+                    <!-- Family Tree Content -->
+                    <div id="family-tree" class="hidden">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- Add Member Modal -->
+            <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">إضافة عضو جديد</h3>
+                        <button onclick="hideAddMemberForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="addMemberForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" name="full_name" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div id="father-field-add">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الأب</label>
+                            <select name="father_id" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">-- اختر الأب --</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">اتركه فارغاً للمؤسس</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
+                            <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                            <p class="text-xs text-gray-500 mt-1">الجيل 1 للمؤسس، 2 لأبنائه، وهكذا</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع العضوية</label>
+                            <select name="membership_type" required class="w-full p-2 border border-gray-300 rounded-md" onchange="handleMembershipTypeChange(this)">
+                                <option value="">— اختر نوع العضوية —</option>
+                                <option value="founder">مؤسس العائلة</option>
+                                <option value="chairman">رئيس مجلس الإدارة</option>
+                                <option value="board_member">عضو مجلس إدارة</option>
+                                <option value="general_assembly">عضو جمعية عمومية</option>
+                                <option value="family_member">عضو عائلة</option>
+                                <option value="honorary">عضو شرف</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حالة العضوية</label>
+                            <select name="membership_status" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="pending">قيد المراجعة</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">مجال التميز (اختياري)</label>
+                            <input type="text" name="field_of_excellence" placeholder="مثال: أعمال، تعليم، طب" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                إضافة العضو
+                            </button>
+                            <button type="button" onclick="hideAddMemberForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="bg-white shadow-lg mt-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div class="text-center text-gray-600">
+                        <p>&copy; 2024 تطبيق آل سعيدان - جميع الحقوق محفوظة</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // البيانات الأساسية (مدمجة في الصفحة)
+        const familyData = [
+            {
+                id: 1,
+                full_name: "الشيخ محمد بن عبدالله بن سعيدان",
+                father_id: null,
+                generation: 1,
+                phone: null,
+                email: null,
+                field_of_excellence: "قيادي ومؤسس",
+                achievements: "مؤسس العائلة وراعي التقاليد العائلية الأصيلة",
+                relationship_level: "family",
+                membership_type: "founder",
+                membership_status: "active",
+                created_at: "2024-01-01"
+            },
+            {
+                id: 2,
+                full_name: "عبدالله محمد آل سعيدان",
+                father_id: 1,
+                generation: 2,
+                phone: null,
+                email: null,
+                field_of_excellence: "أعمال",
+                achievements: "رجل أعمال وأحد أبناء المؤسس",
+                relationship_level: "family",
+                membership_type: "board_member",
+                membership_status: "active",
+                created_at: "2024-01-01"
+            },
+            {
+                id: 3,
+                full_name: "فهد محمد آل سعيدان",
+                father_id: 1,
+                generation: 2,
+                phone: null,
+                email: null,
+                field_of_excellence: "تجاري",
+                achievements: "تاجر متميز وأحد أبناء المؤسس",
+                relationship_level: "family",
+                membership_type: "general_assembly",
+                membership_status: "active",
+                created_at: "2024-01-01"
+            }
+        ];
+
+        // متغيرات عامة
+        let isEditMode = false;
+        let selectedMemberId = null;
+        let currentMembershipFilter = 'all';
+        
+        // كلاس إدارة البيانات
+        class DataManager {
+            constructor() {
+                this.storageKey = 'alsaedan-family-data';
+                this.initializeData();
+            }
+            
+            initializeData() {
+                const savedData = localStorage.getItem(this.storageKey);
+                if (!savedData) {
+                    localStorage.setItem(this.storageKey, JSON.stringify(familyData));
+                }
+            }
+            
+            getData() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : [...familyData];
+            }
+            
+            saveData(data) {
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+            }
+            
+            addMember(memberData) {
+                const currentData = this.getData();
+                const newId = Math.max(...currentData.map(m => m.id), 0) + 1;
+                const newMember = {
+                    ...memberData,
+                    id: newId,
+                    created_at: new Date().toISOString()
+                };
+                currentData.push(newMember);
+                this.saveData(currentData);
+                return newMember;
+            }
+            
+            updateMember(id, memberData) {
+                const currentData = this.getData();
+                const index = currentData.findIndex(m => m.id === id);
+                if (index !== -1) {
+                    currentData[index] = { ...currentData[index], ...memberData };
+                    this.saveData(currentData);
+                    return currentData[index];
+                }
+                return null;
+            }
+            
+            deleteMember(id) {
+                const currentData = this.getData();
+                const filteredData = currentData.filter(m => m.id !== id);
+                this.saveData(filteredData);
+                return true;
+            }
+        }
+
+        // إنشاء مدير البيانات
+        const dataManager = new DataManager();
+
+        // كلاس التطبيق الرئيسي
+        class FamilyTreeApp {
+            constructor() {
+                this.dataManager = dataManager;
+                this.init();
+            }
+            
+            init() {
+                console.log('تطبيق آل سعيدان - تم التحميل بنجاح');
+                this.displayFamilyTree();
+                this.updateMembershipStatistics();
+                this.populateParentDropdowns();
+            }
+            
+            get familyData() {
+                return this.dataManager.getData();
+            }
+            
+            displayFamilyTree(members) {
+                const container = document.getElementById('family-tree');
+                const loadingDiv = document.getElementById('family-loading');
+                
+                if (!container) return;
+                
+                const familyMembers = members || this.familyData;
+                
+                // تجميع الأعضاء حسب الجيل
+                const membersByGeneration = {};
+                familyMembers.forEach(member => {
+                    if (!membersByGeneration[member.generation]) {
+                        membersByGeneration[member.generation] = [];
+                    }
+                    membersByGeneration[member.generation].push(member);
+                });
+                
+                // إخفاء loading وإظهار المحتوى
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                container.style.display = 'block';
+                
+                // إنشاء HTML للشجرة
+                let treeHTML = '<div class="family-tree-container">';
+                
+                // ترتيب الأجيال
+                const sortedGenerations = Object.keys(membersByGeneration).sort((a, b) => a - b);
+                
+                sortedGenerations.forEach(generation => {
+                    const members = membersByGeneration[generation];
+                    
+                    treeHTML += `
+                        <div class="generation-group mb-8">
+                            <div class="text-center mb-4">
+                                <h3 class="text-xl font-bold text-gray-700 bg-gray-100 inline-block px-4 py-2 rounded-full">
+                                    الجيل ${generation}
+                                </h3>
+                            </div>
+                            <div class="flex flex-wrap justify-center gap-4">
+                    `;
+                    
+                    members.forEach(member => {
+                        const membershipBadge = this.getMembershipBadge(member.membership_type);
+                        
+                        treeHTML += `
+                            <div class="member-card bg-white rounded-lg shadow-md p-4 max-w-sm border-r-4 ${membershipBadge.borderColor} relative">
+                                <div class="member-actions">
+                                    <button onclick="showEditMemberForm(${member.id})" class="edit-btn" title="تحرير">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="showDeleteMemberModal(${member.id})" class="delete-btn" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center mb-3">
+                                    <div class="w-12 h-12 ${membershipBadge.bgColor} ${membershipBadge.textColor} rounded-full flex items-center justify-center ml-3">
+                                        <i class="${membershipBadge.icon} text-lg"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-800">${member.full_name}</h4>
+                                        <span class="inline-block px-2 py-1 text-xs rounded-full ${membershipBadge.bgColor} ${membershipBadge.textColor}">
+                                            ${membershipBadge.text}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                ${member.field_of_excellence ? `
+                                    <div class="text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-star text-yellow-500 ml-1"></i>
+                                        ${member.field_of_excellence}
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="text-xs text-gray-500">
+                                    الجيل: ${member.generation}
+                                    ${member.father_id ? ` • الأب: ${this.getFatherName(member.father_id)}` : ' • المؤسس'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    treeHTML += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                treeHTML += '</div>';
+                container.innerHTML = treeHTML;
+                
+                // تطبيق وضع التحرير إذا كان مفعلاً
+                if (isEditMode) {
+                    container.classList.add('edit-mode');
+                }
+            }
+            
+            getMembershipBadge(membershipType) {
+                const badges = {
+                    founder: {
+                        text: 'مؤسس العائلة',
+                        bgColor: 'bg-purple-100',
+                        textColor: 'text-purple-700',
+                        borderColor: 'border-purple-500',
+                        icon: 'fas fa-crown'
+                    },
+                    chairman: {
+                        text: 'رئيس مجلس الإدارة',
+                        bgColor: 'bg-red-100',
+                        textColor: 'text-red-700',
+                        borderColor: 'border-red-500',
+                        icon: 'fas fa-user-tie'
+                    },
+                    board_member: {
+                        text: 'عضو مجلس إدارة',
+                        bgColor: 'bg-blue-100',
+                        textColor: 'text-blue-700',
+                        borderColor: 'border-blue-500',
+                        icon: 'fas fa-users'
+                    },
+                    general_assembly: {
+                        text: 'عضو جمعية عمومية',
+                        bgColor: 'bg-green-100',
+                        textColor: 'text-green-700',
+                        borderColor: 'border-green-500',
+                        icon: 'fas fa-user-friends'
+                    },
+                    family_member: {
+                        text: 'عضو عائلة',
+                        bgColor: 'bg-gray-100',
+                        textColor: 'text-gray-700',
+                        borderColor: 'border-gray-500',
+                        icon: 'fas fa-user'
+                    },
+                    honorary: {
+                        text: 'عضو شرف',
+                        bgColor: 'bg-yellow-100',
+                        textColor: 'text-yellow-700',
+                        borderColor: 'border-yellow-500',
+                        icon: 'fas fa-medal'
+                    }
+                };
+                
+                return badges[membershipType] || badges.family_member;
+            }
+            
+            getFatherName(fatherId) {
+                const father = this.familyData.find(m => m.id === fatherId);
+                return father ? father.full_name : 'غير معروف';
+            }
+            
+            updateMembershipStatistics() {
+                const familyMembers = this.familyData;
+                const stats = {
+                    total: familyMembers.length,
+                    founder: familyMembers.filter(m => m.membership_type === 'founder').length,
+                    chairman: familyMembers.filter(m => m.membership_type === 'chairman').length,
+                    board_members: familyMembers.filter(m => m.membership_type === 'board_member').length,
+                    general_assembly: familyMembers.filter(m => m.membership_type === 'general_assembly').length
+                };
+                
+                const container = document.getElementById('membershipStats');
+                if (!container) return;
+                
+                container.innerHTML = `
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-purple-600">${stats.founder}</div>
+                        <div class="text-sm text-purple-700">مؤسس</div>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-red-600">${stats.chairman}</div>
+                        <div class="text-sm text-red-700">رئيس مجلس</div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-blue-600">${stats.board_members}</div>
+                        <div class="text-sm text-blue-700">أعضاء مجلس</div>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-green-600">${stats.general_assembly}</div>
+                        <div class="text-sm text-green-700">جمعية عمومية</div>
+                    </div>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                        <div class="text-2xl font-bold text-gray-600">${stats.total}</div>
+                        <div class="text-sm text-gray-700">المجموع</div>
+                    </div>
+                `;
+            }
+            
+            addFamilyMember(memberData) {
+                const newMember = this.dataManager.addMember(memberData);
+                this.displayFamilyTree();
+                this.updateMembershipStatistics();
+                this.populateParentDropdowns();
+                return newMember;
+            }
+            
+            populateParentDropdowns() {
+                const familyMembers = this.familyData;
+                const fatherSelect = document.querySelector('select[name="father_id"]');
+                
+                if (!fatherSelect) return;
+                
+                fatherSelect.innerHTML = '<option value="">-- اختر الأب --</option>';
+                
+                familyMembers.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.full_name + ' (الجيل ' + member.generation + ')';
+                    fatherSelect.appendChild(option);
+                });
+            }
+        }
+
+        // المتغيرات العامة
+        let app;
+
+        // دالة للتحكم في حقول النموذج حسب نوع العضوية
+        function handleMembershipTypeChange(selectElement) {
+            const membershipType = selectElement.value;
+            const form = selectElement.closest('form');
+            
+            const fatherField = document.getElementById('father-field-add');
+            const generationInput = form.querySelector('input[name="generation"]');
+            const fatherSelect = form.querySelector('select[name="father_id"]');
+            
+            if (membershipType === 'founder') {
+                // إخفاء حقل الأب للمؤسس
+                if (fatherField) {
+                    fatherField.style.display = 'none';
+                }
+                // تعيين الجيل تلقائياً إلى 1 للمؤسس
+                if (generationInput) {
+                    generationInput.value = 1;
+                    generationInput.readOnly = true;
+                    generationInput.style.backgroundColor = '#f3f4f6';
+                }
+                // مسح اختيار الأب
+                if (fatherSelect) {
+                    fatherSelect.value = '';
+                }
+            } else {
+                // إظهار حقل الأب للأعضاء الآخرين
+                if (fatherField) {
+                    fatherField.style.display = 'block';
+                }
+                // إلغاء القيود على حقل الجيل
+                if (generationInput) {
+                    generationInput.readOnly = false;
+                    generationInput.style.backgroundColor = 'white';
+                    if (generationInput.value === '1') {
+                        generationInput.value = '';
+                    }
+                }
+            }
+        }
+
+        // تبديل وضع التحرير
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            const container = document.getElementById('family-tree');
+            
+            if (btn) {
+                if (isEditMode) {
+                    btn.innerHTML = '<i class="fas fa-eye ml-2"></i>وضع العرض';
+                    btn.className = 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center';
+                    if (container) container.classList.add('edit-mode');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-edit ml-2"></i>وضع التحرير';
+                    btn.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center';
+                    if (container) container.classList.remove('edit-mode');
+                }
+            }
+        }
+
+        // إظهار نموذج إضافة عضو
+        function showAddMemberForm() {
+            if (app) app.populateParentDropdowns();
+            
+            // إعادة تعيين النموذج وإظهار جميع الحقول
+            const form = document.getElementById('addMemberForm');
+            const fatherField = document.getElementById('father-field-add');
+            const generationInput = form.querySelector('input[name="generation"]');
+            
+            if (fatherField) fatherField.style.display = 'block';
+            if (generationInput) {
+                generationInput.readOnly = false;
+                generationInput.style.backgroundColor = 'white';
+            }
+            
+            document.getElementById('addMemberModal').classList.remove('hidden');
+        }
+
+        // إخفاء نموذج إضافة عضو
+        function hideAddMemberForm() {
+            document.getElementById('addMemberModal').classList.add('hidden');
+            document.getElementById('addMemberForm').reset();
+        }
+
+        // إظهار تصفية العضوية
+        function showMembershipFilter() {
+            const filterOptions = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="membershipFilterModal">
+                    <div class="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                        <h3 class="text-xl font-bold mb-4">تصفية حسب نوع العضوية</h3>
+                        <div class="space-y-2">
+                            <button onclick="filterByMembershipType('all')" class="w-full text-right p-2 rounded hover:bg-gray-100">جميع الأعضاء</button>
+                            <button onclick="filterByMembershipType('founder')" class="w-full text-right p-2 rounded hover:bg-purple-100">المؤسس</button>
+                            <button onclick="filterByMembershipType('chairman')" class="w-full text-right p-2 rounded hover:bg-red-100">رئيس مجلس الإدارة</button>
+                            <button onclick="filterByMembershipType('board_member')" class="w-full text-right p-2 rounded hover:bg-blue-100">أعضاء مجلس الإدارة</button>
+                            <button onclick="filterByMembershipType('general_assembly')" class="w-full text-right p-2 rounded hover:bg-green-100">الجمعية العمومية</button>
+                            <button onclick="filterByMembershipType('family_member')" class="w-full text-right p-2 rounded hover:bg-gray-100">أعضاء العائلة</button>
+                        </div>
+                        <button onclick="closeMembershipFilter()" class="w-full mt-4 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">إغلاق</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', filterOptions);
+        }
+
+        // إغلاق تصفية العضوية
+        function closeMembershipFilter() {
+            const modal = document.getElementById('membershipFilterModal');
+            if (modal) modal.remove();
+        }
+
+        // تصفية حسب نوع العضوية
+        function filterByMembershipType(membershipType) {
+            if (!app) return;
+            
+            currentMembershipFilter = membershipType;
+            
+            let filteredMembers = app.familyData;
+            
+            if (membershipType !== 'all') {
+                filteredMembers = app.familyData.filter(member => 
+                    member.membership_type === membershipType
+                );
+            }
+            
+            app.displayFamilyTree(filteredMembers);
+            closeMembershipFilter();
+        }
+
+        // معالجة نموذج إضافة عضو
+        document.getElementById('addMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!app) {
+                alert('لم يتم تحميل التطبيق بعد. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const memberData = {
+                full_name: formData.get('full_name'),
+                father_id: formData.get('father_id') ? parseInt(formData.get('father_id')) : null,
+                generation: parseInt(formData.get('generation')),
+                membership_type: formData.get('membership_type'),
+                membership_status: formData.get('membership_status'),
+                field_of_excellence: formData.get('field_of_excellence') || null,
+                relationship_level: 'family'
+            };
+            
+            try {
+                app.addFamilyMember(memberData);
+                hideAddMemberForm();
+                alert('تم إضافة العضو بنجاح!');
+            } catch (error) {
+                console.error('خطأ في إضافة العضو:', error);
+                alert('حدث خطأ أثناء إضافة العضو. يرجى المحاولة مرة أخرى.');
+            }
+        });
+
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('بدء تحميل تطبيق شجرة العائلة...');
+            app = new FamilyTreeApp();
+        });
+
+        // وظائف وهمية للأزرار التي لم تُطبق بعد
+        function showEditMemberForm(memberId) {
+            alert('ميزة تحرير العضو ستتوفر قريباً');
+        }
+
+        function showDeleteMemberModal(memberId) {
+            if (confirm('هل أنت متأكد من حذف هذا العضو؟')) {
+                if (app) {
+                    app.dataManager.deleteMember(memberId);
+                    app.displayFamilyTree();
+                    app.updateMembershipStatistics();
+                    app.populateParentDropdowns();
+                    alert('تم حذف العضو بنجاح');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

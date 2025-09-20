@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق آل سعيدان - التطبيق الكامل</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Arabic Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind RTL Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'arabic': ['Noto Sans Arabic', 'Arial', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Noto Sans Arabic', Arial, sans-serif; }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .edit-mode .member-card {
+            border: 2px dashed #3b82f6;
+            position: relative;
+        }
+        .edit-mode .member-actions {
+            display: flex !important;
+        }
+        .member-actions {
+            display: none;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            gap: 5px;
+        }
+        .member-actions button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+        }
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <div id="app">
+        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+            <!-- Header -->
+            <header class="bg-white shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-4">
+                        <div class="flex items-center space-x-4 space-x-reverse">
+                            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full p-3">
+                                <i class="fas fa-home text-2xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">تطبيق آل سعيدان</h1>
+                                <p class="text-gray-600">منصة شاملة لإدارة شؤون العائلة</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation Menu -->
+                        <nav class="hidden md:flex items-center space-x-6 space-x-reverse">
+                            <button onclick="showSection('home')" class="nav-item px-4 py-2 rounded-lg font-medium transition-all" id="nav-home">الرئيسية</button>
+                            <button onclick="showSection('family')" class="nav-item px-4 py-2 rounded-lg font-medium transition-all" id="nav-family">شجرة العائلة</button>
+                            <button onclick="showSection('events')" class="nav-item px-4 py-2 rounded-lg font-medium transition-all" id="nav-events">الفعاليات</button>
+                            <button onclick="showSection('suggestions')" class="nav-item px-4 py-2 rounded-lg font-medium transition-all" id="nav-suggestions">الاقتراحات</button>
+                            <button onclick="showSection('library')" class="nav-item px-4 py-2 rounded-lg font-medium transition-all" id="nav-library">المكتبة</button>
+                        </nav>
+                        
+                        <!-- Mobile Menu Button -->
+                        <button onclick="toggleMobileMenu()" class="md:hidden">
+                            <i class="fas fa-bars text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="hidden md:hidden bg-white shadow-lg">
+                <div class="px-4 py-2">
+                    <button onclick="showSection('home')" class="block w-full text-right py-2 px-4 hover:bg-gray-100 rounded">الرئيسية</button>
+                    <button onclick="showSection('family')" class="block w-full text-right py-2 px-4 hover:bg-gray-100 rounded">شجرة العائلة</button>
+                    <button onclick="showSection('events')" class="block w-full text-right py-2 px-4 hover:bg-gray-100 rounded">الفعاليات</button>
+                    <button onclick="showSection('suggestions')" class="block w-full text-right py-2 px-4 hover:bg-gray-100 rounded">الاقتراحات</button>
+                    <button onclick="showSection('library')" class="block w-full text-right py-2 px-4 hover:bg-gray-100 rounded">المكتبة</button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                
+                <!-- Home Section -->
+                <section id="home-section" class="section active">
+                    <div class="text-center mb-12">
+                        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-6">
+                            <i class="fas fa-users text-4xl text-white"></i>
+                        </div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-4">مرحباً بكم في تطبيق آل سعيدان</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">منصة شاملة لإدارة شؤون العائلة، تضم شجرة النسب، الفعاليات، الاقتراحات، ومكتبة التجارب</p>
+                    </div>
+                    
+                    <!-- Statistics Dashboard -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                        <div class="card p-6 text-center">
+                            <div class="text-3xl font-bold text-blue-600 mb-2" id="total-members">0</div>
+                            <div class="text-gray-600">أعضاء العائلة</div>
+                            <i class="fas fa-users text-blue-500 text-2xl mt-3"></i>
+                        </div>
+                        <div class="card p-6 text-center">
+                            <div class="text-3xl font-bold text-green-600 mb-2" id="total-events">0</div>
+                            <div class="text-gray-600">الفعاليات</div>
+                            <i class="fas fa-calendar text-green-500 text-2xl mt-3"></i>
+                        </div>
+                        <div class="card p-6 text-center">
+                            <div class="text-3xl font-bold text-purple-600 mb-2" id="total-suggestions">0</div>
+                            <div class="text-gray-600">الاقتراحات</div>
+                            <i class="fas fa-lightbulb text-purple-500 text-2xl mt-3"></i>
+                        </div>
+                        <div class="card p-6 text-center">
+                            <div class="text-3xl font-bold text-orange-600 mb-2" id="total-library">0</div>
+                            <div class="text-gray-600">مقالات المكتبة</div>
+                            <i class="fas fa-book text-orange-500 text-2xl mt-3"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                        <div class="card p-6 text-center cursor-pointer" onclick="showSection('family')">
+                            <i class="fas fa-sitemap text-4xl text-purple-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold mb-2">شجرة العائلة</h3>
+                            <p class="text-gray-600">إدارة أعضاء العائلة وأنواع العضوية</p>
+                        </div>
+                        <div class="card p-6 text-center cursor-pointer" onclick="showSection('events')">
+                            <i class="fas fa-calendar-alt text-4xl text-blue-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold mb-2">الفعاليات</h3>
+                            <p class="text-gray-600">تنظيم ومتابعة فعاليات العائلة</p>
+                        </div>
+                        <div class="card p-6 text-center cursor-pointer" onclick="showSection('suggestions')">
+                            <i class="fas fa-lightbulb text-4xl text-yellow-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold mb-2">شاركنا أفكارك</h3>
+                            <p class="text-gray-600">اقتراحات وأفكار لتطوير العائلة</p>
+                        </div>
+                        <div class="card p-6 text-center cursor-pointer" onclick="showSection('library')">
+                            <i class="fas fa-book-open text-4xl text-green-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold mb-2">مكتبة التجارب</h3>
+                            <p class="text-gray-600">تجارب وقصص نجاح أفراد العائلة</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-clock text-blue-500 ml-3"></i>
+                            آخر الأنشطة
+                        </h3>
+                        <div id="recent-activity" class="space-y-4">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Family Tree Section -->
+                <section id="family-section" class="section">
+                    <div class="card p-6">
+                        <!-- Hero Section -->
+                        <div class="text-center mb-8">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mb-4">
+                                <i class="fas fa-crown text-2xl text-white"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">شجرة عائلة آل سعيدان</h2>
+                            <p class="text-gray-600">نسب وأجيال العائلة الكريمة</p>
+                        </div>
+                        
+                        <!-- إحصائيات العضوية -->
+                        <div id="membershipStats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                        
+                        <!-- إدارة العائلة -->
+                        <div class="flex justify-center gap-3 mb-6">
+                            <button onclick="toggleEditMode()" id="editModeBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-edit ml-2"></i>
+                                وضع التحرير
+                            </button>
+                            <button onclick="showAddMemberForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
+                                <i class="fas fa-user-plus ml-2"></i>
+                                إضافة عضو
+                            </button>
+                            <button onclick="showMembershipFilter()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center">
+                                <i class="fas fa-filter ml-2"></i>
+                                تصفية العضوية
+                            </button>
+                        </div>
+
+                        <!-- Family Tree Content -->
+                        <div id="family-tree">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Events Section -->
+                <section id="events-section" class="section">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-calendar-alt text-blue-500 ml-3"></i>
+                                فعاليات العائلة
+                            </h2>
+                            <button onclick="showAddEventForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-plus ml-2"></i>
+                                إضافة فعالية
+                            </button>
+                        </div>
+                        
+                        <!-- Filter Tabs -->
+                        <div class="flex gap-2 mb-6">
+                            <button onclick="filterEvents('all')" class="event-filter active px-4 py-2 rounded-lg bg-blue-600 text-white">جميع الفعاليات</button>
+                            <button onclick="filterEvents('upcoming')" class="event-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">القادمة</button>
+                            <button onclick="filterEvents('past')" class="event-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">السابقة</button>
+                        </div>
+                        
+                        <!-- Events Grid -->
+                        <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Suggestions Section -->
+                <section id="suggestions-section" class="section">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-lightbulb text-yellow-500 ml-3"></i>
+                                شاركنا أفكارك
+                            </h2>
+                            <button onclick="showAddSuggestionForm()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition flex items-center">
+                                <i class="fas fa-plus ml-2"></i>
+                                إضافة اقتراح
+                            </button>
+                        </div>
+                        
+                        <!-- Filter by Category -->
+                        <div class="flex gap-2 mb-6 flex-wrap">
+                            <button onclick="filterSuggestions('all')" class="suggestion-filter active px-4 py-2 rounded-lg bg-yellow-600 text-white">جميع الاقتراحات</button>
+                            <button onclick="filterSuggestions('تحسين')" class="suggestion-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">تحسين</button>
+                            <button onclick="filterSuggestions('فعالية')" class="suggestion-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">فعالية</button>
+                            <button onclick="filterSuggestions('خدمة')" class="suggestion-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">خدمة</button>
+                            <button onclick="filterSuggestions('أخرى')" class="suggestion-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">أخرى</button>
+                        </div>
+                        
+                        <!-- Suggestions Grid -->
+                        <div id="suggestions-grid" class="space-y-4">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Library Section -->
+                <section id="library-section" class="section">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-book-open text-green-500 ml-3"></i>
+                                مكتبة التجارب
+                            </h2>
+                            <button onclick="showAddLibraryForm()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
+                                <i class="fas fa-plus ml-2"></i>
+                                إضافة تجربة
+                            </button>
+                        </div>
+                        
+                        <!-- Filter by Category -->
+                        <div class="flex gap-2 mb-6 flex-wrap">
+                            <button onclick="filterLibrary('all')" class="library-filter active px-4 py-2 rounded-lg bg-green-600 text-white">جميع التجارب</button>
+                            <button onclick="filterLibrary('نجاح')" class="library-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">قصص نجاح</button>
+                            <button onclick="filterLibrary('تجارة')" class="library-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">تجارة</button>
+                            <button onclick="filterLibrary('تعليم')" class="library-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">تعليم</button>
+                            <button onclick="filterLibrary('صحة')" class="library-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700">صحة</button>
+                        </div>
+                        
+                        <!-- Library Grid -->
+                        <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Modals -->
+            <!-- Add Member Modal -->
+            <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">إضافة عضو جديد</h3>
+                        <button onclick="hideAddMemberForm()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="addMemberForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" name="full_name" required class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div id="father-field-add">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الأب</label>
+                            <select name="father_id" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">-- اختر الأب --</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">اتركه فارغاً للمؤسس</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الجيل</label>
+                            <input type="number" name="generation" min="1" max="10" required class="w-full p-2 border border-gray-300 rounded-md">
+                            <p class="text-xs text-gray-500 mt-1">الجيل 1 للمؤسس، 2 لأبنائه، وهكذا</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع العضوية</label>
+                            <select name="membership_type" required class="w-full p-2 border border-gray-300 rounded-md" onchange="handleMembershipTypeChange(this)">
+                                <option value="">— اختر نوع العضوية —</option>
+                                <option value="founder">مؤسس العائلة</option>
+                                <option value="chairman">رئيس مجلس الإدارة</option>
+                                <option value="board_member">عضو مجلس إدارة</option>
+                                <option value="general_assembly">عضو جمعية عمومية</option>
+                                <option value="family_member">عضو عائلة</option>
+                                <option value="honorary">عضو شرف</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حالة العضوية</label>
+                            <select name="membership_status" required class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="pending">قيد المراجعة</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">مجال التميز (اختياري)</label>
+                            <input type="text" name="field_of_excellence" placeholder="مثال: أعمال، تعليم، طب" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                                إضافة العضو
+                            </button>
+                            <button type="button" onclick="hideAddMemberForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition">
+                                إلغاء
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="bg-white shadow-lg mt-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div class="text-center text-gray-600">
+                        <p>&copy; 2024 تطبيق آل سعيدان - جميع الحقوق محفوظة</p>
+                        <p class="text-sm mt-2">منصة شاملة لإدارة شؤون العائلة</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // البيانات الأساسية
+        const initialData = {
+            familyMembers: [
+                {
+                    id: 1,
+                    full_name: "الشيخ محمد بن عبدالله بن سعيدان",
+                    father_id: null,
+                    generation: 1,
+                    field_of_excellence: "قيادي ومؤسس",
+                    membership_type: "founder",
+                    membership_status: "active",
+                    created_at: "2024-01-01"
+                },
+                {
+                    id: 2,
+                    full_name: "عبدالله محمد آل سعيدان",
+                    father_id: 1,
+                    generation: 2,
+                    field_of_excellence: "أعمال",
+                    membership_type: "board_member",
+                    membership_status: "active",
+                    created_at: "2024-01-01"
+                },
+                {
+                    id: 3,
+                    full_name: "فهد محمد آل سعيدان",
+                    father_id: 1,
+                    generation: 2,
+                    field_of_excellence: "تجاري",
+                    membership_type: "general_assembly",
+                    membership_status: "active",
+                    created_at: "2024-01-01"
+                }
+            ],
+            events: [
+                {
+                    id: 1,
+                    title: "لقاء العائلة السنوي 2024",
+                    description: "لقاء جميع أفراد العائلة لمناقشة الأمور المهمة وتقوية الروابط",
+                    date: "2024-12-25",
+                    location: "قاعة الاجتماعات الرئيسية",
+                    type: "اجتماع",
+                    status: "upcoming"
+                },
+                {
+                    id: 2,
+                    title: "إفطار رمضان الجماعي",
+                    description: "دعوة جميع أفراد العائلة لإفطار جماعي في شهر رمضان",
+                    date: "2024-04-15",
+                    location: "منزل العائلة",
+                    type: "اجتماعي",
+                    status: "past"
+                }
+            ],
+            suggestions: [
+                {
+                    id: 1,
+                    title: "إنشاء مجموعة واتساب للعائلة",
+                    description: "لتسهيل التواصل وتبادل الأخبار بين أفراد العائلة",
+                    category: "تحسين",
+                    status: "pending",
+                    votes: 15,
+                    submitted_by: "أحمد محمد آل سعيدان",
+                    created_at: "2024-01-15"
+                },
+                {
+                    id: 2,
+                    title: "تنظيم رحلة عائلية سنوية",
+                    description: "رحلة سياحية لجميع أفراد العائلة لتقوية الروابط",
+                    category: "فعالية",
+                    status: "approved",
+                    votes: 23,
+                    submitted_by: "سارة عبدالله آل سعيدان",
+                    created_at: "2024-02-01"
+                }
+            ],
+            library: [
+                {
+                    id: 1,
+                    title: "رحلتي في عالم ريادة الأعمال",
+                    author: "عبدالله محمد آل سعيدان",
+                    category: "نجاح",
+                    summary: "تجربتي في تأسيس شركة ناجحة والدروس المستفادة",
+                    content: "بدأت رحلتي في ريادة الأعمال منذ 15 عاماً...",
+                    published_at: "2024-03-01"
+                },
+                {
+                    id: 2,
+                    title: "أهمية التعليم في بناء المستقبل",
+                    author: "فاطمة أحمد آل سعيدان",
+                    category: "تعليم",
+                    summary: "كيف غير التعليم مسار حياتي وحياة عائلتي",
+                    content: "التعليم هو الاستثمار الحقيقي في المستقبل...",
+                    published_at: "2024-02-15"
+                }
+            ]
+        };
+
+        // إدارة البيانات
+        class AppDataManager {
+            constructor() {
+                this.storageKey = 'alsaedan-app-complete';
+                this.initializeData();
+            }
+            
+            initializeData() {
+                const savedData = localStorage.getItem(this.storageKey);
+                if (!savedData) {
+                    localStorage.setItem(this.storageKey, JSON.stringify(initialData));
+                }
+            }
+            
+            getData(type) {
+                const data = localStorage.getItem(this.storageKey);
+                const parsed = data ? JSON.parse(data) : initialData;
+                return parsed[type] || [];
+            }
+            
+            saveData(type, data) {
+                const allData = localStorage.getItem(this.storageKey);
+                const parsed = allData ? JSON.parse(allData) : initialData;
+                parsed[type] = data;
+                localStorage.setItem(this.storageKey, JSON.stringify(parsed));
+            }
+            
+            addItem(type, item) {
+                const currentData = this.getData(type);
+                const newId = Math.max(...currentData.map(i => i.id), 0) + 1;
+                const newItem = { ...item, id: newId, created_at: new Date().toISOString() };
+                currentData.push(newItem);
+                this.saveData(type, currentData);
+                return newItem;
+            }
+        }
+
+        // متغيرات عامة
+        let app;
+        let dataManager;
+        let isEditMode = false;
+        let currentSection = 'home';
+
+        // كلاس التطبيق الرئيسي
+        class AlSaedanCompleteApp {
+            constructor() {
+                this.dataManager = new AppDataManager();
+                this.init();
+            }
+            
+            init() {
+                console.log('تطبيق آل سعيدان الكامل - تم التحميل بنجاح');
+                this.updateHomeStatistics();
+                this.loadRecentActivity();
+                this.displayFamilyTree();
+                this.displayEvents();
+                this.displaySuggestions();
+                this.displayLibrary();
+            }
+            
+            // الإحصائيات الرئيسية
+            updateHomeStatistics() {
+                const familyMembers = this.dataManager.getData('familyMembers');
+                const events = this.dataManager.getData('events');
+                const suggestions = this.dataManager.getData('suggestions');
+                const library = this.dataManager.getData('library');
+                
+                document.getElementById('total-members').textContent = familyMembers.length;
+                document.getElementById('total-events').textContent = events.length;
+                document.getElementById('total-suggestions').textContent = suggestions.length;
+                document.getElementById('total-library').textContent = library.length;
+            }
+            
+            // آخر الأنشطة
+            loadRecentActivity() {
+                const activities = [
+                    { icon: 'fas fa-user-plus', text: 'تم إضافة عضو جديد: أحمد محمد آل سعيدان', time: '2 ساعات' },
+                    { icon: 'fas fa-calendar', text: 'تم إضافة فعالية: لقاء العائلة السنوي', time: '5 ساعات' },
+                    { icon: 'fas fa-lightbulb', text: 'اقتراح جديد: تنظيم رحلة عائلية', time: '1 يوم' },
+                    { icon: 'fas fa-book', text: 'تجربة جديدة: رحلتي في ريادة الأعمال', time: '2 أيام' }
+                ];
+                
+                const container = document.getElementById('recent-activity');
+                container.innerHTML = activities.map(activity => `
+                    <div class="flex items-center space-x-3 space-x-reverse p-3 hover:bg-gray-50 rounded">
+                        <div class="flex-shrink-0">
+                            <i class="${activity.icon} text-blue-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-gray-800">${activity.text}</p>
+                        </div>
+                        <div class="text-sm text-gray-500">${activity.time}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // عرض شجرة العائلة
+            displayFamilyTree() {
+                const familyMembers = this.dataManager.getData('familyMembers');
+                
+                // تحديث إحصائيات العضوية
+                const stats = {
+                    total: familyMembers.length,
+                    founder: familyMembers.filter(m => m.membership_type === 'founder').length,
+                    chairman: familyMembers.filter(m => m.membership_type === 'chairman').length,
+                    board_members: familyMembers.filter(m => m.membership_type === 'board_member').length,
+                    general_assembly: familyMembers.filter(m => m.membership_type === 'general_assembly').length
+                };
+                
+                const statsContainer = document.getElementById('membershipStats');
+                if (statsContainer) {
+                    statsContainer.innerHTML = `
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-purple-600">${stats.founder}</div>
+                            <div class="text-sm text-purple-700">مؤسس</div>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-red-600">${stats.chairman}</div>
+                            <div class="text-sm text-red-700">رئيس مجلس</div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-blue-600">${stats.board_members}</div>
+                            <div class="text-sm text-blue-700">أعضاء مجلس</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-green-600">${stats.general_assembly}</div>
+                            <div class="text-sm text-green-700">جمعية عمومية</div>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-gray-600">${stats.total}</div>
+                            <div class="text-sm text-gray-700">المجموع</div>
+                        </div>
+                    `;
+                }
+                
+                // عرض الشجرة
+                const container = document.getElementById('family-tree');
+                if (!container) return;
+                
+                const membersByGeneration = {};
+                familyMembers.forEach(member => {
+                    if (!membersByGeneration[member.generation]) {
+                        membersByGeneration[member.generation] = [];
+                    }
+                    membersByGeneration[member.generation].push(member);
+                });
+                
+                let treeHTML = '<div class="family-tree-container">';
+                const sortedGenerations = Object.keys(membersByGeneration).sort((a, b) => a - b);
+                
+                sortedGenerations.forEach(generation => {
+                    const members = membersByGeneration[generation];
+                    
+                    treeHTML += `
+                        <div class="generation-group mb-8">
+                            <div class="text-center mb-4">
+                                <h3 class="text-xl font-bold text-gray-700 bg-gray-100 inline-block px-4 py-2 rounded-full">
+                                    الجيل ${generation}
+                                </h3>
+                            </div>
+                            <div class="flex flex-wrap justify-center gap-4">
+                    `;
+                    
+                    members.forEach(member => {
+                        const badge = this.getMembershipBadge(member.membership_type);
+                        
+                        treeHTML += `
+                            <div class="member-card bg-white rounded-lg shadow-md p-4 max-w-sm border-r-4 ${badge.borderColor}">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-12 h-12 ${badge.bgColor} ${badge.textColor} rounded-full flex items-center justify-center ml-3">
+                                        <i class="${badge.icon} text-lg"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-800">${member.full_name}</h4>
+                                        <span class="inline-block px-2 py-1 text-xs rounded-full ${badge.bgColor} ${badge.textColor}">
+                                            ${badge.text}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                ${member.field_of_excellence ? `
+                                    <div class="text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-star text-yellow-500 ml-1"></i>
+                                        ${member.field_of_excellence}
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="text-xs text-gray-500">
+                                    الجيل: ${member.generation}
+                                    ${member.father_id ? ` • الأب: ${this.getFatherName(member.father_id)}` : ' • المؤسس'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    treeHTML += '</div></div>';
+                });
+                
+                treeHTML += '</div>';
+                container.innerHTML = treeHTML;
+            }
+            
+            getMembershipBadge(membershipType) {
+                const badges = {
+                    founder: { text: 'مؤسس العائلة', bgColor: 'bg-purple-100', textColor: 'text-purple-700', borderColor: 'border-purple-500', icon: 'fas fa-crown' },
+                    chairman: { text: 'رئيس مجلس الإدارة', bgColor: 'bg-red-100', textColor: 'text-red-700', borderColor: 'border-red-500', icon: 'fas fa-user-tie' },
+                    board_member: { text: 'عضو مجلس إدارة', bgColor: 'bg-blue-100', textColor: 'text-blue-700', borderColor: 'border-blue-500', icon: 'fas fa-users' },
+                    general_assembly: { text: 'عضو جمعية عمومية', bgColor: 'bg-green-100', textColor: 'text-green-700', borderColor: 'border-green-500', icon: 'fas fa-user-friends' },
+                    family_member: { text: 'عضو عائلة', bgColor: 'bg-gray-100', textColor: 'text-gray-700', borderColor: 'border-gray-500', icon: 'fas fa-user' },
+                    honorary: { text: 'عضو شرف', bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', borderColor: 'border-yellow-500', icon: 'fas fa-medal' }
+                };
+                return badges[membershipType] || badges.family_member;
+            }
+            
+            getFatherName(fatherId) {
+                const familyMembers = this.dataManager.getData('familyMembers');
+                const father = familyMembers.find(m => m.id === fatherId);
+                return father ? father.full_name : 'غير معروف';
+            }
+            
+            // عرض الفعاليات
+            displayEvents() {
+                const events = this.dataManager.getData('events');
+                const container = document.getElementById('events-grid');
+                if (!container) return;
+                
+                container.innerHTML = events.map(event => `
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-semibold text-gray-800">${event.title}</h3>
+                            <span class="px-2 py-1 text-xs rounded-full ${event.status === 'upcoming' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                                ${event.status === 'upcoming' ? 'قادمة' : 'سابقة'}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-4">${event.description}</p>
+                        <div class="space-y-2 text-sm text-gray-500">
+                            <div><i class="fas fa-calendar ml-2"></i>${event.date}</div>
+                            <div><i class="fas fa-map-marker-alt ml-2"></i>${event.location}</div>
+                            <div><i class="fas fa-tag ml-2"></i>${event.type}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // عرض الاقتراحات
+            displaySuggestions() {
+                const suggestions = this.dataManager.getData('suggestions');
+                const container = document.getElementById('suggestions-grid');
+                if (!container) return;
+                
+                container.innerHTML = suggestions.map(suggestion => `
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-semibold text-gray-800">${suggestion.title}</h3>
+                            <div class="flex items-center space-x-2 space-x-reverse">
+                                <span class="px-2 py-1 text-xs rounded-full ${suggestion.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                    ${suggestion.status === 'approved' ? 'مقبول' : 'قيد المراجعة'}
+                                </span>
+                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                                    ${suggestion.category}
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">${suggestion.description}</p>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <div><i class="fas fa-user ml-2"></i>${suggestion.submitted_by}</div>
+                            <div><i class="fas fa-thumbs-up ml-2"></i>${suggestion.votes} تصويت</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // عرض المكتبة
+            displayLibrary() {
+                const library = this.dataManager.getData('library');
+                const container = document.getElementById('library-grid');
+                if (!container) return;
+                
+                container.innerHTML = library.map(item => `
+                    <div class="card p-6">
+                        <div class="mb-3">
+                            <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">${item.category}</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${item.title}</h3>
+                        <p class="text-gray-600 mb-4">${item.summary}</p>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <div><i class="fas fa-user ml-2"></i>${item.author}</div>
+                            <div><i class="fas fa-calendar ml-2"></i>${new Date(item.published_at).toLocaleDateString('ar-SA')}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // إضافة عضو جديد
+            addFamilyMember(memberData) {
+                const newMember = this.dataManager.addItem('familyMembers', memberData);
+                this.displayFamilyTree();
+                this.updateHomeStatistics();
+                this.populateParentDropdowns();
+                return newMember;
+            }
+            
+            populateParentDropdowns() {
+                const familyMembers = this.dataManager.getData('familyMembers');
+                const fatherSelect = document.querySelector('select[name="father_id"]');
+                
+                if (!fatherSelect) return;
+                
+                fatherSelect.innerHTML = '<option value="">-- اختر الأب --</option>';
+                
+                familyMembers.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.full_name + ' (الجيل ' + member.generation + ')';
+                    fatherSelect.appendChild(option);
+                });
+            }
+        }
+
+        // وظائف التنقل
+        function showSection(sectionName) {
+            // إخفاء جميع الأقسام
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // إظهار القسم المطلوب
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // تحديث التنقل
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            const activeNav = document.getElementById('nav-' + sectionName);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+            
+            currentSection = sectionName;
+            
+            // إخفاء القائمة المحمولة
+            document.getElementById('mobileMenu').classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // وظائف إدارة العضوية
+        function handleMembershipTypeChange(selectElement) {
+            const membershipType = selectElement.value;
+            const form = selectElement.closest('form');
+            
+            const fatherField = document.getElementById('father-field-add');
+            const generationInput = form.querySelector('input[name="generation"]');
+            const fatherSelect = form.querySelector('select[name="father_id"]');
+            
+            if (membershipType === 'founder') {
+                if (fatherField) fatherField.style.display = 'none';
+                if (generationInput) {
+                    generationInput.value = 1;
+                    generationInput.readOnly = true;
+                    generationInput.style.backgroundColor = '#f3f4f6';
+                }
+                if (fatherSelect) fatherSelect.value = '';
+            } else {
+                if (fatherField) fatherField.style.display = 'block';
+                if (generationInput) {
+                    generationInput.readOnly = false;
+                    generationInput.style.backgroundColor = 'white';
+                    if (generationInput.value === '1') generationInput.value = '';
+                }
+            }
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            const container = document.getElementById('family-tree');
+            
+            if (btn) {
+                if (isEditMode) {
+                    btn.innerHTML = '<i class="fas fa-eye ml-2"></i>وضع العرض';
+                    btn.className = 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-edit ml-2"></i>وضع التحرير';
+                    btn.className = 'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center';
+                }
+            }
+        }
+
+        function showAddMemberForm() {
+            if (app) app.populateParentDropdowns();
+            
+            const form = document.getElementById('addMemberForm');
+            const fatherField = document.getElementById('father-field-add');
+            const generationInput = form.querySelector('input[name="generation"]');
+            
+            if (fatherField) fatherField.style.display = 'block';
+            if (generationInput) {
+                generationInput.readOnly = false;
+                generationInput.style.backgroundColor = 'white';
+            }
+            
+            document.getElementById('addMemberModal').classList.remove('hidden');
+        }
+
+        function hideAddMemberForm() {
+            document.getElementById('addMemberModal').classList.add('hidden');
+            document.getElementById('addMemberForm').reset();
+        }
+
+        function showMembershipFilter() {
+            alert('ميزة التصفية ستتوفر قريباً');
+        }
+
+        // وظائف وهمية للأقسام الأخرى
+        function showAddEventForm() {
+            alert('ميزة إضافة فعالية ستتوفر قريباً');
+        }
+
+        function showAddSuggestionForm() {
+            alert('ميزة إضافة اقتراح ستتوفر قريباً');
+        }
+
+        function showAddLibraryForm() {
+            alert('ميزة إضافة تجربة ستتوفر قريباً');
+        }
+
+        function filterEvents(type) {
+            // تحديث أزرار التصفية
+            document.querySelectorAll('.event-filter').forEach(btn => {
+                btn.className = 'event-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700';
+            });
+            event.target.className = 'event-filter active px-4 py-2 rounded-lg bg-blue-600 text-white';
+            
+            // تطبيق التصفية (مبسط)
+            console.log('تصفية الفعاليات:', type);
+        }
+
+        function filterSuggestions(category) {
+            document.querySelectorAll('.suggestion-filter').forEach(btn => {
+                btn.className = 'suggestion-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700';
+            });
+            event.target.className = 'suggestion-filter active px-4 py-2 rounded-lg bg-yellow-600 text-white';
+            
+            console.log('تصفية الاقتراحات:', category);
+        }
+
+        function filterLibrary(category) {
+            document.querySelectorAll('.library-filter').forEach(btn => {
+                btn.className = 'library-filter px-4 py-2 rounded-lg bg-gray-200 text-gray-700';
+            });
+            event.target.className = 'library-filter active px-4 py-2 rounded-lg bg-green-600 text-white';
+            
+            console.log('تصفية المكتبة:', category);
+        }
+
+        // معالجة نموذج إضافة عضو
+        document.getElementById('addMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!app) {
+                alert('لم يتم تحميل التطبيق بعد. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const memberData = {
+                full_name: formData.get('full_name'),
+                father_id: formData.get('father_id') ? parseInt(formData.get('father_id')) : null,
+                generation: parseInt(formData.get('generation')),
+                membership_type: formData.get('membership_type'),
+                membership_status: formData.get('membership_status'),
+                field_of_excellence: formData.get('field_of_excellence') || null,
+                relationship_level: 'family'
+            };
+            
+            try {
+                app.addFamilyMember(memberData);
+                hideAddMemberForm();
+                alert('تم إضافة العضو بنجاح!');
+            } catch (error) {
+                console.error('خطأ في إضافة العضو:', error);
+                alert('حدث خطأ أثناء إضافة العضو. يرجى المحاولة مرة أخرى.');
+            }
+        });
+
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('بدء تحميل تطبيق آل سعيدان الكامل...');
+            app = new AlSaedanCompleteApp();
+            dataManager = app.dataManager;
+            
+            // عرض الصفحة الرئيسية بشكل افتراضي
+            showSection('home');
+        });
+    </script>
+</body>
+</html>
