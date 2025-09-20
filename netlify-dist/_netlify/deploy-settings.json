@@ -1,0 +1,37 @@
+{
+  "build": {
+    "command": "echo 'Static deployment ready'",
+    "publish": ".",
+    "environment": {
+      "NODE_VERSION": "18",
+      "LANG": "ar_SA.UTF-8"
+    }
+  },
+  "settings": {
+    "site_name": "family-alsaedan",
+    "custom_domain": "family.salmansaedan.com",
+    "https_forced": true,
+    "branch_deploy_enabled": true,
+    "form_processing": true,
+    "identity_enabled": false,
+    "large_media_enabled": false
+  },
+  "deployment_info": {
+    "app_name": "تطبيق إدارة عائلة آل سعدان",
+    "version": "v2.0",
+    "deployment_type": "static_html",
+    "main_files": [
+      "index.html",
+      "app-complete.html", 
+      "family.html",
+      "404.html"
+    ],
+    "features": [
+      "شجرة العائلة",
+      "إدارة الأحداث", 
+      "نظام الاقتراحات",
+      "المكتبة الرقمية",
+      "لوحة الإحصائيات"
+    ]
+  }
+}
