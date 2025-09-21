@@ -1,10 +1,10 @@
-// بيانات عائلة آل سعدان - المؤسس محمد وأبناءه
+// بيانات عائلة بن سعيدان - المؤسس محمد وأبناءه
 const familySeedData = {
     familyMembers: [
         // المؤسس - الجيل الأول
         {
             id: 'founder_muhammad',
-            full_name: 'محمد آل سعدان',
+            full_name: 'محمد بن سعيدان',
             father_id: null,
             generation: 1,
             membership_type: 'founder',
@@ -12,14 +12,14 @@ const familySeedData = {
             location: 'نجد',
             phone: '',
             email: '',
-            notes: 'مؤسس عائلة آل سعدان',
+            notes: 'مؤسس عائلة بن سعيدان',
             created_at: new Date().toISOString()
         },
         
         // الجيل الثاني - أبناء وبنات المؤسس محمد
         {
             id: 'abdullah_muhammad',
-            full_name: 'عبدالله محمد آل سعدان',
+            full_name: 'عبدالله محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'chairman',
@@ -32,7 +32,7 @@ const familySeedData = {
         },
         {
             id: 'munira_muhammad',
-            full_name: 'منيرة محمد آل سعدان',
+            full_name: 'منيرة محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'board_member',
@@ -45,7 +45,7 @@ const familySeedData = {
         },
         {
             id: 'fahd_muhammad',
-            full_name: 'فهد محمد آل سعدان',
+            full_name: 'فهد محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'board_member',
@@ -58,7 +58,7 @@ const familySeedData = {
         },
         {
             id: 'hamd_muhammad',
-            full_name: 'حمد محمد آل سعدان',
+            full_name: 'حمد محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'board_member',
@@ -71,7 +71,7 @@ const familySeedData = {
         },
         {
             id: 'ibrahim_muhammad',
-            full_name: 'ابراهيم محمد آل سعدان',
+            full_name: 'ابراهيم محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'assembly_member',
@@ -84,7 +84,7 @@ const familySeedData = {
         },
         {
             id: 'sarah_muhammad',
-            full_name: 'سارة محمد آل سعدان',
+            full_name: 'سارة محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -97,7 +97,7 @@ const familySeedData = {
         },
         {
             id: 'abdulrahman_muhammad',
-            full_name: 'عبدالرحمن محمد آل سعدان',
+            full_name: 'عبدالرحمن محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'assembly_member',
@@ -110,7 +110,7 @@ const familySeedData = {
         },
         {
             id: 'nasser_muhammad',
-            full_name: 'ناصر محمد آل سعدان',
+            full_name: 'ناصر محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'assembly_member',
@@ -123,7 +123,7 @@ const familySeedData = {
         },
         {
             id: 'saad_muhammad',
-            full_name: 'سعد محمد آل سعدان',
+            full_name: 'سعد محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -136,7 +136,7 @@ const familySeedData = {
         },
         {
             id: 'nora_muhammad',
-            full_name: 'نورة محمد آل سعدان',
+            full_name: 'نورة محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -149,7 +149,7 @@ const familySeedData = {
         },
         {
             id: 'abdulmohsen_muhammad',
-            full_name: 'عبدالمحسن محمد آل سعدان',
+            full_name: 'عبدالمحسن محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -162,7 +162,7 @@ const familySeedData = {
         },
         {
             id: 'abdulaziz_muhammad',
-            full_name: 'عبدالعزيز محمد آل سعدان',
+            full_name: 'عبدالعزيز محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -175,7 +175,7 @@ const familySeedData = {
         },
         {
             id: 'alanoud_muhammad',
-            full_name: 'العنود محمد آل سعدان',
+            full_name: 'العنود محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -188,7 +188,7 @@ const familySeedData = {
         },
         {
             id: 'mutaib_muhammad',
-            full_name: 'متعب محمد آل سعدان',
+            full_name: 'متعب محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -201,7 +201,7 @@ const familySeedData = {
         },
         {
             id: 'wasmiah_muhammad',
-            full_name: 'وسمية محمد آل سعدان',
+            full_name: 'وسمية محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
@@ -214,7 +214,7 @@ const familySeedData = {
         },
         {
             id: 'bandar_muhammad',
-            full_name: 'بندر محمد آل سعدان',
+            full_name: 'بندر محمد بن سعيدان',
             father_id: 'founder_muhammad',
             generation: 2,
             membership_type: 'family_member',
