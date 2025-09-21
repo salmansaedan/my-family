@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار المزامنة - عائلة بن سعيدان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; }
+        .sync-status { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+                🏠 اختبار مزامنة عائلة بن سعيدان
+            </h1>
+            
+            <!-- مؤشر المزامنة -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div id="syncStatus" class="text-center text-blue-700 font-medium"></div>
+            </div>
+            
+            <!-- إضافة عضو جديد -->
+            <div class="mb-6">
+                <h2 class="text-xl font-bold mb-4">إضافة عضو جديد</h2>
+                <div class="flex gap-4">
+                    <input type="text" id="memberName" class="flex-1 p-3 border rounded-lg" placeholder="اسم العضو الجديد">
+                    <button onclick="addMember()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                        إضافة
+                    </button>
+                </div>
+            </div>
+            
+            <!-- قائمة الأعضاء -->
+            <div class="mb-6">
+                <h2 class="text-xl font-bold mb-4">أعضاء العائلة (<span id="memberCount">0</span>)</h2>
+                <div id="membersList" class="space-y-2"></div>
+            </div>
+            
+            <!-- عمليات التحكم -->
+            <div class="flex gap-4 justify-center">
+                <button onclick="clearAllData()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    مسح جميع البيانات
+                </button>
+                <button onclick="forceSync()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    مزامنة فورية
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // محاكاة نظام المزامنة المبسط
+        class SyncDemo {
+            constructor() {
+                this.localKey = 'saedan_family_demo_local';
+                this.centralKey = 'saedan_family_demo_central';
+                this.data = this.loadLocal() || { members: [], version: 0 };
+                this.syncInterval = null;
+                
+                this.render();
+                this.startAutoSync();
+                this.showSyncStatus('جاهز للمزامنة', 'info');
+            }
+            
+            loadLocal() {
+                const stored = localStorage.getItem(this.localKey);
+                return stored ? JSON.parse(stored) : null;
+            }
+            
+            saveLocal() {
+                localStorage.setItem(this.localKey, JSON.stringify(this.data));
+            }
+            
+            loadCentral() {
+                const stored = localStorage.getItem(this.centralKey);
+                return stored ? JSON.parse(stored) : null;
+            }
+            
+            saveCentral() {
+                localStorage.setItem(this.centralKey, JSON.stringify(this.data));
+                console.log('💾 تم حفظ البيانات مركزياً:', this.data.members.length, 'عضو');
+            }
+            
+            addMember(name) {
+                if (!name.trim()) return;
+                
+                const member = {
+                    id: Date.now(),
+                    name: name.trim(),
+                    addedAt: new Date().toLocaleString('ar-SA')
+                };
+                
+                this.data.members.push(member);
+                this.data.version++;
+                this.data.lastUpdated = new Date().toISOString();
+                
+                this.saveLocal();
+                this.saveCentral();
+                this.render();
+                
+                this.showSyncStatus(`تمت إضافة "${name}" ومزامنة البيانات`, 'success');
+                
+                return member;
+            }
+            
+            sync() {
+                const central = this.loadCentral();
+                
+                if (!central) {
+                    console.log('📤 رفع البيانات المحلية للمركز');
+                    this.saveCentral();
+                    this.showSyncStatus('تم رفع البيانات للمركز', 'success');
+                    return;
+                }
+                
+                if (central.version > this.data.version) {
+                    console.log('📥 تحديث البيانات من المركز');
+                    this.data = central;
+                    this.saveLocal();
+                    this.render();
+                    this.showSyncStatus('تم تحديث البيانات من مستخدم آخر!', 'update');
+                } else if (this.data.version > central.version) {
+                    console.log('📤 رفع البيانات المحدثة للمركز');
+                    this.saveCentral();
+                    this.showSyncStatus('تم رفع التحديثات للمركز', 'success');
+                } else {
+                    console.log('✅ البيانات متزامنة');
+                }
+            }
+            
+            startAutoSync() {
+                this.syncInterval = setInterval(() => {
+                    this.sync();
+                }, 3000); // كل 3 ثوان للعرض السريع
+            }
+            
+            render() {
+                const membersList = document.getElementById('membersList');
+                const memberCount = document.getElementById('memberCount');
+                
+                memberCount.textContent = this.data.members.length;
+                
+                if (this.data.members.length === 0) {
+                    membersList.innerHTML = '<p class="text-gray-500 text-center py-4">لا توجد أعضاء بعد</p>';
+                    return;
+                }
+                
+                membersList.innerHTML = this.data.members.map(member => `
+                    <div class="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
+                        <div>
+                            <span class="font-medium">${member.name}</span>
+                            <span class="text-sm text-gray-500 mr-2">- ${member.addedAt}</span>
+                        </div>
+                        <button onclick="syncDemo.removeMember(${member.id})" class="text-red-600 hover:text-red-800">
+                            حذف
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            removeMember(id) {
+                this.data.members = this.data.members.filter(m => m.id !== id);
+                this.data.version++;
+                this.data.lastUpdated = new Date().toISOString();
+                
+                this.saveLocal();
+                this.saveCentral();
+                this.render();
+                this.showSyncStatus('تم حذف العضو ومزامنة البيانات', 'success');
+            }
+            
+            clearAll() {
+                this.data = { members: [], version: 0 };
+                this.saveLocal();
+                this.saveCentral();
+                this.render();
+                this.showSyncStatus('تم مسح جميع البيانات', 'warning');
+            }
+            
+            showSyncStatus(message, type = 'info') {
+                const statusEl = document.getElementById('syncStatus');
+                
+                let icon = '🔄';
+                let color = 'text-blue-700';
+                
+                switch (type) {
+                    case 'success':
+                        icon = '✅';
+                        color = 'text-green-700';
+                        break;
+                    case 'update':
+                        icon = '🔄';
+                        color = 'text-purple-700';
+                        break;
+                    case 'warning':
+                        icon = '⚠️';
+                        color = 'text-orange-700';
+                        break;
+                    case 'error':
+                        icon = '❌';
+                        color = 'text-red-700';
+                        break;
+                }
+                
+                statusEl.innerHTML = `<span class="${color}">${icon} ${message}</span>`;
+                
+                setTimeout(() => {
+                    statusEl.innerHTML = '<span class="text-gray-500">🔄 مزامنة تلقائية كل 3 ثوان</span>';
+                }, 3000);
+            }
+        }
+        
+        // تهيئة العرض
+        let syncDemo;
+        
+        window.onload = function() {
+            syncDemo = new SyncDemo();
+        };
+        
+        // دوال العمليات
+        function addMember() {
+            const input = document.getElementById('memberName');
+            const name = input.value;
+            if (name.trim()) {
+                syncDemo.addMember(name);
+                input.value = '';
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('هل أنت متأكد من حذف جميع البيانات؟')) {
+                syncDemo.clearAll();
+            }
+        }
+        
+        function forceSync() {
+            syncDemo.sync();
+            syncDemo.showSyncStatus('تم تشغيل المزامنة الفورية', 'info');
+        }
+        
+        // إضافة عضو بالضغط على Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.id === 'memberName') {
+                addMember();
+            }
+        });
+    </script>
+</body>
+</html>
