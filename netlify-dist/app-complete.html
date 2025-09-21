@@ -361,6 +361,9 @@
             }
 
             initializeDefaultData() {
+                // Only initialize if completely empty - preserve user-added data
+                console.log('Checking existing data...', this.data);
+                
                 const defaultData = {
                     familyMembers: [
                         // المؤسس - الجيل الأول
@@ -647,10 +650,13 @@
                     ]
                 };
 
-                // Merge with existing data
+                // Only merge if data doesn't exist at all
                 Object.keys(defaultData).forEach(key => {
-                    if (!this.data[key] || this.data[key].length === 0) {
+                    if (!this.data[key]) {
                         this.data[key] = defaultData[key];
+                        console.log(`Initialized ${key} with default data`);
+                    } else {
+                        console.log(`Preserving existing ${key} data (${this.data[key].length} items)`);
                     }
                 });
 
@@ -1576,11 +1582,107 @@
                 this.displayLibrary();
                 return newItem;
             }
+            
+            // إضافة عضو عائلة جديد - الوظيفة المفقودة
+            addFamilyMember(memberData) {
+                console.log('Adding new family member:', memberData);
+                
+                // التحقق من البيانات المطلوبة
+                if (!memberData.full_name) {
+                    throw new Error('الاسم مطلوب');
+                }
+                
+                // حساب الجيل التلقائي بناءً على الأب
+                if (memberData.father_id) {
+                    const father = this.dataManager.getData('familyMembers')
+                        .find(m => m.id === memberData.father_id);
+                    if (father) {
+                        memberData.generation = father.generation + 1;
+                    }
+                } else {
+                    memberData.generation = 1; // المؤسس
+                }
+                
+                const newMember = this.dataManager.addItem('familyMembers', {
+                    ...memberData,
+                    created_at: new Date().toISOString()
+                });
+                
+                console.log('Family member added successfully:', newMember);
+                console.log('Total members now:', this.dataManager.getData('familyMembers').length);
+                
+                // التحقق من الحفظ في localStorage
+                const savedData = localStorage.getItem(this.dataManager.storageKey);
+                console.log('Data saved to localStorage:', savedData ? 'Yes' : 'No');
+                
+                // تحديث العرض
+                this.displayFamilyMembers();
+                this.loadFatherOptions();
+                this.initializeCharts(); // تحديث الرسوم البيانية
+                
+                return newMember;
+            }
+            
+            // تعديل عضو عائلة
+            editFamilyMember(id, memberData) {
+                console.log('Editing family member:', id, memberData);
+                
+                const updatedMember = this.dataManager.updateItem('familyMembers', id, memberData);
+                
+                if (updatedMember) {
+                    console.log('Family member updated successfully:', updatedMember);
+                    this.displayFamilyMembers();
+                    this.initializeCharts();
+                }
+                
+                return updatedMember;
+            }
+            
+            // حذف عضو عائلة
+            deleteFamilyMember(id) {
+                // التأكد من عدم حذف المؤسس
+                const member = this.dataManager.getData('familyMembers').find(m => m.id === id);
+                if (member && member.membership_type === 'founder') {
+                    alert('لا يمكن حذف المؤسس!');
+                    return false;
+                }
+                
+                console.log('Deleting family member:', id);
+                
+                const deleted = this.dataManager.deleteItem('familyMembers', id);
+                
+                if (deleted) {
+                    console.log('Family member deleted successfully');
+                    this.displayFamilyMembers();
+                    this.loadFatherOptions();
+                    this.initializeCharts();
+                }
+                
+                return deleted;
+            }
         }
 
         // Initialize app when page loads
         document.addEventListener('DOMContentLoaded', function() {
             app = new EnhancedAlSaedanApp();
+            
+            // إضافة زر تشخيص البيانات (للتطوير)
+            const debugButton = document.createElement('button');
+            debugButton.textContent = 'تشخيص البيانات';
+            debugButton.className = 'fixed bottom-4 left-4 bg-red-500 text-white px-3 py-1 rounded text-sm';
+            debugButton.onclick = function() {
+                const data = localStorage.getItem('saedan_family_data_enhanced');
+                console.log('=== تشخيص البيانات ===');
+                console.log('localStorage key:', 'saedan_family_data_enhanced');
+                console.log('Data exists:', !!data);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    console.log('Family members count:', parsed.familyMembers?.length || 0);
+                    console.log('All data:', parsed);
+                }
+                alert(`البيانات المحفوظة: ${data ? 'موجود' : 'غير موجود'}\nعدد الأعضاء: ${data ? JSON.parse(data).familyMembers?.length || 0 : 0}`);
+            };
+            document.body.appendChild(debugButton);
         });
 
         // Navigation functions
@@ -1699,13 +1801,37 @@
 
         function handleAddMember(event) {
             event.preventDefault();
+            console.log('Form submitted for adding member');
+            
             const formData = new FormData(event.target);
             const memberData = Object.fromEntries(formData.entries());
             
+            console.log('Member data to be added:', memberData);
+            
+            // التأكد من وجود البيانات المطلوبة
+            if (!memberData.full_name || !memberData.membership_type) {
+                alert('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
             if (app) {
-                app.addFamilyMember(memberData);
-                app.showToast('تم إضافة العضو بنجاح');
-                hideAddMemberForm();
+                try {
+                    const newMember = app.addFamilyMember(memberData);
+                    if (newMember) {
+                        app.showToast('تم إضافة العضو بنجاح');
+                        hideAddMemberForm();
+                        
+                        // تحديث فوري للعرض
+                        setTimeout(() => {
+                            if (currentSection === 'family') {
+                                app.displayFamilyMembers();
+                            }
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error('Error adding member:', error);
+                    alert('حدث خطأ أثناء إضافة العضو');
+                }
             }
         }
 
