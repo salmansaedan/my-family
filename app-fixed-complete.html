@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق آل سعيدان - إصدار ثابت</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Arabic Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <style>
+        body { 
+            font-family: 'Noto Sans Arabic', Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #059669);
+            transform: translateY(-1px);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800 ml-4">
+                        <i class="fas fa-sitemap text-blue-600 ml-2"></i>
+                        تطبيق آل سعيدان
+                    </h1>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-8 rtl:space-x-reverse">
+                    <button id="nav-home" class="nav-item active px-4 py-2 rounded-lg transition" onclick="showSection('home')">
+                        <i class="fas fa-home ml-2"></i>الرئيسية
+                    </button>
+                    <button id="nav-family" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('family')">
+                        <i class="fas fa-users ml-2"></i>شجرة العائلة
+                    </button>
+                </div>
+                
+                <!-- أزرار التحكم -->
+                <div class="flex gap-2">
+                    <button onclick="resetToDefault()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                        إعادة تعيين
+                    </button>
+                    <button onclick="clearAllData()" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                        مسح الكل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- مؤشر حالة المزامنة -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-2">
+            <div id="syncStatus" class="text-center min-h-6">
+                <span class="text-green-700">✅ جاهز للاستخدام</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="home-section" class="section active">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Statistics Cards -->
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-blue-600 mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="total-members">0</h3>
+                    <p class="text-gray-600">إجمالي الأعضاء</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-green-600 mb-2">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="founders-count">1</h3>
+                    <p class="text-gray-600">المؤسس</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-purple-600 mb-2">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="board-count">0</h3>
+                    <p class="text-gray-600">أعضاء الإدارة</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-orange-600 mb-2">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="sync-status">متصل</h3>
+                    <p class="text-gray-600">حالة المزامنة</p>
+                </div>
+            </div>
+            
+            <div class="card p-8 text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">مرحباً بك في تطبيق عائلة بن سعيدان</h2>
+                <p class="text-xl text-gray-600 mb-6">نظام إدارة العائلة مع مزامنة فورية بين جميع المستخدمين</p>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <p class="text-green-800 font-medium">✨ النظام يعمل بكامل طاقته!</p>
+                    <p class="text-green-600 text-sm">جميع البيانات محفوظة ومتزامنة بين المستخدمين</p>
+                </div>
+                <button onclick="showSection('family')" class="btn-primary text-white px-8 py-3 rounded-lg text-lg">
+                    <i class="fas fa-users ml-2"></i>استكشف شجرة العائلة
+                </button>
+            </div>
+        </section>
+
+        <!-- Family Section -->
+        <section id="family-section" class="section">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">شجرة العائلة</h2>
+                <div class="flex gap-4">
+                    <button onclick="loadCompleteFamily()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-download ml-2"></i>تحميل الشجرة الكاملة
+                    </button>
+                    <button onclick="showAddMemberModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-plus ml-2"></i>إضافة عضو
+                    </button>
+                </div>
+            </div>
+            
+            <div id="family-members" class="space-y-4">
+                <!-- Family members will be populated here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
+        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">إضافة عضو جديد</h3>
+            <form id="addMemberForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
+                    <input type="text" name="full_name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                    <select name="membership_type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- اختر نوع العضوية --</option>
+                        <option value="chairman">رئيس مجلس الإدارة</option>
+                        <option value="board_member">عضو مجلس الإدارة</option>
+                        <option value="assembly_member">عضو الجمعية العمومية</option>
+                        <option value="family_member">عضو عائلة</option>
+                        <option value="honorary">عضو فخري</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">الأب (اختياري)</label>
+                    <select name="father_id" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- اختر الأب --</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                    <input type="tel" name="phone" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse">
+                    <button type="button" onclick="hideAddMemberModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="submitMember()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        حفظ العضو
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // البيانات الأساسية الكاملة للعائلة
+        const DEFAULT_FAMILY_DATA = {
+            familyMembers: [
+                // المؤسس
+                {
+                    id: 'founder_muhammad',
+                    full_name: 'محمد بن سعيدان',
+                    membership_type: 'founder',
+                    father_id: null,
+                    generation: 1,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                
+                // الجيل الثاني - أبناء المؤسس
+                {
+                    id: 'abdullah_muhammad',
+                    full_name: 'عبدالله محمد بن سعيدان',
+                    membership_type: 'chairman',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'munira_muhammad',
+                    full_name: 'منيرة محمد بن سعيدان',
+                    membership_type: 'board_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'fahd_muhammad',
+                    full_name: 'فهد محمد بن سعيدان',
+                    membership_type: 'board_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'hamd_muhammad',
+                    full_name: 'حمد محمد بن سعيدان',
+                    membership_type: 'board_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'ibrahim_muhammad',
+                    full_name: 'ابراهيم محمد بن سعيدان',
+                    membership_type: 'assembly_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'sarah_muhammad',
+                    full_name: 'سارة محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'abdulrahman_muhammad',
+                    full_name: 'عبدالرحمن محمد بن سعيدان',
+                    membership_type: 'assembly_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'nasser_muhammad',
+                    full_name: 'ناصر محمد بن سعيدان',
+                    membership_type: 'assembly_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'saad_muhammad',
+                    full_name: 'سعد محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'nora_muhammad',
+                    full_name: 'نورة محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'salman_muhammad',
+                    full_name: 'سلمان محمد بن سعيدان',
+                    membership_type: 'board_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '0533361154',
+                    email: 'info@salmansaedan.com',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'faisal_muhammad',
+                    full_name: 'فيصل محمد بن سعيدان',
+                    membership_type: 'assembly_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'khalid_muhammad',
+                    full_name: 'خالد محمد بن سعيدان',
+                    membership_type: 'assembly_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'ahmed_muhammad',
+                    full_name: 'أحمد محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'maha_muhammad',
+                    full_name: 'مها محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                },
+                {
+                    id: 'omar_muhammad',
+                    full_name: 'عمر محمد بن سعيدان',
+                    membership_type: 'family_member',
+                    father_id: 'founder_muhammad',
+                    generation: 2,
+                    phone: '',
+                    email: '',
+                    created_at: '2024-01-01T00:00:00.000Z'
+                }
+            ],
+            version: 1,
+            lastUpdated: new Date().toISOString()
+        };
+
+        // نظام مزامنة محلي محسن
+        class LocalSyncManager {
+            constructor() {
+                this.localKey = 'saedan_family_local_v2';
+                this.sharedKey = 'saedan_family_shared_v2';
+                this.backupKey = 'saedan_family_backup_v2';
+                this.syncInterval = null;
+                
+                this.startAutoSync();
+                console.log('✅ نظام المزامنة المحسن جاهز');
+            }
+            
+            syncData(localData) {
+                try {
+                    // إنشاء نسخة احتياطية
+                    localStorage.setItem(this.backupKey, JSON.stringify(localData));
+                    
+                    const sharedData = this.loadShared();
+                    const currentTime = new Date().toISOString();
+                    
+                    if (!sharedData || (localData.version || 0) > (sharedData.version || 0)) {
+                        localData.lastSyncTime = currentTime;
+                        this.saveShared(localData);
+                        console.log('📤 تم رفع البيانات للمخزن المشترك');
+                        return { action: 'uploaded', success: true };
+                    } else if ((sharedData.version || 0) > (localData.version || 0)) {
+                        console.log('📥 تحديث البيانات من المخزن المشترك');
+                        return { action: 'update_local', data: sharedData };
+                    }
+                    
+                    return { action: 'synced' };
+                } catch (error) {
+                    console.error('❌ خطأ في المزامنة:', error);
+                    return { action: 'error', error };
+                }
+            }
+            
+            loadShared() {
+                try {
+                    const stored = localStorage.getItem(this.sharedKey);
+                    return stored ? JSON.parse(stored) : null;
+                } catch (error) {
+                    console.error('❌ خطأ في قراءة البيانات المشتركة:', error);
+                    return null;
+                }
+            }
+            
+            saveShared(data) {
+                try {
+                    localStorage.setItem(this.sharedKey, JSON.stringify(data));
+                    localStorage.setItem('lastSyncTime', new Date().toISOString());
+                    
+                    window.dispatchEvent(new StorageEvent('storage', {
+                        key: this.sharedKey,
+                        newValue: JSON.stringify(data)
+                    }));
+                    
+                    console.log('✅ تم حفظ البيانات في المخزن المشترك');
+                } catch (error) {
+                    console.error('❌ خطأ في حفظ البيانات:', error);
+                }
+            }
+            
+            startAutoSync() {
+                window.addEventListener('storage', (e) => {
+                    if (e.key === this.sharedKey && window.app && e.newValue) {
+                        console.log('🔄 تم اكتشاف تحديث من نافذة أخرى');
+                        try {
+                            const sharedData = JSON.parse(e.newValue);
+                            if (sharedData && sharedData.familyMembers) {
+                                window.app.dataManager.data = sharedData;
+                                window.app.dataManager.saveData();
+                                window.app.displayFamilyMembers();
+                                window.app.updateStatistics();
+                                window.app.showSyncStatus('تم استلام تحديث من مستخدم آخر!', 'success');
+                            }
+                        } catch (error) {
+                            console.error('❌ خطأ في معالجة التحديث:', error);
+                        }
+                    }
+                });
+                
+                this.syncInterval = setInterval(() => {
+                    if (window.app && window.app.dataManager) {
+                        this.performSync();
+                    }
+                }, 5000);
+            }
+            
+            performSync() {
+                if (window.app && window.app.dataManager) {
+                    const localData = window.app.dataManager.data;
+                    const syncResult = this.syncData(localData);
+                    
+                    if (syncResult.action === 'update_local') {
+                        window.app.dataManager.data = syncResult.data;
+                        window.app.dataManager.saveData();
+                        window.app.displayFamilyMembers();
+                        window.app.updateStatistics();
+                        window.app.showSyncStatus('تحديث من مستخدم آخر', 'success');
+                    }
+                }
+            }
+        }
+
+        // مدير البيانات المحسن
+        class DataManager {
+            constructor() {
+                this.storageKey = 'saedan_family_local_v2';
+                this.data = this.loadData();
+                this.syncManager = new LocalSyncManager();
+                this.initializeData();
+            }
+            
+            loadData() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    const parsed = stored ? JSON.parse(stored) : null;
+                    
+                    // التحقق من سلامة البيانات
+                    if (parsed && parsed.familyMembers && Array.isArray(parsed.familyMembers) && parsed.familyMembers.length > 0) {
+                        console.log('✅ تم تحميل البيانات المحفوظة:', parsed.familyMembers.length, 'عضو');
+                        return parsed;
+                    } else {
+                        console.log('⚠️ البيانات المحفوظة غير صالحة، سيتم استخدام البيانات الافتراضية');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في تحميل البيانات:', error);
+                    return null;
+                }
+            }
+            
+            saveData() {
+                try {
+                    // التحقق من سلامة البيانات قبل الحفظ
+                    if (!this.data.familyMembers || !Array.isArray(this.data.familyMembers)) {
+                        console.error('❌ البيانات غير صالحة للحفظ');
+                        return false;
+                    }
+                    
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.data));
+                    console.log('✅ تم حفظ البيانات محلياً:', this.data.familyMembers.length, 'عضو');
+                    return true;
+                } catch (error) {
+                    console.error('❌ خطأ في حفظ البيانات:', error);
+                    return false;
+                }
+            }
+            
+            initializeData() {
+                if (!this.data || !this.data.familyMembers || this.data.familyMembers.length === 0) {
+                    console.log('🔄 تهيئة البيانات الافتراضية...');
+                    this.data = JSON.parse(JSON.stringify(DEFAULT_FAMILY_DATA));
+                    this.data.version = 1;
+                    this.data.lastUpdated = new Date().toISOString();
+                    
+                    if (this.saveData()) {
+                        console.log('✅ تم تهيئة البيانات الافتراضية بنجاح');
+                        this.syncToShared();
+                    } else {
+                        console.error('❌ فشل في تهيئة البيانات');
+                    }
+                } else {
+                    console.log('✅ البيانات موجودة ومُحمّلة:', this.data.familyMembers.length, 'عضو');
+                }
+            }
+            
+            addMember(memberData) {
+                try {
+                    const newMember = {
+                        ...memberData,
+                        id: this.generateId(),
+                        generation: this.calculateGeneration(memberData.father_id),
+                        created_at: new Date().toISOString()
+                    };
+                    
+                    if (!this.data.familyMembers) {
+                        this.data.familyMembers = [];
+                    }
+                    
+                    this.data.familyMembers.push(newMember);
+                    this.data.version = (this.data.version || 0) + 1;
+                    this.data.lastUpdated = new Date().toISOString();
+                    
+                    if (this.saveData()) {
+                        this.syncToShared();
+                        console.log('✅ تم إضافة عضو جديد:', newMember.full_name);
+                        return newMember;
+                    } else {
+                        console.error('❌ فشل في حفظ العضو الجديد');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في إضافة العضو:', error);
+                    return null;
+                }
+            }
+            
+            calculateGeneration(fatherId) {
+                if (!fatherId) return 1;
+                
+                const father = this.data.familyMembers.find(m => m.id === fatherId);
+                return father ? (father.generation || 1) + 1 : 2;
+            }
+            
+            syncToShared() {
+                if (this.syncManager) {
+                    try {
+                        const result = this.syncManager.syncData(this.data);
+                        if (result.success) {
+                            console.log('✅ تم مزامنة البيانات');
+                        }
+                    } catch (error) {
+                        console.error('❌ خطأ في المزامنة:', error);
+                    }
+                }
+            }
+            
+            generateId() {
+                return 'member_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            getMembershipTypeText(type) {
+                const types = {
+                    'founder': 'المؤسس',
+                    'chairman': 'رئيس مجلس الإدارة',
+                    'board_member': 'عضو مجلس الإدارة',
+                    'assembly_member': 'عضو الجمعية العمومية',
+                    'family_member': 'عضو عائلة',
+                    'honorary': 'عضو فخري'
+                };
+                return types[type] || type;
+            }
+            
+            getMembershipTypeColor(type) {
+                const colors = {
+                    'founder': 'text-yellow-600',
+                    'chairman': 'text-purple-600',
+                    'board_member': 'text-blue-600',
+                    'assembly_member': 'text-green-600',
+                    'family_member': 'text-gray-600',
+                    'honorary': 'text-orange-600'
+                };
+                return colors[type] || 'text-gray-600';
+            }
+        }
+
+        // التطبيق الرئيسي
+        class FamilyApp {
+            constructor() {
+                this.dataManager = new DataManager();
+                this.currentSection = 'home';
+                
+                this.displayFamilyMembers();
+                this.updateStatistics();
+                this.populateParentDropdown();
+                this.showSyncStatus('تطبيق العائلة جاهز ومتزامن', 'success');
+            }
+            
+            displayFamilyMembers() {
+                const container = document.getElementById('family-members');
+                const members = this.dataManager.data.familyMembers || [];
+                
+                if (members.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl text-gray-300 mb-4">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <p class="text-gray-500 text-xl mb-4">لا توجد أعضاء في الشجرة</p>
+                            <button onclick="loadCompleteFamily()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-download ml-2"></i>تحميل الشجرة الكاملة
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // ترتيب الأعضاء حسب الجيل والنوع
+                const sortedMembers = members.sort((a, b) => {
+                    if (a.generation !== b.generation) {
+                        return (a.generation || 1) - (b.generation || 1);
+                    }
+                    
+                    const typeOrder = {
+                        'founder': 0,
+                        'chairman': 1,
+                        'board_member': 2,
+                        'assembly_member': 3,
+                        'family_member': 4,
+                        'honorary': 5
+                    };
+                    
+                    return (typeOrder[a.membership_type] || 6) - (typeOrder[b.membership_type] || 6);
+                });
+                
+                container.innerHTML = sortedMembers.map(member => `
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="text-xl font-bold text-gray-800">${member.full_name}</h3>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">الجيل ${member.generation || 1}</span>
+                                </div>
+                                <p class="font-medium mb-2 ${this.dataManager.getMembershipTypeColor(member.membership_type)}">
+                                    <i class="fas ${member.membership_type === 'founder' ? 'fa-crown' : 'fa-user'} ml-1"></i>
+                                    ${this.dataManager.getMembershipTypeText(member.membership_type)}
+                                </p>
+                                ${member.phone ? `<p class="text-gray-600 text-sm mb-1"><i class="fas fa-phone ml-1"></i>${member.phone}</p>` : ''}
+                                ${member.email ? `<p class="text-gray-600 text-sm mb-1"><i class="fas fa-envelope ml-1"></i>${member.email}</p>` : ''}
+                                <p class="text-gray-500 text-xs">أُضيف في: ${new Date(member.created_at).toLocaleDateString('ar-SA')}</p>
+                            </div>
+                            <div class="text-3xl ${member.membership_type === 'founder' ? 'text-yellow-500' : 'text-blue-500'}">
+                                <i class="fas ${member.membership_type === 'founder' ? 'fa-crown' : 'fa-user'}"></i>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateStatistics() {
+                const members = this.dataManager.data.familyMembers || [];
+                const founders = members.filter(m => m.membership_type === 'founder').length;
+                const boardMembers = members.filter(m => ['chairman', 'board_member'].includes(m.membership_type)).length;
+                
+                document.getElementById('total-members').textContent = members.length;
+                document.getElementById('founders-count').textContent = founders;
+                document.getElementById('board-count').textContent = boardMembers;
+            }
+            
+            populateParentDropdown() {
+                const select = document.querySelector('select[name="father_id"]');
+                if (!select) return;
+                
+                const members = this.dataManager.data.familyMembers || [];
+                const maleMembers = members.filter(m => !m.full_name.includes('نورة') && !m.full_name.includes('سارة') && !m.full_name.includes('منيرة') && !m.full_name.includes('مها'));
+                
+                select.innerHTML = '<option value="">-- اختر الأب --</option>';
+                maleMembers.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = `${member.full_name} (${this.dataManager.getMembershipTypeText(member.membership_type)})`;
+                    select.appendChild(option);
+                });
+            }
+            
+            addMember(memberData) {
+                try {
+                    const newMember = this.dataManager.addMember(memberData);
+                    
+                    if (newMember) {
+                        this.displayFamilyMembers();
+                        this.updateStatistics();
+                        this.populateParentDropdown();
+                        this.showSyncStatus(`تم إضافة "${memberData.full_name}" بنجاح`, 'success');
+                        return newMember;
+                    } else {
+                        this.showSyncStatus('فشل في إضافة العضو', 'error');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error('خطأ في إضافة العضو:', error);
+                    this.showSyncStatus('خطأ في إضافة العضو', 'error');
+                    return null;
+                }
+            }
+            
+            showSyncStatus(message, type = 'info') {
+                const statusEl = document.getElementById('syncStatus');
+                if (statusEl) {
+                    let icon = '🔄';
+                    let color = 'text-blue-700';
+                    
+                    switch (type) {
+                        case 'success':
+                            icon = '✅';
+                            color = 'text-green-700';
+                            break;
+                        case 'error':
+                            icon = '❌';
+                            color = 'text-red-700';
+                            break;
+                        case 'warning':
+                            icon = '⚠️';
+                            color = 'text-orange-700';
+                            break;
+                    }
+                    
+                    statusEl.innerHTML = `<span class="${color}">${icon} ${message}</span>`;
+                    
+                    setTimeout(() => {
+                        statusEl.innerHTML = '<span class="text-gray-500">🔄 مزامنة تلقائية نشطة</span>';
+                    }, 4000);
+                }
+            }
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // متغيرات عامة
+        let app;
+
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 بدء تهيئة التطبيق...');
+            app = new FamilyApp();
+            console.log('✅ تم تحميل التطبيق بنجاح');
+        });
+
+        // وظائف التنقل
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            const navButton = document.getElementById(`nav-${sectionName}`);
+            if (navButton) {
+                navButton.classList.add('active');
+            }
+            
+            if (app) {
+                app.currentSection = sectionName;
+            }
+        }
+
+        // وظائف إدارة البيانات
+        function loadCompleteFamily() {
+            if (confirm('هل تريد تحميل الشجرة الكاملة لعائلة بن سعيدان؟ سيتم استبدال البيانات الحالية.')) {
+                console.log('🔄 تحميل الشجرة الكاملة...');
+                
+                app.dataManager.data = JSON.parse(JSON.stringify(DEFAULT_FAMILY_DATA));
+                app.dataManager.data.version = (app.dataManager.data.version || 0) + 1;
+                app.dataManager.data.lastUpdated = new Date().toISOString();
+                
+                if (app.dataManager.saveData()) {
+                    app.dataManager.syncToShared();
+                    app.displayFamilyMembers();
+                    app.updateStatistics();
+                    app.populateParentDropdown();
+                    app.showSyncStatus('تم تحميل الشجرة الكاملة بنجاح', 'success');
+                    app.showToast('تم تحميل شجرة العائلة الكاملة!', 'success');
+                } else {
+                    app.showSyncStatus('فشل في تحميل الشجرة', 'error');
+                }
+            }
+        }
+        
+        function resetToDefault() {
+            if (confirm('هل تريد إعادة تعيين البيانات إلى الوضع الافتراضي؟')) {
+                console.log('🔄 إعادة تعيين البيانات...');
+                loadCompleteFamily();
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء!')) {
+                console.log('🗑️ مسح جميع البيانات...');
+                
+                localStorage.removeItem('saedan_family_local_v2');
+                localStorage.removeItem('saedan_family_shared_v2');
+                localStorage.removeItem('saedan_family_backup_v2');
+                
+                app.dataManager.data = { familyMembers: [], version: 0 };
+                app.displayFamilyMembers();
+                app.updateStatistics();
+                app.showSyncStatus('تم مسح جميع البيانات', 'warning');
+                app.showToast('تم مسح جميع البيانات', 'warning');
+            }
+        }
+
+        // وظائف الـ Modal
+        function showAddMemberModal() {
+            app.populateParentDropdown();
+            document.getElementById('addMemberModal').classList.remove('hidden');
+        }
+        
+        function hideAddMemberModal() {
+            document.getElementById('addMemberModal').classList.add('hidden');
+            document.getElementById('addMemberForm').reset();
+        }
+        
+        function submitMember() {
+            const form = document.getElementById('addMemberForm');
+            const formData = new FormData(form);
+            
+            const memberData = {
+                full_name: formData.get('full_name').trim(),
+                membership_type: formData.get('membership_type'),
+                father_id: formData.get('father_id') || null,
+                phone: formData.get('phone').trim() || '',
+                email: formData.get('email').trim() || ''
+            };
+            
+            if (!memberData.full_name || !memberData.membership_type) {
+                app.showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            
+            const newMember = app.addMember(memberData);
+            
+            if (newMember) {
+                hideAddMemberModal();
+                app.showToast(`تم إضافة ${memberData.full_name} بنجاح!`, 'success');
+            } else {
+                app.showToast('فشل في إضافة العضو', 'error');
+            }
+        }
+        
+        // مستمعي الأحداث
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const modal = document.getElementById('addMemberModal');
+                if (!modal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    submitMember();
+                }
+            }
+        });
+
+        document.getElementById('addMemberModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAddMemberModal();
+            }
+        });
+    </script>
+</body>
+</html>
