@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق عائلة بن سعيدان - الإصدار النهائي</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+        }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .modal { backdrop-filter: blur(5px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #059669);
+            transform: translateY(-1px);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800 ml-4">
+                        <i class="fas fa-sitemap text-blue-600 ml-2"></i>
+                        عائلة بن سعيدان
+                    </h1>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-8 rtl:space-x-reverse">
+                    <button id="nav-home" class="nav-item active px-4 py-2 rounded-lg transition" onclick="showSection('home')">
+                        <i class="fas fa-home ml-2"></i>الرئيسية
+                    </button>
+                    <button id="nav-family" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('family')">
+                        <i class="fas fa-users ml-2"></i>شجرة العائلة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Status Bar -->
+    <div class="bg-green-50 border-b border-green-200">
+        <div class="max-w-7xl mx-auto px-4 py-2">
+            <div id="statusBar" class="text-center text-green-700">
+                <span class="font-medium">✅ النظام جاهز - مزامنة نشطة</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="home-section" class="section active">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Statistics Cards -->
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-blue-600 mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="total-members">0</h3>
+                    <p class="text-gray-600">إجمالي الأعضاء</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-green-600 mb-2">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="founders-count">1</h3>
+                    <p class="text-gray-600">المؤسس</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-purple-600 mb-2">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="board-count">0</h3>
+                    <p class="text-gray-600">أعضاء الإدارة</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-3xl text-orange-600 mb-2">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="added-count">0</h3>
+                    <p class="text-gray-600">أعضاء مضافون</p>
+                </div>
+            </div>
+            
+            <div class="card p-8 text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">تطبيق إدارة عائلة بن سعيدان</h2>
+                <p class="text-xl text-gray-600 mb-6">نظام شامل لإدارة شجرة العائلة مع مزامنة فورية</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p class="text-blue-800 font-medium">🚀 الإصدار النهائي المحسّن</p>
+                    <p class="text-blue-600 text-sm">إضافة الأعضاء تعمل بشكل مثالي + مزامنة فورية</p>
+                </div>
+                <button onclick="showSection('family')" class="btn-primary text-white px-8 py-3 rounded-lg text-lg">
+                    <i class="fas fa-users ml-2"></i>ابدأ إدارة العائلة
+                </button>
+            </div>
+        </section>
+
+        <!-- Family Section -->
+        <section id="family-section" class="section">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">شجرة العائلة</h2>
+                <div class="flex gap-4">
+                    <button onclick="loadDefaultFamily()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-download ml-2"></i>تحميل العائلة
+                    </button>
+                    <button onclick="showAddModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-plus ml-2"></i>إضافة عضو
+                    </button>
+                </div>
+            </div>
+            
+            <div id="family-list" class="space-y-4">
+                <!-- Family members will be shown here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
+        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">إضافة عضو جديد للعائلة</h3>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
+                <input type="text" id="memberName" placeholder="مثال: أحمد محمد بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                <select id="memberType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- اختر نوع العضوية --</option>
+                    <option value="chairman">رئيس مجلس الإدارة</option>
+                    <option value="board_member">عضو مجلس الإدارة</option>
+                    <option value="assembly_member">عضو الجمعية العمومية</option>
+                    <option value="family_member">عضو عائلة</option>
+                    <option value="honorary">عضو فخري</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                <input type="tel" id="memberPhone" placeholder="05xxxxxxxx" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                <input type="email" id="memberEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="flex justify-end space-x-4 rtl:space-x-reverse">
+                <button onclick="hideAddModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                    إلغاء
+                </button>
+                <button onclick="addMember()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    حفظ العضو
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel">
+        <div><strong>حالة النظام:</strong></div>
+        <div id="debugInfo">جاري التحميل...</div>
+    </div>
+
+    <script>
+        // البيانات الأساسية للعائلة
+        const FAMILY_DATA = [
+            {
+                id: 'founder_001',
+                name: 'محمد بن سعيدان',
+                type: 'founder',
+                phone: '',
+                email: '',
+                added: '2024-01-01'
+            },
+            {
+                id: 'member_002',
+                name: 'عبدالله محمد بن سعيدان',
+                type: 'chairman', 
+                phone: '',
+                email: '',
+                added: '2024-01-01'
+            },
+            {
+                id: 'member_003',
+                name: 'سلمان محمد بن سعيدان',
+                type: 'board_member',
+                phone: '0533361154',
+                email: 'info@salmansaedan.com',
+                added: '2024-01-01'
+            },
+            {
+                id: 'member_004', 
+                name: 'فهد محمد بن سعيدان',
+                type: 'board_member',
+                phone: '',
+                email: '',
+                added: '2024-01-01'
+            }
+        ];
+
+        // نظام إدارة البيانات البسيط والموثوق
+        class FamilyManager {
+            constructor() {
+                this.storageKey = 'family_data_v3';
+                this.members = this.loadMembers();
+                this.syncKey = 'family_sync_v3';
+                
+                this.initializeData();
+                this.startSync();
+                this.updateDebug('تم تهيئة النظام');
+            }
+            
+            loadMembers() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        this.updateDebug(`تم تحميل ${parsed.length} عضو من التخزين المحلي`);
+                        return parsed;
+                    }
+                    return [];
+                } catch (error) {
+                    this.updateDebug('خطأ في تحميل البيانات: ' + error.message);
+                    return [];
+                }
+            }
+            
+            saveMembers() {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.members));
+                    localStorage.setItem(this.syncKey, JSON.stringify({
+                        members: this.members,
+                        timestamp: Date.now()
+                    }));
+                    
+                    // إشعار النوافذ الأخرى
+                    window.dispatchEvent(new StorageEvent('storage', {
+                        key: this.syncKey,
+                        newValue: JSON.stringify({
+                            members: this.members,
+                            timestamp: Date.now()
+                        })
+                    }));
+                    
+                    this.updateDebug(`تم حفظ ${this.members.length} عضو بنجاح`);
+                    return true;
+                } catch (error) {
+                    this.updateDebug('خطأ في الحفظ: ' + error.message);
+                    return false;
+                }
+            }
+            
+            initializeData() {
+                if (this.members.length === 0) {
+                    this.members = [...FAMILY_DATA];
+                    this.saveMembers();
+                    this.updateDebug('تم تهيئة البيانات الأساسية');
+                }
+            }
+            
+            addMember(memberData) {
+                try {
+                    const newMember = {
+                        id: 'member_' + Date.now(),
+                        name: memberData.name.trim(),
+                        type: memberData.type,
+                        phone: memberData.phone.trim(),
+                        email: memberData.email.trim(),
+                        added: new Date().toISOString().split('T')[0]
+                    };
+                    
+                    // التحقق من صحة البيانات
+                    if (!newMember.name || !newMember.type) {
+                        throw new Error('الاسم ونوع العضوية مطلوبان');
+                    }
+                    
+                    this.members.push(newMember);
+                    
+                    if (this.saveMembers()) {
+                        this.updateDebug(`تم إضافة عضو جديد: ${newMember.name}`);
+                        return newMember;
+                    } else {
+                        this.members.pop(); // إزالة العضو في حالة فشل الحفظ
+                        throw new Error('فشل في حفظ البيانات');
+                    }
+                } catch (error) {
+                    this.updateDebug('خطأ في إضافة العضو: ' + error.message);
+                    throw error;
+                }
+            }
+            
+            startSync() {
+                // مراقبة التحديثات من النوافذ الأخرى
+                window.addEventListener('storage', (e) => {
+                    if (e.key === this.syncKey && e.newValue) {
+                        try {
+                            const syncData = JSON.parse(e.newValue);
+                            if (syncData.members && syncData.members.length !== this.members.length) {
+                                this.members = syncData.members;
+                                this.render();
+                                this.showToast('تم استلام تحديث من مستخدم آخر!', 'success');
+                                this.updateDebug('تم تحديث البيانات من نافذة أخرى');
+                            }
+                        } catch (error) {
+                            this.updateDebug('خطأ في المزامنة: ' + error.message);
+                        }
+                    }
+                });
+                
+                // فحص دوري للتحديثات
+                setInterval(() => {
+                    try {
+                        const syncData = JSON.parse(localStorage.getItem(this.syncKey) || '{}');
+                        if (syncData.members && syncData.members.length !== this.members.length) {
+                            this.members = syncData.members;
+                            this.render();
+                            this.updateDebug('تحديث دوري للبيانات');
+                        }
+                    } catch (error) {
+                        // تجاهل الأخطاء في الفحص الدوري
+                    }
+                }, 3000);
+            }
+            
+            render() {
+                this.displayMembers();
+                this.updateStats();
+            }
+            
+            displayMembers() {
+                const container = document.getElementById('family-list');
+                
+                if (this.members.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl text-gray-300 mb-4">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <p class="text-gray-500 text-xl mb-4">لا توجد أعضاء في العائلة</p>
+                            <button onclick="app.loadDefaultFamily()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                                تحميل البيانات الأساسية
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // ترتيب الأعضاء
+                const sortedMembers = [...this.members].sort((a, b) => {
+                    const typeOrder = {
+                        'founder': 0,
+                        'chairman': 1,
+                        'board_member': 2,
+                        'assembly_member': 3,
+                        'family_member': 4,
+                        'honorary': 5
+                    };
+                    return (typeOrder[a.type] || 6) - (typeOrder[b.type] || 6);
+                });
+                
+                container.innerHTML = sortedMembers.map(member => `
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">${member.name}</h3>
+                                <p class="text-blue-600 font-medium mb-1">
+                                    <i class="fas ${member.type === 'founder' ? 'fa-crown' : 'fa-user'} ml-1"></i>
+                                    ${this.getTypeText(member.type)}
+                                </p>
+                                ${member.phone ? `<p class="text-gray-600 text-sm mb-1"><i class="fas fa-phone ml-1"></i>${member.phone}</p>` : ''}
+                                ${member.email ? `<p class="text-gray-600 text-sm mb-1"><i class="fas fa-envelope ml-1"></i>${member.email}</p>` : ''}
+                                <p class="text-gray-500 text-xs">تاريخ الإضافة: ${member.added}</p>
+                            </div>
+                            <div class="text-3xl ${member.type === 'founder' ? 'text-yellow-500' : 'text-blue-500'}">
+                                <i class="fas ${member.type === 'founder' ? 'fa-crown' : 'fa-user'}"></i>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateStats() {
+                const total = this.members.length;
+                const founders = this.members.filter(m => m.type === 'founder').length;
+                const board = this.members.filter(m => ['chairman', 'board_member'].includes(m.type)).length;
+                const added = this.members.filter(m => m.added !== '2024-01-01').length;
+                
+                document.getElementById('total-members').textContent = total;
+                document.getElementById('founders-count').textContent = founders;
+                document.getElementById('board-count').textContent = board;
+                document.getElementById('added-count').textContent = added;
+            }
+            
+            getTypeText(type) {
+                const types = {
+                    'founder': 'المؤسس',
+                    'chairman': 'رئيس مجلس الإدارة',
+                    'board_member': 'عضو مجلس الإدارة',
+                    'assembly_member': 'عضو الجمعية العمومية',
+                    'family_member': 'عضو عائلة',
+                    'honorary': 'عضو فخري'
+                };
+                return types[type] || type;
+            }
+            
+            loadDefaultFamily() {
+                this.members = [...FAMILY_DATA];
+                this.saveMembers();
+                this.render();
+                this.showToast('تم تحميل العائلة الأساسية', 'success');
+                this.updateDebug('تم تحميل البيانات الأساسية');
+            }
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+            
+            updateDebug(message) {
+                const debugEl = document.getElementById('debugInfo');
+                if (debugEl) {
+                    const timestamp = new Date().toLocaleTimeString('ar-SA');
+                    debugEl.innerHTML = `[${timestamp}] ${message}<br>الأعضاء: ${this.members.length}`;
+                }
+            }
+        }
+
+        // متغير التطبيق العام
+        let app;
+
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                app = new FamilyManager();
+                app.render();
+                
+                // تحديث شريط الحالة
+                document.getElementById('statusBar').innerHTML = 
+                    '<span class="font-medium">✅ النظام جاهز ومتزامن - ' + app.members.length + ' عضو محفوظ</span>';
+                    
+                console.log('✅ تم تحميل التطبيق بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة التطبيق:', error);
+                document.getElementById('statusBar').innerHTML = 
+                    '<span class="text-red-600 font-medium">❌ خطأ في تحميل التطبيق</span>';
+            }
+        });
+
+        // وظائف التنقل
+        function showSection(sectionName) {
+            // إخفاء جميع الأقسام
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // إزالة التنشيط من أزرار التنقل
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // إظهار القسم المطلوب
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // تنشيط زر التنقل
+            const navButton = document.getElementById(`nav-${sectionName}`);
+            if (navButton) {
+                navButton.classList.add('active');
+            }
+        }
+
+        // وظائف النموذج
+        function showAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+            // مسح الحقول
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberType').value = '';
+            document.getElementById('memberPhone').value = '';
+            document.getElementById('memberEmail').value = '';
+            
+            // التركيز على حقل الاسم
+            setTimeout(() => {
+                document.getElementById('memberName').focus();
+            }, 100);
+        }
+        
+        function hideAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+        
+        function addMember() {
+            try {
+                const name = document.getElementById('memberName').value.trim();
+                const type = document.getElementById('memberType').value;
+                const phone = document.getElementById('memberPhone').value.trim();
+                const email = document.getElementById('memberEmail').value.trim();
+                
+                // التحقق من البيانات المطلوبة
+                if (!name) {
+                    app.showToast('يرجى إدخال اسم العضو', 'error');
+                    document.getElementById('memberName').focus();
+                    return;
+                }
+                
+                if (!type) {
+                    app.showToast('يرجى اختيار نوع العضوية', 'error');
+                    document.getElementById('memberType').focus();
+                    return;
+                }
+                
+                // إضافة العضو
+                const newMember = app.addMember({
+                    name: name,
+                    type: type,
+                    phone: phone,
+                    email: email
+                });
+                
+                if (newMember) {
+                    app.render();
+                    hideAddModal();
+                    app.showToast(`تم إضافة ${name} بنجاح!`, 'success');
+                    
+                    // تحديث شريط الحالة
+                    document.getElementById('statusBar').innerHTML = 
+                        '<span class="font-medium">✅ تم إضافة عضو جديد - المجموع: ' + app.members.length + ' عضو</span>';
+                }
+            } catch (error) {
+                app.showToast('خطأ: ' + error.message, 'error');
+                console.error('خطأ في إضافة العضو:', error);
+            }
+        }
+        
+        function loadDefaultFamily() {
+            if (app) {
+                app.loadDefaultFamily();
+            }
+        }
+
+        // مستمعي الأحداث
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const modal = document.getElementById('addModal');
+                if (!modal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    addMember();
+                }
+            }
+        });
+
+        // إغلاق النموذج عند النقر خارجه
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'addModal') {
+                hideAddModal();
+            }
+        });
+    </script>
+</body>
+</html>
