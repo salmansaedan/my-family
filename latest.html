@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أحدث إصدار - تطبيق آل سعيدان</title>
+    <meta http-equiv="refresh" content="0; url=./app-fixed-complete.html">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .redirect-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .version-info {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="logo">🔥 الإصدار الثابت الجديد</div>
+        
+        <div class="version-info">
+            <h3>✅ مشكلة حذف الشجرة محلولة!</h3>
+            <p>🛡️ حماية كاملة من فقدان البيانات</p>
+            <p>👥 الشجرة الكاملة (17 عضو)</p>
+            <p>🔄 مزامنة فورية بين المستخدمين</p>
+        </div>
+        
+        <div class="spinner"></div>
+        <p>جاري التوجيه إلى أحدث إصدار...</p>
+    </div>
+    
+    <script>
+        setTimeout(function() {
+            window.location.href = './app-fixed-complete.html';
+        }, 1000);
+    </script>
+</body>
+</html>
