@@ -460,7 +460,7 @@
                     <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
                         <i class="fas fa-sitemap ml-2"></i>ربط الأجيال
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الجيل السابق</label>
                             <select id="familyFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -472,6 +472,15 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">الجيل الحالي</label>
                             <input type="text" id="familyCurrentGeneration" placeholder="سيتم حسابه تلقائياً" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg" readonly>
                             <p class="text-sm text-green-600 mt-1">يُحسب تلقائياً بناءً على الوالد المختار</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الزوج/الزوجة (اختياري)</label>
+                            <select id="familySpouseId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- اختر الزوج/الزوجة --</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">اختر من نفس الجيل أو جيل مقارب لإنشاء رابط الزواج</p>
                         </div>
                     </div>
                 </div>
@@ -570,7 +579,7 @@
     </div>
 
     <script>
-        // بيانات العائلة الأساسية مع الجيل الثاني
+        // بيانات العائلة الأساسية مع الزوجات
         const SAMPLE_FAMILY_DATA = {
             familyMembers: [
                 // الجيل المؤسس
@@ -593,9 +602,30 @@
                     hobbies: 'القراءة، الاستثمار العقاري، الأعمال الخيرية',
                     created_at: '2024-01-01'
                 },
-                // الجيل الثاني - أطفال المؤسس
+                // زوجة المؤسس
                 {
-                    id: 'gen2_001',
+                    id: 'founder_wife_001',
+                    full_name: 'فاطمة أحمد العلي',
+                    first_name: 'فاطمة',
+                    middle_name: 'أحمد',
+                    last_name: 'العلي',
+                    membership_type: 'family_member',
+                    gender: 'female',
+                    father_id: null,
+                    spouse_id: 'founder_001',
+                    generation: 1,
+                    birth_date: '1955-03-15',
+                    birth_place: 'الرياض، المملكة العربية السعودية',
+                    profession: 'ربة منزل',
+                    specialization: 'إدارة شؤون الأسرة',
+                    phone: '0533361155',
+                    email: 'fatima.founder@salmansaedan.com',
+                    hobbies: 'الطبخ، تربية الأطفال، الأعمال اليدوية، القراءة',
+                    created_at: '2024-01-01'
+                },
+                // الجيل الثاني - الأبناء الحقيقيون
+                {
+                    id: 'gen2_son1',
                     full_name: 'سلمان محمد بن سعيدان',
                     first_name: 'سلمان',
                     middle_name: 'محمد',
@@ -608,86 +638,31 @@
                     birth_place: 'الرياض، المملكة العربية السعودية',
                     profession: 'مطور عقاري',
                     specialization: 'إدارة المشاريع العقارية',
-                    phone: '0501234567',
+                    phone: '0533361156',
                     email: 'salman@salmansaedan.com',
                     hobbies: 'السفر، التصوير، الرياضة، تطوير الأعمال',
                     created_at: '2024-01-02'
                 },
+                // زوجة سلمان
                 {
-                    id: 'gen2_002',
-                    full_name: 'عبدالله محمد بن سعيدان',
-                    first_name: 'عبدالله',
-                    middle_name: 'محمد',
-                    last_name: 'بن سعيدان',
-                    membership_type: 'board_member',
-                    gender: 'male',
-                    father_id: 'founder_001',
-                    generation: 2,
-                    birth_date: '1977-08-20',
-                    birth_place: 'جدة، المملكة العربية السعودية',
-                    profession: 'مهندس',
-                    specialization: 'هندسة معمارية',
-                    phone: '0507654321',
-                    email: 'abdullah@example.com',
-                    hobbies: 'التصميم المعماري، الرسم، السباحة',
-                    created_at: '2024-01-03'
-                },
-                {
-                    id: 'gen2_003',
-                    full_name: 'فاطمة محمد بن سعيدان',
-                    first_name: 'فاطمة',
-                    middle_name: 'محمد',
-                    last_name: 'بن سعيدان',
+                    id: 'gen2_wife1',
+                    full_name: 'نورا عبدالله المطيري',
+                    first_name: 'نورا',
+                    middle_name: 'عبدالله',
+                    last_name: 'المطيري',
                     membership_type: 'family_member',
                     gender: 'female',
-                    father_id: 'founder_001',
+                    father_id: null,
+                    spouse_id: 'gen2_son1',
                     generation: 2,
-                    birth_date: '1980-03-10',
-                    birth_place: 'الدمام، المملكة العربية السعودية',
-                    profession: 'طبيبة',
-                    specialization: 'طب الأطفال',
-                    phone: '0551234567',
-                    email: 'fatima@example.com',
-                    hobbies: 'القراءة الطبية، رعاية الأطفال، الطبخ',
-                    created_at: '2024-01-04'
-                },
-                {
-                    id: 'gen2_004',
-                    full_name: 'أحمد محمد بن سعيدان',
-                    first_name: 'أحمد',
-                    middle_name: 'محمد',
-                    last_name: 'بن سعيدان',
-                    membership_type: 'general_assembly',
-                    gender: 'male',
-                    father_id: 'founder_001',
-                    generation: 2,
-                    birth_date: '1982-11-30',
+                    birth_date: '1978-08-22',
                     birth_place: 'الرياض، المملكة العربية السعودية',
-                    profession: 'معلم',
-                    specialization: 'التربية والتعليم',
-                    phone: '0559876543',
-                    email: 'ahmed@example.com',
-                    hobbies: 'التدريس، القراءة، كرة القدم، الشطرنج',
-                    created_at: '2024-01-05'
-                },
-                {
-                    id: 'gen2_005',
-                    full_name: 'عائشة محمد بن سعيدان',
-                    first_name: 'عائشة',
-                    middle_name: 'محمد',
-                    last_name: 'بن سعيدان',
-                    membership_type: 'family_member',
-                    gender: 'female',
-                    father_id: 'founder_001',
-                    generation: 2,
-                    birth_date: '1985-07-18',
-                    birth_place: 'مكة المكرمة، المملكة العربية السعودية',
-                    profession: 'مصممة',
-                    specialization: 'تصميم الديكور الداخلي',
-                    phone: '0554567890',
-                    email: 'aisha@example.com',
-                    hobbies: 'التصميم، الرسم، الخياطة، الفنون اليدوية',
-                    created_at: '2024-01-06'
+                    profession: 'مديرة تسويق',
+                    specialization: 'التسويق الرقمي',
+                    phone: '0533361157',
+                    email: 'nora@salmansaedan.com',
+                    hobbies: 'التصميم، التسوق، اللياقة البدنية، السفر',
+                    created_at: '2024-01-02'
                 }
             ],
             events: [
@@ -1194,6 +1169,8 @@
             renderMemberCard(member, showConnection = false) {
                 const father = member.father_id ? 
                     this.dataManager.getData('familyMembers').find(m => m.id === member.father_id) : null;
+                const spouse = member.spouse_id ? 
+                    this.dataManager.getData('familyMembers').find(m => m.id === member.spouse_id) : null;
                 const childrenCount = member.children ? member.children.length : 0;
                 
                 return `
@@ -1224,6 +1201,13 @@
                                         <p class="text-gray-600 text-sm mb-2">
                                             <i class="fas fa-arrow-up ml-2 text-blue-500"></i>
                                             ${member.gender === 'male' ? 'ابن' : 'ابنة'} ${father.full_name}
+                                        </p>
+                                    ` : ''}
+                                    
+                                    ${spouse ? `
+                                        <p class="text-purple-600 text-sm mb-2">
+                                            <i class="fas fa-ring ml-2 text-purple-500"></i>
+                                            ${member.gender === 'male' ? 'متزوج من' : 'متزوجة من'} ${spouse.full_name}
                                         </p>
                                     ` : ''}
                                     
@@ -1345,8 +1329,9 @@
             }
 
             populateParentSelect() {
-                const select = document.getElementById('familyFatherId');
-                select.innerHTML = '<option value="">-- اختر الوالد --</option>';
+                // قائمة الوالدين (الذكور فقط)
+                const fatherSelect = document.getElementById('familyFatherId');
+                fatherSelect.innerHTML = '<option value="">-- اختر الوالد --</option>';
                 
                 const maleMembers = this.dataManager.getData('familyMembers').filter(m => m.gender === 'male');
                 
@@ -1370,7 +1355,43 @@
                         genGroup.appendChild(option);
                     });
                     
-                    select.appendChild(genGroup);
+                    fatherSelect.appendChild(genGroup);
+                });
+
+                // قائمة الأزواج (جميع الأعضاء)
+                this.populateSpouseSelect();
+            }
+
+            populateSpouseSelect() {
+                const spouseSelect = document.getElementById('familySpouseId');
+                if (!spouseSelect) return;
+                
+                spouseSelect.innerHTML = '<option value="">-- اختر الزوج/الزوجة --</option>';
+                
+                const allMembers = this.dataManager.getData('familyMembers');
+                
+                // تجميع حسب الأجيال
+                const generations = {};
+                allMembers.forEach(member => {
+                    const gen = member.generation || 1;
+                    if (!generations[gen]) generations[gen] = [];
+                    generations[gen].push(member);
+                });
+                
+                // إضافة الخيارات مجموعة حسب الأجيال
+                Object.keys(generations).sort((a, b) => parseInt(a) - parseInt(b)).forEach(genNum => {
+                    const genGroup = document.createElement('optgroup');
+                    genGroup.label = `${genNum == '1' ? 'الجيل المؤسس' : 'الجيل ' + genNum}`;
+                    
+                    generations[genNum].forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id;
+                        const genderIcon = member.gender === 'male' ? '♂️' : '♀️';
+                        option.textContent = `${genderIcon} ${member.full_name}`;
+                        genGroup.appendChild(option);
+                    });
+                    
+                    spouseSelect.appendChild(genGroup);
                 });
             }
 
@@ -1383,6 +1404,7 @@
                 
                 // باقي البيانات
                 document.getElementById('familyFatherId').value = member.father_id || '';
+                document.getElementById('familySpouseId').value = member.spouse_id || '';
                 document.getElementById('familyMembershipType').value = member.membership_type || '';
                 document.getElementById('familyGender').value = member.gender || '';
                 document.getElementById('familyBirthDate').value = member.birth_date || '';
@@ -1420,6 +1442,7 @@
                     middle_name: middleName,
                     last_name: lastName,
                     father_id: document.getElementById('familyFatherId').value || null,
+                    spouse_id: document.getElementById('familySpouseId').value || null,
                     membership_type: document.getElementById('familyMembershipType').value,
                     gender: document.getElementById('familyGender').value,
                     birth_date: document.getElementById('familyBirthDate').value || null,
