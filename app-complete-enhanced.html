@@ -404,71 +404,165 @@
 
     <!-- Family Member Modal -->
     <div id="familyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
-        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4 max-h-screen overflow-y-auto">
-            <h3 class="text-xl font-bold mb-4" id="familyModalTitle">إضافة عضو جديد للعائلة</h3>
+        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800" id="familyModalTitle">إضافة عضو جديد للعائلة</h3>
+                <button type="button" onclick="hideFamilyModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             
             <form id="familyForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
-                    <input type="text" id="familyFullName" placeholder="مثال: أحمد محمد بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <!-- معلومات الاسم -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-user ml-2"></i>بيانات الاسم
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأول *</label>
+                            <input type="text" id="familyFirstName" placeholder="مثال: أحمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأوسط</label>
+                            <input type="text" id="familyMiddleName" placeholder="مثال: محمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العائلة *</label>
+                            <input type="text" id="familyLastName" placeholder="مثال: بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">الاسم الكامل (معاينة)</label>
+                        <div id="fullNamePreview" class="text-lg font-semibold text-gray-800">سيتم تكوين الاسم تلقائياً...</div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الأب</label>
-                    <select id="familyFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">-- اختر الوالد --</option>
-                    </select>
-                    <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق لإنشاء الرابط العائلي</p>
+
+                <!-- معلومات الميلاد -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-birthday-cake ml-2"></i>بيانات الميلاد
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
+                            <input type="date" id="familyBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">مكان الميلاد</label>
+                            <input type="text" id="familyBirthPlace" placeholder="مثال: الرياض، المملكة العربية السعودية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
-                    <select id="familyMembershipType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">-- اختر نوع العضوية --</option>
-                        <option value="founder">مؤسس</option>
-                        <option value="chairman">رئيس مجلس الإدارة</option>
-                        <option value="board_member">عضو مجلس الإدارة</option>
-                        <option value="general_assembly">عضو الجمعية العمومية</option>
-                        <option value="family_member">عضو عائلة</option>
-                        <option value="honorary">عضو شرفي</option>
-                    </select>
+
+                <!-- معلومات الأجيال -->
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
+                        <i class="fas fa-sitemap ml-2"></i>ربط الأجيال
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الجيل السابق</label>
+                            <select id="familyFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- اختر الوالد --</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق لإنشاء الرابط العائلي</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل الحالي</label>
+                            <input type="text" id="familyCurrentGeneration" placeholder="سيتم حسابه تلقائياً" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg" readonly>
+                            <p class="text-sm text-green-600 mt-1">يُحسب تلقائياً بناءً على الوالد المختار</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
-                    <select id="familyGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">-- اختر الجنس --</option>
-                        <option value="male">ذكر</option>
-                        <option value="female">أنثى</option>
-                    </select>
+
+                <!-- معلومات شخصية -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                        <i class="fas fa-id-card ml-2"></i>المعلومات الشخصية
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
+                            <select id="familyGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">-- اختر الجنس --</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                            <select id="familyMembershipType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">-- اختر نوع العضوية --</option>
+                                <option value="founder">👑 مؤسس</option>
+                                <option value="chairman">🎖️ رئيس مجلس الإدارة</option>
+                                <option value="board_member">👔 عضو مجلس الإدارة</option>
+                                <option value="general_assembly">👥 عضو الجمعية العمومية</option>
+                                <option value="family_member">👨‍👩‍👧‍👦 عضو عائلة</option>
+                                <option value="honorary">🏅 عضو شرفي</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
-                    <input type="date" id="familyBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                <!-- معلومات مهنية -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
+                        <i class="fas fa-briefcase ml-2"></i>المعلومات المهنية
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة</label>
+                            <input type="text" id="familyProfession" placeholder="مثال: مهندس، طبيب، معلم" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص العملي</label>
+                            <input type="text" id="familySpecialization" placeholder="مثال: هندسة الحاسوب، طب الأطفال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">الموقع/المدينة</label>
-                    <input type="text" id="familyLocation" placeholder="مثال: الرياض" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                <!-- معلومات الاتصال -->
+                <div class="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-teal-800 mb-4 flex items-center">
+                        <i class="fas fa-phone ml-2"></i>معلومات التواصل
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال</label>
+                            <input type="tel" id="familyPhone" placeholder="05xxxxxxxx" pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">يرجى إدخال رقم الجوال بصيغة 05xxxxxxxx</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                            <input type="email" id="familyEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
-                    <input type="tel" id="familyPhone" placeholder="05xxxxxxxx" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                <!-- معلومات إضافية -->
+                <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-rose-800 mb-4 flex items-center">
+                        <i class="fas fa-heart ml-2"></i>المعلومات الإضافية
+                    </h4>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الهوايات والاهتمامات</label>
+                            <textarea id="familyHobbies" rows="3" placeholder="مثال: القراءة، الرياضة، السفر، التصوير، البرمجة..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"></textarea>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-                    <input type="email" id="familyEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse">
-                    <button type="button" onclick="hideFamilyModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-                        إلغاء
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
+                    <button type="button" onclick="hideFamilyModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
                     </button>
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        حفظ العضو
+                    <button type="button" onclick="resetFamilyForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition font-medium shadow-lg">
+                        <i class="fas fa-save ml-2"></i>حفظ العضو
                     </button>
                 </div>
             </form>
@@ -483,80 +577,116 @@
                 {
                     id: 'founder_001',
                     full_name: 'محمد بن سعيدان',
+                    first_name: 'محمد',
+                    middle_name: '',
+                    last_name: 'بن سعيدان',
                     membership_type: 'founder',
                     gender: 'male',
                     father_id: null,
                     generation: 1,
                     birth_date: '1950-01-01',
-                    location: 'الرياض',
+                    birth_place: 'الرياض، المملكة العربية السعودية',
+                    profession: 'رجل أعمال',
+                    specialization: 'التطوير العقاري',
                     phone: '0533361154',
                     email: 'info@salmansaedan.com',
+                    hobbies: 'القراءة، الاستثمار العقاري، الأعمال الخيرية',
                     created_at: '2024-01-01'
                 },
                 // الجيل الثاني - أطفال المؤسس
                 {
                     id: 'gen2_001',
                     full_name: 'سلمان محمد بن سعيدان',
+                    first_name: 'سلمان',
+                    middle_name: 'محمد',
+                    last_name: 'بن سعيدان',
                     membership_type: 'chairman',
                     gender: 'male',
                     father_id: 'founder_001',
                     generation: 2,
                     birth_date: '1975-05-15',
-                    location: 'الرياض',
+                    birth_place: 'الرياض، المملكة العربية السعودية',
+                    profession: 'مطور عقاري',
+                    specialization: 'إدارة المشاريع العقارية',
                     phone: '0501234567',
                     email: 'salman@salmansaedan.com',
+                    hobbies: 'السفر، التصوير، الرياضة، تطوير الأعمال',
                     created_at: '2024-01-02'
                 },
                 {
                     id: 'gen2_002',
                     full_name: 'عبدالله محمد بن سعيدان',
+                    first_name: 'عبدالله',
+                    middle_name: 'محمد',
+                    last_name: 'بن سعيدان',
                     membership_type: 'board_member',
                     gender: 'male',
                     father_id: 'founder_001',
                     generation: 2,
                     birth_date: '1977-08-20',
-                    location: 'جدة',
+                    birth_place: 'جدة، المملكة العربية السعودية',
+                    profession: 'مهندس',
+                    specialization: 'هندسة معمارية',
                     phone: '0507654321',
                     email: 'abdullah@example.com',
+                    hobbies: 'التصميم المعماري، الرسم، السباحة',
                     created_at: '2024-01-03'
                 },
                 {
                     id: 'gen2_003',
                     full_name: 'فاطمة محمد بن سعيدان',
+                    first_name: 'فاطمة',
+                    middle_name: 'محمد',
+                    last_name: 'بن سعيدان',
                     membership_type: 'family_member',
                     gender: 'female',
                     father_id: 'founder_001',
                     generation: 2,
                     birth_date: '1980-03-10',
-                    location: 'الدمام',
+                    birth_place: 'الدمام، المملكة العربية السعودية',
+                    profession: 'طبيبة',
+                    specialization: 'طب الأطفال',
                     phone: '0551234567',
                     email: 'fatima@example.com',
+                    hobbies: 'القراءة الطبية، رعاية الأطفال، الطبخ',
                     created_at: '2024-01-04'
                 },
                 {
                     id: 'gen2_004',
                     full_name: 'أحمد محمد بن سعيدان',
+                    first_name: 'أحمد',
+                    middle_name: 'محمد',
+                    last_name: 'بن سعيدان',
                     membership_type: 'general_assembly',
                     gender: 'male',
                     father_id: 'founder_001',
                     generation: 2,
                     birth_date: '1982-11-30',
-                    location: 'الرياض',
+                    birth_place: 'الرياض، المملكة العربية السعودية',
+                    profession: 'معلم',
+                    specialization: 'التربية والتعليم',
                     phone: '0559876543',
                     email: 'ahmed@example.com',
+                    hobbies: 'التدريس، القراءة، كرة القدم، الشطرنج',
                     created_at: '2024-01-05'
                 },
                 {
                     id: 'gen2_005',
                     full_name: 'عائشة محمد بن سعيدان',
+                    first_name: 'عائشة',
+                    middle_name: 'محمد',
+                    last_name: 'بن سعيدان',
                     membership_type: 'family_member',
                     gender: 'female',
                     father_id: 'founder_001',
                     generation: 2,
                     birth_date: '1985-07-18',
-                    location: 'مكة المكرمة',
+                    birth_place: 'مكة المكرمة، المملكة العربية السعودية',
+                    profession: 'مصممة',
+                    specialization: 'تصميم الديكور الداخلي',
                     phone: '0554567890',
                     email: 'aisha@example.com',
+                    hobbies: 'التصميم، الرسم، الخياطة، الفنون اليدوية',
                     created_at: '2024-01-06'
                 }
             ],
@@ -891,6 +1021,58 @@
                         this.saveFamilyMember();
                     });
                 }
+
+                // مستمعات حقول النموذج المحسن
+                this.setupFormFieldListeners();
+            }
+
+            setupFormFieldListeners() {
+                // تحديث معاينة الاسم الكامل
+                const nameFields = ['familyFirstName', 'familyMiddleName', 'familyLastName'];
+                nameFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.addEventListener('input', this.updateFullNamePreview.bind(this));
+                    }
+                });
+
+                // تحديث الجيل عند اختيار الوالد
+                const fatherSelect = document.getElementById('familyFatherId');
+                if (fatherSelect) {
+                    fatherSelect.addEventListener('change', this.updateGenerationDisplay.bind(this));
+                }
+            }
+
+            updateFullNamePreview() {
+                const firstName = document.getElementById('familyFirstName')?.value.trim() || '';
+                const middleName = document.getElementById('familyMiddleName')?.value.trim() || '';
+                const lastName = document.getElementById('familyLastName')?.value.trim() || '';
+                
+                let fullName = firstName;
+                if (middleName) fullName += ` ${middleName}`;
+                if (lastName) fullName += ` ${lastName}`;
+                
+                const preview = document.getElementById('fullNamePreview');
+                if (preview) {
+                    preview.textContent = fullName || 'سيتم تكوين الاسم تلقائياً...';
+                }
+            }
+
+            updateGenerationDisplay() {
+                const fatherSelect = document.getElementById('familyFatherId');
+                const generationDisplay = document.getElementById('familyCurrentGeneration');
+                
+                if (!fatherSelect || !generationDisplay) return;
+
+                const fatherId = fatherSelect.value;
+                let generation = 1; // افتراضي للمؤسس
+
+                if (fatherId) {
+                    const father = this.dataManager.getData('familyMembers').find(m => m.id === fatherId);
+                    generation = father ? (father.generation + 1) : 1;
+                }
+
+                generationDisplay.value = `الجيل ${generation} ${generation === 1 ? '(مؤسس)' : generation === 2 ? '(أطفال المؤسس)' : '(أحفاد)'}`;
             }
 
             refreshAllSections() {
@@ -1056,12 +1238,22 @@
                                         </p>
                                     ` : ''}
                                     
-                                    <div class="space-y-1 text-xs text-gray-500">
-                                        ${member.birth_date ? `<div><i class="fas fa-birthday-cake ml-2"></i>${new Date(member.birth_date).toLocaleDateString('ar-SA')}</div>` : ''}
-                                        ${member.location ? `<div><i class="fas fa-map-marker-alt ml-2"></i>${member.location}</div>` : ''}
-                                        ${member.phone ? `<div><i class="fas fa-phone ml-2"></i>${member.phone}</div>` : ''}
-                                        ${member.email ? `<div><i class="fas fa-envelope ml-2"></i>${member.email}</div>` : ''}
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-500 mt-3">
+                                        ${member.birth_date ? `<div><i class="fas fa-birthday-cake ml-2 text-pink-500"></i>${new Date(member.birth_date).toLocaleDateString('ar-SA')}</div>` : ''}
+                                        ${member.birth_place ? `<div><i class="fas fa-map-marker-alt ml-2 text-red-500"></i>${member.birth_place}</div>` : ''}
+                                        ${member.profession ? `<div><i class="fas fa-briefcase ml-2 text-blue-500"></i>${member.profession}</div>` : ''}
+                                        ${member.specialization ? `<div><i class="fas fa-graduation-cap ml-2 text-green-500"></i>${member.specialization}</div>` : ''}
+                                        ${member.phone ? `<div><i class="fas fa-phone ml-2 text-indigo-500"></i>${member.phone}</div>` : ''}
+                                        ${member.email ? `<div><i class="fas fa-envelope ml-2 text-purple-500"></i>${member.email}</div>` : ''}
                                     </div>
+                                    ${member.hobbies ? `
+                                        <div class="mt-3 p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                                            <div class="text-xs text-amber-700">
+                                                <i class="fas fa-heart ml-2"></i>
+                                                <strong>الهوايات:</strong> ${member.hobbies}
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -1183,14 +1375,27 @@
             }
 
             fillFamilyForm(member) {
-                document.getElementById('familyFullName').value = member.full_name || '';
+                // تحليل الاسم الكامل
+                const nameParts = (member.full_name || '').split(' ');
+                document.getElementById('familyFirstName').value = nameParts[0] || '';
+                document.getElementById('familyMiddleName').value = nameParts[1] || '';
+                document.getElementById('familyLastName').value = nameParts.slice(2).join(' ') || '';
+                
+                // باقي البيانات
                 document.getElementById('familyFatherId').value = member.father_id || '';
                 document.getElementById('familyMembershipType').value = member.membership_type || '';
                 document.getElementById('familyGender').value = member.gender || '';
                 document.getElementById('familyBirthDate').value = member.birth_date || '';
-                document.getElementById('familyLocation').value = member.location || '';
+                document.getElementById('familyBirthPlace').value = member.birth_place || '';
+                document.getElementById('familyProfession').value = member.profession || '';
+                document.getElementById('familySpecialization').value = member.specialization || '';
                 document.getElementById('familyPhone').value = member.phone || '';
                 document.getElementById('familyEmail').value = member.email || '';
+                document.getElementById('familyHobbies').value = member.hobbies || '';
+                
+                // تحديث المعاينة والجيل
+                this.updateFullNamePreview();
+                this.updateGenerationDisplay();
                 
                 // حفظ ID للتعديل
                 document.getElementById('familyForm').dataset.editId = member.id;
@@ -1200,20 +1405,47 @@
                 const form = document.getElementById('familyForm');
                 const editId = form.dataset.editId;
                 
+                // تجميع بيانات الاسم
+                const firstName = document.getElementById('familyFirstName').value.trim();
+                const middleName = document.getElementById('familyMiddleName').value.trim();
+                const lastName = document.getElementById('familyLastName').value.trim();
+                
+                let fullName = firstName;
+                if (middleName) fullName += ` ${middleName}`;
+                if (lastName) fullName += ` ${lastName}`;
+                
                 const memberData = {
-                    full_name: document.getElementById('familyFullName').value.trim(),
+                    full_name: fullName,
+                    first_name: firstName,
+                    middle_name: middleName,
+                    last_name: lastName,
                     father_id: document.getElementById('familyFatherId').value || null,
                     membership_type: document.getElementById('familyMembershipType').value,
                     gender: document.getElementById('familyGender').value,
                     birth_date: document.getElementById('familyBirthDate').value || null,
-                    location: document.getElementById('familyLocation').value.trim(),
+                    birth_place: document.getElementById('familyBirthPlace').value.trim(),
+                    profession: document.getElementById('familyProfession').value.trim(),
+                    specialization: document.getElementById('familySpecialization').value.trim(),
                     phone: document.getElementById('familyPhone').value.trim(),
-                    email: document.getElementById('familyEmail').value.trim()
+                    email: document.getElementById('familyEmail').value.trim(),
+                    hobbies: document.getElementById('familyHobbies').value.trim()
                 };
                 
                 // التحقق من البيانات المطلوبة
-                if (!memberData.full_name || !memberData.membership_type || !memberData.gender) {
-                    this.showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+                if (!firstName || !lastName || !memberData.membership_type || !memberData.gender) {
+                    this.showToast('يرجى ملء جميع الحقول المطلوبة: الاسم الأول، اسم العائلة، نوع العضوية، والجنس', 'error');
+                    return;
+                }
+
+                // التحقق من صحة رقم الجوال (إذا تم إدخاله)
+                if (memberData.phone && !/^05\d{8}$/.test(memberData.phone)) {
+                    this.showToast('يرجى إدخال رقم جوال صحيح بصيغة 05xxxxxxxx', 'error');
+                    return;
+                }
+
+                // التحقق من صحة البريد الإلكتروني (إذا تم إدخاله)
+                if (memberData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberData.email)) {
+                    this.showToast('يرجى إدخال بريد إلكتروني صحيح', 'error');
                     return;
                 }
                 
@@ -1239,6 +1471,18 @@
             hideFamilyModal() {
                 document.getElementById('familyModal').classList.add('hidden');
                 document.getElementById('familyForm').reset();
+                this.updateFullNamePreview();
+                this.updateGenerationDisplay();
+            }
+
+            resetFamilyForm() {
+                if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟')) {
+                    document.getElementById('familyForm').reset();
+                    delete document.getElementById('familyForm').dataset.editId;
+                    this.updateFullNamePreview();
+                    this.updateGenerationDisplay();
+                    this.showToast('تم إعادة تعيين النموذج', 'warning');
+                }
             }
 
             // وظائف الأحداث والأقسام الأخرى (مبسطة)
@@ -1561,6 +1805,12 @@
         function hideFamilyModal() {
             if (app) {
                 app.hideFamilyModal();
+            }
+        }
+
+        function resetFamilyForm() {
+            if (app) {
+                app.resetFamilyForm();
             }
         }
 
