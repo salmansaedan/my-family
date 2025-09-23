@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شجرة عائلة بن سعيدان - نسخة التشخيص</title>
+    
+    <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .modal { backdrop-filter: blur(5px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            transition: all 0.3s;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .generation {
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 20px;
+        }
+        
+        .generation-header {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .member-card {
+            margin: 10px 0;
+            border-right: 3px solid #10b981;
+            padding-right: 15px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800 ml-4">
+                        <i class="fas fa-sitemap text-blue-600 ml-2"></i>
+                        شجرة عائلة بن سعيدان - نسخة التشخيص
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel">
+        <div><strong>🔍 لوحة التشخيص</strong></div>
+        <div id="debugStatus">تهيئة...</div>
+        <div id="debugMembers">الأعضاء: 0</div>
+        <div id="debugLastAction">الإجراء الأخير: بدء التطبيق</div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="bg-green-50 border-b border-green-200">
+        <div class="max-w-7xl mx-auto px-4 py-2">
+            <div id="statusBar" class="text-center text-green-700">
+                <span class="font-medium">🌳 نسخة التشخيص - اختبار إضافة الأعضاء</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 text-center">
+                <div class="text-3xl text-blue-600 mb-2">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800" id="total-members">0</h3>
+                <p class="text-gray-600">إجمالي الأعضاء</p>
+            </div>
+            <div class="card p-6 text-center">
+                <div class="text-3xl text-yellow-600 mb-2">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800" id="generations-count">1</h3>
+                <p class="text-gray-600">الأجيال</p>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex justify-center gap-4 mb-8">
+            <button onclick="loadFounderFamily()" class="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700">
+                <i class="fas fa-crown ml-2"></i>تحميل المؤسس
+            </button>
+            <button onclick="showAddModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                <i class="fas fa-plus ml-2"></i>إضافة عضو جديد
+            </button>
+            <button onclick="testSystem()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+                <i class="fas fa-bug ml-2"></i>اختبار النظام
+            </button>
+        </div>
+        
+        <!-- Family Tree Display -->
+        <div id="family-tree" class="space-y-6">
+            <!-- Family tree will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
+        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">إضافة عضو جديد للعائلة</h3>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
+                <input type="text" id="memberName" placeholder="مثال: أحمد محمد بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الأب *</label>
+                <select id="parentSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- اختر الوالد --</option>
+                </select>
+                <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق لإنشاء الرابط العائلي</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                <select id="memberType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- اختر نوع العضوية --</option>
+                    <option value="chairman">رئيس مجلس الإدارة</option>
+                    <option value="board_member">عضو مجلس الإدارة</option>
+                    <option value="assembly_member">عضو الجمعية العمومية</option>
+                    <option value="family_member">عضو عائلة</option>
+                    <option value="honorary">عضو فخري</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
+                <select id="memberGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- اختر الجنس --</option>
+                    <option value="male">ذكر</option>
+                    <option value="female">أنثى</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                <input type="tel" id="memberPhone" placeholder="05xxxxxxxx" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                <input type="email" id="memberEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="flex justify-end space-x-4 rtl:space-x-reverse">
+                <button onclick="hideAddModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                    إلغاء
+                </button>
+                <button onclick="addMember()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    إضافة للعائلة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // البيانات الأساسية للعائلة مع الروابط
+        const FOUNDER_FAMILY = [
+            {
+                id: 'founder_001',
+                name: 'محمد بن سعيدان',
+                type: 'founder',
+                parent_id: null,
+                generation: 1,
+                gender: 'male',
+                phone: '0533361154',
+                email: 'info@salmansaedan.com',
+                children: [],
+                added: '2024-01-01'
+            }
+        ];
+
+        // نظام إدارة الشجرة العائلية مع التشخيص
+        class FamilyTreeManagerWithDebug {
+            constructor() {
+                this.storageKey = 'family_tree_debug_v1';
+                this.members = [];
+                this.debugLog = [];
+                
+                this.logDebug('بدء تهيئة النظام');
+                this.loadMembers();
+                this.initializeData();
+                this.updateDebugPanel();
+                this.logDebug('تم تحميل النظام بنجاح');
+            }
+            
+            logDebug(message) {
+                const timestamp = new Date().toLocaleTimeString('ar-SA');
+                this.debugLog.push(`${timestamp}: ${message}`);
+                console.log(`[DEBUG] ${message}`);
+                
+                // تحديث لوحة التشخيص
+                document.getElementById('debugLastAction').textContent = `الإجراء الأخير: ${message}`;
+            }
+            
+            loadMembers() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    if (stored) {
+                        this.members = JSON.parse(stored);
+                        this.logDebug(`تم تحميل ${this.members.length} عضو من التخزين المحلي`);
+                    } else {
+                        this.members = [];
+                        this.logDebug('لا توجد بيانات محفوظة - بدء من الصفر');
+                    }
+                } catch (error) {
+                    this.logDebug(`خطأ في تحميل البيانات: ${error.message}`);
+                    this.members = [];
+                }
+            }
+            
+            saveMembers() {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.members));
+                    this.logDebug(`تم حفظ ${this.members.length} عضو بنجاح`);
+                    this.updateDebugPanel();
+                    return true;
+                } catch (error) {
+                    this.logDebug(`خطأ في الحفظ: ${error.message}`);
+                    return false;
+                }
+            }
+            
+            initializeData() {
+                if (this.members.length === 0) {
+                    this.logDebug('تحميل بيانات المؤسس الافتراضية');
+                    this.members = [...FOUNDER_FAMILY];
+                    this.saveMembers();
+                }
+                this.updateChildrenReferences();
+            }
+            
+            updateChildrenReferences() {
+                this.members.forEach(member => {
+                    member.children = this.members
+                        .filter(child => child.parent_id === member.id)
+                        .map(child => child.id);
+                });
+                this.logDebug('تم تحديث مراجع الأطفال');
+            }
+            
+            addMember(memberData) {
+                try {
+                    this.logDebug(`محاولة إضافة عضو: ${memberData.name}`);
+                    
+                    // التحقق من البيانات الأساسية
+                    if (!memberData.name || !memberData.type || !memberData.gender) {
+                        throw new Error('البيانات الأساسية مطلوبة: الاسم، النوع، الجنس');
+                    }
+                    
+                    // حساب الجيل
+                    let generation = 1;
+                    if (memberData.parent_id) {
+                        const parent = this.members.find(m => m.id === memberData.parent_id);
+                        if (parent) {
+                            generation = parent.generation + 1;
+                            this.logDebug(`الوالد موجود: ${parent.name}, الجيل الجديد: ${generation}`);
+                        } else {
+                            this.logDebug(`تحذير: الوالد المحدد غير موجود (${memberData.parent_id})`);
+                        }
+                    } else {
+                        this.logDebug('عضو بدون والد - سيكون في الجيل الأول');
+                    }
+                    
+                    const newMember = {
+                        id: 'member_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                        name: memberData.name.trim(),
+                        type: memberData.type,
+                        parent_id: memberData.parent_id || null,
+                        generation: generation,
+                        gender: memberData.gender,
+                        phone: (memberData.phone || '').trim(),
+                        email: (memberData.email || '').trim(),
+                        children: [],
+                        added: new Date().toISOString().split('T')[0]
+                    };
+                    
+                    this.members.push(newMember);
+                    this.updateChildrenReferences();
+                    
+                    if (this.saveMembers()) {
+                        this.logDebug(`تم إضافة العضو بنجاح: ${newMember.name} (ID: ${newMember.id})`);
+                        return newMember;
+                    } else {
+                        this.members.pop(); // إزالة العضو في حالة فشل الحفظ
+                        throw new Error('فشل في حفظ البيانات');
+                    }
+                } catch (error) {
+                    this.logDebug(`خطأ في إضافة العضو: ${error.message}`);
+                    throw error;
+                }
+            }
+            
+            displayFamilyTree() {
+                const container = document.getElementById('family-tree');
+                
+                if (this.members.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl text-gray-300 mb-4">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <p class="text-gray-500 text-xl mb-4">لا توجد شجرة عائلية</p>
+                            <button onclick="app.loadFounderFamily()" class="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700">
+                                إنشاء شجرة العائلة
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // تجميع الأعضاء حسب الأجيال
+                const generations = {};
+                this.members.forEach(member => {
+                    if (!generations[member.generation]) {
+                        generations[member.generation] = [];
+                    }
+                    generations[member.generation].push(member);
+                });
+                
+                // ترتيب الأجيال
+                const sortedGenerations = Object.keys(generations).sort((a, b) => parseInt(a) - parseInt(b));
+                
+                container.innerHTML = sortedGenerations.map(genNum => {
+                    const genMembers = generations[genNum];
+                    const isFounderGen = genNum == '1';
+                    
+                    return `
+                        <div class="generation">
+                            <div class="generation-header">
+                                <i class="fas ${isFounderGen ? 'fa-crown' : 'fa-users'} ml-2"></i>
+                                ${isFounderGen ? 'الجيل المؤسس' : `الجيل ${genNum}`} 
+                                (${genMembers.length} ${genMembers.length === 1 ? 'فرد' : 'أفراد'})
+                            </div>
+                            
+                            ${genMembers.map(member => this.renderMemberCard(member)).join('')}
+                        </div>
+                    `;
+                }).join('');
+                
+                this.logDebug(`تم عرض ${this.members.length} عضو في ${sortedGenerations.length} جيل`);
+            }
+            
+            renderMemberCard(member) {
+                const parent = member.parent_id ? this.members.find(m => m.id === member.parent_id) : null;
+                const childrenCount = member.children ? member.children.length : 0;
+                
+                return `
+                    <div class="member-card">
+                        <div class="card p-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h4 class="text-lg font-bold text-gray-800 mb-2">
+                                        ${member.name}
+                                        <span class="text-sm ${member.gender === 'male' ? 'text-blue-500' : 'text-pink-500'} mr-2">
+                                            <i class="fas ${member.gender === 'male' ? 'fa-mars' : 'fa-venus'}"></i>
+                                        </span>
+                                    </h4>
+                                    
+                                    ${parent ? `
+                                        <p class="text-gray-600 text-sm mb-1">
+                                            <i class="fas fa-arrow-up ml-1"></i>
+                                            ${member.gender === 'male' ? 'ابن' : 'ابنة'} ${parent.name}
+                                        </p>
+                                    ` : ''}
+                                    
+                                    <p class="text-blue-600 font-medium mb-1">
+                                        <i class="fas ${member.type === 'founder' ? 'fa-crown' : 'fa-user'} ml-1"></i>
+                                        ${this.getTypeText(member.type)}
+                                    </p>
+                                    
+                                    ${childrenCount > 0 ? `
+                                        <p class="text-green-600 text-sm mb-1">
+                                            <i class="fas fa-arrow-down ml-1"></i>
+                                            له ${childrenCount} ${childrenCount === 1 ? 'طفل' : 'أطفال'}
+                                        </p>
+                                    ` : ''}
+                                    
+                                    ${member.phone ? `<p class="text-gray-600 text-xs"><i class="fas fa-phone ml-1"></i>${member.phone}</p>` : ''}
+                                    ${member.email ? `<p class="text-gray-600 text-xs"><i class="fas fa-envelope ml-1"></i>${member.email}</p>` : ''}
+                                    
+                                    <p class="text-xs text-gray-500 mt-2">ID: ${member.id}</p>
+                                </div>
+                                <div class="text-2xl ${member.type === 'founder' ? 'text-yellow-500' : 'text-blue-500'}">
+                                    <i class="fas ${member.type === 'founder' ? 'fa-crown' : 'fa-user'}"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            populateParentSelect() {
+                const select = document.getElementById('parentSelect');
+                select.innerHTML = '<option value="">-- اختر الوالد --</option>';
+                
+                const maleMembers = this.members.filter(m => m.gender === 'male');
+                this.logDebug(`تم العثور على ${maleMembers.length} ذكر لقائمة الآباء`);
+                
+                const generations = {};
+                maleMembers.forEach(member => {
+                    if (!generations[member.generation]) {
+                        generations[member.generation] = [];
+                    }
+                    generations[member.generation].push(member);
+                });
+                
+                Object.keys(generations).sort((a, b) => parseInt(a) - parseInt(b)).forEach(genNum => {
+                    const genGroup = document.createElement('optgroup');
+                    genGroup.label = `${genNum == '1' ? 'الجيل المؤسس' : 'الجيل ' + genNum}`;
+                    
+                    generations[genNum].forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id;
+                        option.textContent = `${member.name} (${this.getTypeText(member.type)})`;
+                        genGroup.appendChild(option);
+                    });
+                    
+                    select.appendChild(genGroup);
+                });
+            }
+            
+            render() {
+                this.displayFamilyTree();
+                this.updateStats();
+                this.populateParentSelect();
+                this.updateDebugPanel();
+            }
+            
+            updateStats() {
+                const total = this.members.length;
+                const generations = new Set(this.members.map(m => m.generation)).size;
+                
+                document.getElementById('total-members').textContent = total;
+                document.getElementById('generations-count').textContent = generations;
+            }
+            
+            updateDebugPanel() {
+                document.getElementById('debugStatus').textContent = `حالة: نشط`;
+                document.getElementById('debugMembers').textContent = `الأعضاء: ${this.members.length}`;
+            }
+            
+            getTypeText(type) {
+                const types = {
+                    'founder': 'المؤسس',
+                    'chairman': 'رئيس مجلس الإدارة',
+                    'board_member': 'عضو مجلس الإدارة',
+                    'assembly_member': 'عضو الجمعية العمومية',
+                    'family_member': 'عضو عائلة',
+                    'honorary': 'عضو فخري'
+                };
+                return types[type] || type;
+            }
+            
+            loadFounderFamily() {
+                this.members = [...FOUNDER_FAMILY];
+                this.saveMembers();
+                this.render();
+                this.showToast('تم تحميل العائلة المؤسسة', 'success');
+                this.logDebug('تم إعادة تحميل بيانات المؤسس');
+            }
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 300);
+                }, 4000);
+            }
+            
+            testSystem() {
+                this.logDebug('بدء اختبار النظام');
+                
+                // اختبار 1: إضافة عضو تجريبي
+                try {
+                    const testMember = {
+                        name: 'اختبار العضو ' + Date.now(),
+                        parent_id: this.members.length > 0 ? this.members[0].id : null,
+                        type: 'family_member',
+                        gender: 'male',
+                        phone: '0501234567',
+                        email: 'test@example.com'
+                    };
+                    
+                    const result = this.addMember(testMember);
+                    if (result) {
+                        this.logDebug('✅ اختبار الإضافة نجح');
+                        this.render();
+                        this.showToast('اختبار النظام نجح - تم إضافة عضو تجريبي', 'success');
+                    }
+                } catch (error) {
+                    this.logDebug(`❌ اختبار الإضافة فشل: ${error.message}`);
+                    this.showToast(`اختبار النظام فشل: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // متغير التطبيق العام
+        let app;
+
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                app = new FamilyTreeManagerWithDebug();
+                app.render();
+                console.log('✅ تم تحميل نسخة التشخيص بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة التطبيق:', error);
+                document.getElementById('debugStatus').textContent = `خطأ: ${error.message}`;
+            }
+        });
+
+        // وظائف النموذج
+        function showAddModal() {
+            app.populateParentSelect();
+            document.getElementById('addModal').classList.remove('hidden');
+            
+            // مسح الحقول
+            document.getElementById('memberName').value = '';
+            document.getElementById('parentSelect').value = '';
+            document.getElementById('memberType').value = '';
+            document.getElementById('memberGender').value = '';
+            document.getElementById('memberPhone').value = '';
+            document.getElementById('memberEmail').value = '';
+            
+            setTimeout(() => {
+                document.getElementById('memberName').focus();
+            }, 100);
+        }
+        
+        function hideAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+        
+        function addMember() {
+            try {
+                const name = document.getElementById('memberName').value.trim();
+                const parent_id = document.getElementById('parentSelect').value;
+                const type = document.getElementById('memberType').value;
+                const gender = document.getElementById('memberGender').value;
+                const phone = document.getElementById('memberPhone').value.trim();
+                const email = document.getElementById('memberEmail').value.trim();
+                
+                app.logDebug(`محاولة إضافة عضو من النموذج: ${name}`);
+                
+                // التحقق من البيانات المطلوبة
+                if (!name) {
+                    app.showToast('يرجى إدخال اسم العضو', 'error');
+                    app.logDebug('❌ فشل: اسم العضو مطلوب');
+                    return;
+                }
+                
+                if (!type) {
+                    app.showToast('يرجى اختيار نوع العضوية', 'error');
+                    app.logDebug('❌ فشل: نوع العضوية مطلوب');
+                    return;
+                }
+                
+                if (!gender) {
+                    app.showToast('يرجى اختيار الجنس', 'error');
+                    app.logDebug('❌ فشل: الجنس مطلوب');
+                    return;
+                }
+                
+                // إضافة العضو
+                const newMember = app.addMember({
+                    name: name,
+                    parent_id: parent_id,
+                    type: type,
+                    gender: gender,
+                    phone: phone,
+                    email: email
+                });
+                
+                if (newMember) {
+                    app.render();
+                    hideAddModal();
+                    app.showToast(`تم إضافة ${name} للجيل ${newMember.generation}!`, 'success');
+                    app.logDebug(`✅ نجح إضافة العضو: ${name} - الجيل ${newMember.generation}`);
+                }
+            } catch (error) {
+                app.logDebug(`❌ خطأ في النموذج: ${error.message}`);
+                app.showToast('خطأ: ' + error.message, 'error');
+            }
+        }
+        
+        function loadFounderFamily() {
+            if (app) {
+                app.loadFounderFamily();
+            }
+        }
+        
+        function testSystem() {
+            if (app) {
+                app.testSystem();
+            }
+        }
+
+        // مستمعي الأحداث
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const modal = document.getElementById('addModal');
+                if (!modal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    addMember();
+                }
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'addModal') {
+                hideAddModal();
+            }
+        });
+    </script>
+</body>
+</html>
