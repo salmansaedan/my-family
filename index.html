@@ -85,6 +85,18 @@
         .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
+        /* إصلاح مشكلة الرسوم البيانية */
+        canvas {
+            max-height: 300px !important;
+            width: 100% !important;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
         /* تصميم الشجرة العائلية المحسن */
         .generation {
             margin-bottom: 40px;
@@ -350,11 +362,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="card p-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">توزيع العضوية</h3>
-                    <canvas id="membershipChart" width="400" height="300"></canvas>
+                    <div class="chart-container">
+                        <canvas id="membershipChart"></canvas>
+                    </div>
                 </div>
                 <div class="card p-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">النشاط الشهري</h3>
-                    <canvas id="activityChart" width="400" height="300"></canvas>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2714,7 +2730,13 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false
+                        maintainAspectRatio: true,
+                        aspectRatio: 1.2,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
                     }
                 });
             }
@@ -2746,10 +2768,16 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: true,
+                        aspectRatio: 1.8,
                         scales: {
                             y: {
                                 beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top'
                             }
                         }
                     }

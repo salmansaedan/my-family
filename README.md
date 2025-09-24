@@ -15,7 +15,8 @@
 
 ## الروابط
 - **الخدمة المحلية**: https://3000-isvb57g3ae2i9g8x3xn7i-6532622b.e2b.dev
-- **GitHub**: يتم الإعداد عند الحاجة
+- **GitHub Repository**: https://github.com/salmansaedan/my-family
+- **المشروع المباشر**: يمكن استضافة الملفات على أي خادم ويب
 
 ## معمارية البيانات
 
