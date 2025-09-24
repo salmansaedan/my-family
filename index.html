@@ -205,22 +205,56 @@
                 </div>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex space-x-8 rtl:space-x-reverse">
-                    <button id="nav-home" class="nav-item active px-4 py-2 rounded-lg transition" onclick="showSection('home')">
-                        <i class="fas fa-home ml-2"></i>الرئيسية
-                    </button>
-                    <button id="nav-family" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('family')">
-                        <i class="fas fa-users ml-2"></i>الشجرة العائلية
-                    </button>
-                    <button id="nav-events" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('events')">
-                        <i class="fas fa-calendar ml-2"></i>الأحداث
-                    </button>
-                    <button id="nav-suggestions" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('suggestions')">
-                        <i class="fas fa-lightbulb ml-2"></i>الاقتراحات
-                    </button>
-                    <button id="nav-library" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('library')">
-                        <i class="fas fa-book ml-2"></i>المكتبة الرقمية
-                    </button>
+                <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+                    <!-- Navigation Items (shown when logged in) -->
+                    <div id="mainNavigation" class="flex space-x-8 rtl:space-x-reverse">
+                        <button id="nav-home" class="nav-item active px-4 py-2 rounded-lg transition" onclick="showSection('home')">
+                            <i class="fas fa-home ml-2"></i>الرئيسية
+                        </button>
+                        <button id="nav-family" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('family')">
+                            <i class="fas fa-users ml-2"></i>الشجرة العائلية
+                        </button>
+                        <button id="nav-events" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('events')">
+                            <i class="fas fa-calendar ml-2"></i>الأحداث
+                        </button>
+                        <button id="nav-suggestions" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('suggestions')">
+                            <i class="fas fa-lightbulb ml-2"></i>الاقتراحات
+                        </button>
+                        <button id="nav-library" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('library')">
+                            <i class="fas fa-book ml-2"></i>المكتبة الرقمية
+                        </button>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                        <!-- Admin Panel (admin only) -->
+                        <button id="nav-admin" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden" onclick="showSection('admin')">
+                            <i class="fas fa-cog ml-2"></i>لوحة الإدارة
+                        </button>
+                        
+                        <!-- User Profile -->
+                        <div class="relative" id="userProfileMenu">
+                            <button onclick="showSection('profile')" class="flex items-center px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                <i class="fas fa-user ml-2"></i>
+                                <span id="currentUserName">الملف الشخصي</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Logout -->
+                        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                            <i class="fas fa-sign-out-alt ml-2"></i>خروج
+                        </button>
+                    </div>
+                    
+                    <!-- Login/Register buttons (shown when not logged in) -->
+                    <div id="authButtons" class="flex items-center space-x-4 rtl:space-x-reverse">
+                        <button onclick="showLoginModal()" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                            <i class="fas fa-sign-in-alt ml-2"></i>دخول
+                        </button>
+                        <button onclick="showRegisterModal()" class="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
+                            <i class="fas fa-user-plus ml-2"></i>تسجيل جديد
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -398,6 +432,58 @@
             
             <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Library items will be displayed here -->
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile-section" class="section">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">الملف الشخصي</h2>
+                    <button onclick="editProfile()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-edit ml-2"></i>تعديل البيانات
+                    </button>
+                </div>
+                
+                <div id="profileContent" class="space-y-6">
+                    <!-- Profile content will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="admin-section" class="section">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">لوحة الإدارة</h2>
+                <div class="flex gap-4">
+                    <button onclick="refreshPendingUsers()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-refresh ml-2"></i>تحديث
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Pending Users Tab -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">طلبات التسجيل المعلقة</h3>
+                <div id="pendingUsersGrid" class="space-y-4">
+                    <!-- Pending users will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- System Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">المستخدمون المفعلون</h4>
+                    <div class="text-3xl font-bold text-green-600" id="activeUsersCount">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">طلبات معلقة</h4>
+                    <div class="text-3xl font-bold text-orange-600" id="pendingUsersCount">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">إجمالي المستخدمين</h4>
+                    <div class="text-3xl font-bold text-blue-600" id="totalUsersCount">0</div>
+                </div>
             </div>
         </section>
     </div>
@@ -578,6 +664,239 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
+        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">تسجيل الدخول</h3>
+                <button type="button" onclick="hideLoginModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهوية أو البريد الإلكتروني *</label>
+                    <input type="text" id="loginIdentifier" placeholder="أدخل رقم الهوية أو البريد الإلكتروني" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور *</label>
+                    <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="rememberMe" class="mr-2">
+                        <span class="text-sm text-gray-600">تذكرني</span>
+                    </label>
+                    <button type="button" class="text-sm text-blue-600 hover:text-blue-800">نسيت كلمة المرور؟</button>
+                </div>
+                
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse">
+                    <button type="button" onclick="hideLoginModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        دخول
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">ليس لديك حساب؟ 
+                    <button onclick="hideLoginModal(); showRegisterModal()" class="text-blue-600 hover:text-blue-800 font-medium">سجل الآن</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
+        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">تسجيل عضو جديد</h3>
+                <button type="button" onclick="hideRegisterModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle text-blue-600 ml-2"></i>
+                    <div class="text-blue-800">
+                        <p class="font-medium">ملاحظة هامة:</p>
+                        <p class="text-sm mt-1">سيتم إرسال طلب التسجيل للمراجعة من قبل الإدارة. ستتلقى إشعاراً عند تفعيل حسابك.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="registerForm">
+                <!-- معلومات الاسم -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-user ml-2"></i>بيانات الاسم
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأول *</label>
+                            <input type="text" id="registerFirstName" placeholder="مثال: أحمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأوسط *</label>
+                            <input type="text" id="registerMiddleName" placeholder="مثال: محمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العائلة *</label>
+                            <input type="text" id="registerLastName" placeholder="مثال: بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">الاسم الكامل (معاينة)</label>
+                        <div id="registerFullNamePreview" class="text-lg font-semibold text-gray-800">سيتم تكوين الاسم تلقائياً...</div>
+                    </div>
+                </div>
+
+                <!-- معلومات الميلاد والهوية -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-id-card ml-2"></i>البيانات الشخصية
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهوية *</label>
+                            <input type="text" id="registerNationalId" placeholder="1xxxxxxxxx" pattern="[1-2][0-9]{9}" maxlength="10" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            <p class="text-xs text-gray-500 mt-1">رقم الهوية السعودية (10 أرقام)</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد *</label>
+                            <input type="date" id="registerBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">مكان الميلاد *</label>
+                            <input type="text" id="registerBirthPlace" placeholder="مثال: الرياض، المملكة العربية السعودية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات الأجيال -->
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
+                        <i class="fas fa-sitemap ml-2"></i>ربط الأجيال
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الجيل السابق</label>
+                            <select id="registerFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- اختر الوالد (اختياري) --</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق إذا كان متاحاً</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل المتوقع</label>
+                            <input type="text" id="registerExpectedGeneration" placeholder="سيتم حسابه تلقائياً" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg" readonly>
+                            <p class="text-sm text-green-600 mt-1">يُحسب تلقائياً بناءً على الوالد المختار</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- المعلومات المهنية والعلمية -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
+                        <i class="fas fa-graduation-cap ml-2"></i>المعلومات المهنية والعلمية
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة *</label>
+                            <input type="text" id="registerProfession" placeholder="مثال: مهندس، طبيب، معلم" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص العلمي *</label>
+                            <input type="text" id="registerSpecialization" placeholder="مثال: هندسة الحاسوب، طب الأطفال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات التواصل -->
+                <div class="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-teal-800 mb-4 flex items-center">
+                        <i class="fas fa-phone ml-2"></i>معلومات التواصل
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال *</label>
+                            <input type="tel" id="registerPhone" placeholder="05xxxxxxxx" pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            <p class="text-xs text-gray-500 mt-1">يرجى إدخال رقم الجوال بصيغة 05xxxxxxxx</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني *</label>
+                            <input type="email" id="registerEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الهوايات وكلمة المرور -->
+                <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-rose-800 mb-4 flex items-center">
+                        <i class="fas fa-key ml-2"></i>معلومات إضافية وأمنية
+                    </h4>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الهوايات والاهتمامات *</label>
+                            <textarea id="registerHobbies" rows="3" placeholder="مثال: القراءة، الرياضة، السفر، التصوير، البرمجة..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical" required></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور *</label>
+                                <input type="password" id="registerPassword" placeholder="أدخل كلمة مرور قوية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <p class="text-xs text-gray-500 mt-1">8 أحرف على الأقل</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">تأكيد كلمة المرور *</label>
+                                <input type="password" id="registerPasswordConfirm" placeholder="أعد إدخال كلمة المرور" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الموافقة والشروط -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                    <label class="flex items-start">
+                        <input type="checkbox" id="registerAgree" class="mt-1 mr-2" required>
+                        <div class="text-sm text-gray-700">
+                            <p class="font-medium">أوافق على الشروط والأحكام:</p>
+                            <ul class="mt-2 space-y-1 text-xs text-gray-600">
+                                <li>• جميع البيانات المدخلة صحيحة ومسؤول عنها</li>
+                                <li>• سيتم مراجعة الطلب من قبل إدارة العائلة</li>
+                                <li>• الالتزام بآداب وقوانين التطبيق</li>
+                                <li>• عدم إساءة استخدام المنصة أو البيانات</li>
+                            </ul>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
+                    <button type="button" onclick="hideRegisterModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="button" onclick="resetRegisterForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition font-medium shadow-lg">
+                        <i class="fas fa-user-plus ml-2"></i>إرسال طلب التسجيل
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">لديك حساب بالفعل؟ 
+                    <button onclick="hideRegisterModal(); showLoginModal()" class="text-blue-600 hover:text-blue-800 font-medium">سجل دخول</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // بيانات العائلة الأساسية
         const SAMPLE_FAMILY_DATA = {
@@ -661,6 +980,257 @@
                 }
             ]
         };
+
+        // نظام إدارة المستخدمين والمصادقة
+        class UserManager {
+            constructor() {
+                this.usersStorageKey = 'al_saedan_users_v1';
+                this.currentUserKey = 'al_saedan_current_user';
+                this.users = this.loadUsers();
+                this.currentUser = this.loadCurrentUser();
+                this.initializeDefaultAdmin();
+            }
+
+            loadUsers() {
+                try {
+                    const stored = localStorage.getItem(this.usersStorageKey);
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    console.error('خطأ في تحميل المستخدمين:', error);
+                    return [];
+                }
+            }
+
+            saveUsers() {
+                try {
+                    localStorage.setItem(this.usersStorageKey, JSON.stringify(this.users));
+                    return true;
+                } catch (error) {
+                    console.error('خطأ في حفظ المستخدمين:', error);
+                    return false;
+                }
+            }
+
+            loadCurrentUser() {
+                try {
+                    const stored = localStorage.getItem(this.currentUserKey);
+                    return stored ? JSON.parse(stored) : null;
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            saveCurrentUser(user) {
+                try {
+                    if (user) {
+                        localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+                    } else {
+                        localStorage.removeItem(this.currentUserKey);
+                    }
+                    this.currentUser = user;
+                    return true;
+                } catch (error) {
+                    console.error('خطأ في حفظ المستخدم الحالي:', error);
+                    return false;
+                }
+            }
+
+            initializeDefaultAdmin() {
+                // إضافة حساب إدمن افتراضي
+                const adminExists = this.users.some(u => u.role === 'admin');
+                if (!adminExists) {
+                    const defaultAdmin = {
+                        id: 'admin_default',
+                        national_id: '1000000000',
+                        first_name: 'مدير',
+                        middle_name: 'النظام',
+                        last_name: 'الافتراضي',
+                        full_name: 'مدير النظام الافتراضي',
+                        email: 'admin@salmansaedan.com',
+                        phone: '0533361154',
+                        password: this.hashPassword('admin123'), // كلمة مرور افتراضية
+                        role: 'admin',
+                        status: 'active',
+                        birth_date: '1970-01-01',
+                        birth_place: 'الرياض',
+                        profession: 'إدارة النظام',
+                        specialization: 'إدارة تقنية المعلومات',
+                        hobbies: 'إدارة الأنظمة، التطوير التقني',
+                        father_id: null,
+                        generation: 1,
+                        created_at: new Date().toISOString(),
+                        approved_at: new Date().toISOString(),
+                        approved_by: 'system'
+                    };
+                    this.users.push(defaultAdmin);
+                    this.saveUsers();
+                    console.log('✅ تم إنشاء حساب المدير الافتراضي');
+                }
+            }
+
+            hashPassword(password) {
+                // تشفير بسيط - في التطبيق الحقيقي استخدم تشفير أقوى
+                return btoa(password + 'salt_key_2024');
+            }
+
+            verifyPassword(inputPassword, hashedPassword) {
+                return this.hashPassword(inputPassword) === hashedPassword;
+            }
+
+            generateId() {
+                return 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            // تسجيل مستخدم جديد
+            registerUser(userData) {
+                // التحقق من عدم وجود المستخدم
+                const existingUser = this.users.find(u => 
+                    u.national_id === userData.national_id || u.email === userData.email
+                );
+                
+                if (existingUser) {
+                    throw new Error('المستخدم موجود بالفعل بنفس رقم الهوية أو البريد الإلكتروني');
+                }
+
+                const newUser = {
+                    id: this.generateId(),
+                    ...userData,
+                    password: this.hashPassword(userData.password),
+                    role: 'user',
+                    status: 'pending', // في انتظار الموافقة
+                    created_at: new Date().toISOString(),
+                    approved_at: null,
+                    approved_by: null
+                };
+
+                this.users.push(newUser);
+                this.saveUsers();
+                return newUser;
+            }
+
+            // تسجيل دخول
+            login(identifier, password) {
+                const user = this.users.find(u => 
+                    (u.national_id === identifier || u.email === identifier) &&
+                    u.status === 'active'
+                );
+
+                if (!user) {
+                    throw new Error('المستخدم غير موجود أو غير مفعل');
+                }
+
+                if (!this.verifyPassword(password, user.password)) {
+                    throw new Error('كلمة المرور غير صحيحة');
+                }
+
+                this.saveCurrentUser(user);
+                return user;
+            }
+
+            // تسجيل خروج
+            logout() {
+                this.saveCurrentUser(null);
+                return true;
+            }
+
+            // الحصول على المستخدمين المعلقين
+            getPendingUsers() {
+                return this.users.filter(u => u.status === 'pending');
+            }
+
+            // الحصول على المستخدمين المفعلين
+            getActiveUsers() {
+                return this.users.filter(u => u.status === 'active');
+            }
+
+            // تفعيل مستخدم (للإدمن فقط)
+            approveUser(userId, adminId) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                const admin = this.users.find(u => u.id === adminId && u.role === 'admin');
+
+                if (userIndex === -1) {
+                    throw new Error('المستخدم غير موجود');
+                }
+
+                if (!admin) {
+                    throw new Error('ليس لديك صلاحية لتفعيل المستخدمين');
+                }
+
+                this.users[userIndex].status = 'active';
+                this.users[userIndex].approved_at = new Date().toISOString();
+                this.users[userIndex].approved_by = adminId;
+
+                this.saveUsers();
+                return this.users[userIndex];
+            }
+
+            // رفض مستخدم (للإدمن فقط)
+            rejectUser(userId, adminId) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                const admin = this.users.find(u => u.id === adminId && u.role === 'admin');
+
+                if (userIndex === -1) {
+                    throw new Error('المستخدم غير موجود');
+                }
+
+                if (!admin) {
+                    throw new Error('ليس لديك صلاحية لرفض المستخدمين');
+                }
+
+                this.users.splice(userIndex, 1);
+                this.saveUsers();
+                return true;
+            }
+
+            // التحقق من الصلاحيات
+            hasPermission(action) {
+                if (!this.currentUser || this.currentUser.status !== 'active') {
+                    return false;
+                }
+
+                const permissions = {
+                    admin: ['view_all', 'edit_all', 'delete_all', 'approve_users', 'manage_system'],
+                    user: ['view_own', 'edit_own', 'comment_only']
+                };
+
+                return permissions[this.currentUser.role]?.includes(action) || false;
+            }
+
+            // تحديث بيانات المستخدم
+            updateUser(userId, updateData) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                
+                if (userIndex === -1) {
+                    throw new Error('المستخدم غير موجود');
+                }
+
+                // التحقق من الصلاحيات
+                if (this.currentUser.id !== userId && this.currentUser.role !== 'admin') {
+                    throw new Error('ليس لديك صلاحية لتعديل هذا المستخدم');
+                }
+
+                // منع تغيير بيانات حساسة للمستخدمين العاديين
+                const restrictedFields = ['role', 'status', 'approved_at', 'approved_by'];
+                if (this.currentUser.role !== 'admin') {
+                    restrictedFields.forEach(field => delete updateData[field]);
+                }
+
+                this.users[userIndex] = {
+                    ...this.users[userIndex],
+                    ...updateData,
+                    updated_at: new Date().toISOString()
+                };
+
+                this.saveUsers();
+                
+                // تحديث المستخدم الحالي إذا كان هو نفسه
+                if (this.currentUser.id === userId) {
+                    this.saveCurrentUser(this.users[userIndex]);
+                }
+
+                return this.users[userIndex];
+            }
+        }
 
         // نظام إدارة البيانات المحسن
         class EnhancedDataManager {
@@ -910,20 +1480,247 @@
         class EnhancedAlSaedanApp {
             constructor() {
                 this.dataManager = new EnhancedDataManager();
+                this.userManager = new UserManager();
                 this.charts = {};
                 this.init();
             }
 
             init() {
+                this.updateAuthUI();
                 this.createModals();
                 this.displayHomeStatistics();
                 this.displayFamilyTree();
                 this.displayEvents();
                 this.displaySuggestions();
                 this.displayLibrary();
+                this.displayProfile();
+                this.displayAdminPanel();
                 this.initializeCharts();
                 this.setupEventListeners();
                 console.log('تم تحميل التطبيق الشامل المحسن بنجاح');
+            }
+
+            // تحديث واجهة المصادقة
+            updateAuthUI() {
+                const isLoggedIn = this.userManager.currentUser !== null;
+                const isAdmin = this.userManager.currentUser?.role === 'admin';
+
+                // إظهار/إخفاء العناصر حسب حالة تسجيل الدخول
+                const mainNavigation = document.getElementById('mainNavigation');
+                const userProfileMenu = document.getElementById('userProfileMenu');
+                const authButtons = document.getElementById('authButtons');
+                const adminButton = document.getElementById('nav-admin');
+                const currentUserName = document.getElementById('currentUserName');
+
+                if (isLoggedIn) {
+                    mainNavigation.classList.remove('hidden');
+                    userProfileMenu.classList.remove('hidden');
+                    authButtons.classList.add('hidden');
+                    
+                    if (currentUserName) {
+                        currentUserName.textContent = this.userManager.currentUser.first_name;
+                    }
+                    
+                    if (isAdmin && adminButton) {
+                        adminButton.classList.remove('hidden');
+                    }
+                } else {
+                    mainNavigation.classList.add('hidden');
+                    userProfileMenu.classList.add('hidden');
+                    authButtons.classList.remove('hidden');
+                    if (adminButton) {
+                        adminButton.classList.add('hidden');
+                    }
+                }
+            }
+
+            // عرض الملف الشخصي
+            displayProfile() {
+                const container = document.getElementById('profileContent');
+                if (!container) return;
+
+                const user = this.userManager.currentUser;
+                if (!user) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl text-white mb-4 opacity-50">
+                                <i class="fas fa-user-slash"></i>
+                            </div>
+                            <p class="text-white text-xl mb-4">يرجى تسجيل الدخول أولاً</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const statusBadge = user.status === 'active' ? 
+                    '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">مفعل</span>' :
+                    '<span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">في انتظار التفعيل</span>';
+
+                const roleBadge = user.role === 'admin' ?
+                    '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">👑 مدير</span>' :
+                    '<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">👤 عضو</span>';
+
+                container.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                                    ${user.first_name.charAt(0)}${user.last_name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-800">${user.full_name}</h3>
+                                    <div class="flex items-center space-x-2 rtl:space-x-reverse mt-2">
+                                        ${statusBadge}
+                                        ${roleBadge}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- المعلومات الشخصية -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                    <i class="fas fa-user ml-2 text-blue-600"></i>المعلومات الشخصية
+                                </h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">رقم الهوية:</span>
+                                        <span class="text-gray-800">${user.national_id}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">تاريخ الميلاد:</span>
+                                        <span class="text-gray-800">${user.birth_date ? new Date(user.birth_date).toLocaleDateString('ar-SA') : 'غير محدد'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">مكان الميلاد:</span>
+                                        <span class="text-gray-800">${user.birth_place || 'غير محدد'}</span>
+                                    </div>
+                                    ${user.generation ? `
+                                        <div class="flex justify-between">
+                                            <span class="font-medium text-gray-600">الجيل:</span>
+                                            <span class="text-gray-800">الجيل ${user.generation}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- المعلومات المهنية -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                    <i class="fas fa-briefcase ml-2 text-green-600"></i>المعلومات المهنية
+                                </h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">المهنة:</span>
+                                        <span class="text-gray-800">${user.profession || 'غير محدد'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">التخصص:</span>
+                                        <span class="text-gray-800">${user.specialization || 'غير محدد'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- معلومات التواصل -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                    <i class="fas fa-phone ml-2 text-teal-600"></i>معلومات التواصل
+                                </h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">الجوال:</span>
+                                        <span class="text-gray-800">${user.phone || 'غير محدد'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium text-gray-600">الإيميل:</span>
+                                        <span class="text-gray-800">${user.email || 'غير محدد'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- الهوايات -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                    <i class="fas fa-heart ml-2 text-rose-600"></i>الهوايات والاهتمامات
+                                </h4>
+                                <p class="text-sm text-gray-700">${user.hobbies || 'لم يتم تحديد هوايات'}</p>
+                            </div>
+                        </div>
+
+                        <!-- تواريخ مهمة -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-500">
+                                <div>تاريخ التسجيل: ${new Date(user.created_at).toLocaleDateString('ar-SA')}</div>
+                                ${user.approved_at ? `<div>تاريخ التفعيل: ${new Date(user.approved_at).toLocaleDateString('ar-SA')}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // عرض لوحة الإدارة
+            displayAdminPanel() {
+                if (!this.userManager.currentUser || this.userManager.currentUser.role !== 'admin') {
+                    return;
+                }
+
+                const pendingContainer = document.getElementById('pendingUsersGrid');
+                const activeUsersCount = document.getElementById('activeUsersCount');
+                const pendingUsersCount = document.getElementById('pendingUsersCount');
+                const totalUsersCount = document.getElementById('totalUsersCount');
+
+                if (!pendingContainer) return;
+
+                const pendingUsers = this.userManager.getPendingUsers();
+                const activeUsers = this.userManager.getActiveUsers();
+                const totalUsers = this.userManager.users.length;
+
+                // تحديث الإحصائيات
+                if (activeUsersCount) activeUsersCount.textContent = activeUsers.length;
+                if (pendingUsersCount) pendingUsersCount.textContent = pendingUsers.length;
+                if (totalUsersCount) totalUsersCount.textContent = totalUsers;
+
+                // عرض المستخدمين المعلقين
+                if (pendingUsers.length === 0) {
+                    pendingContainer.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-check-circle text-4xl mb-2"></i>
+                            <p>لا توجد طلبات تسجيل معلقة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                pendingContainer.innerHTML = pendingUsers.map(user => `
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-800">${user.full_name}</h4>
+                                <div class="mt-2 space-y-1 text-sm text-gray-600">
+                                    <div>📧 ${user.email}</div>
+                                    <div>📱 ${user.phone}</div>
+                                    <div>🆔 ${user.national_id}</div>
+                                    <div>💼 ${user.profession} - ${user.specialization}</div>
+                                    <div>📅 ${new Date(user.created_at).toLocaleDateString('ar-SA')}</div>
+                                </div>
+                                ${user.hobbies ? `
+                                    <div class="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                        <strong>الهوايات:</strong> ${user.hobbies}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="flex flex-col space-y-2 mr-4">
+                                <button onclick="approveUser('${user.id}')" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                                    <i class="fas fa-check ml-1"></i>موافقة
+                                </button>
+                                <button onclick="rejectUser('${user.id}')" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                                    <i class="fas fa-times ml-1"></i>رفض
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             }
 
             setupEventListeners() {
@@ -955,8 +1752,27 @@
                     });
                 }
 
+                // مستمع نموذج تسجيل الدخول
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleLogin();
+                    });
+                }
+
+                // مستمع نموذج التسجيل
+                const registerForm = document.getElementById('registerForm');
+                if (registerForm) {
+                    registerForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleRegister();
+                    });
+                }
+
                 // مستمعات حقول النموذج المحسن
                 this.setupFormFieldListeners();
+                this.setupRegisterFormListeners();
             }
 
             setupFormFieldListeners() {
@@ -1006,6 +1822,184 @@
                 }
 
                 generationDisplay.value = `الجيل ${generation} ${generation === 1 ? '(مؤسس)' : generation === 2 ? '(أطفال المؤسس)' : '(أحفاد)'}`;
+            }
+
+            // إعداد مستمعات نموذج التسجيل
+            setupRegisterFormListeners() {
+                // تحديث معاينة الاسم الكامل
+                const nameFields = ['registerFirstName', 'registerMiddleName', 'registerLastName'];
+                nameFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.addEventListener('input', updateRegisterFullNamePreview);
+                    }
+                });
+
+                // تحديث الجيل المتوقع عند اختيار الوالد
+                const fatherSelect = document.getElementById('registerFatherId');
+                if (fatherSelect) {
+                    fatherSelect.addEventListener('change', this.updateRegisterGeneration.bind(this));
+                }
+            }
+
+            updateRegisterGeneration() {
+                const fatherSelect = document.getElementById('registerFatherId');
+                const generationDisplay = document.getElementById('registerExpectedGeneration');
+                
+                if (!fatherSelect || !generationDisplay) return;
+
+                const fatherId = fatherSelect.value;
+                let generation = 1; // افتراضي للمؤسس
+
+                if (fatherId) {
+                    const father = this.dataManager.getData('familyMembers').find(m => m.id === fatherId);
+                    generation = father ? (father.generation + 1) : 1;
+                }
+
+                generationDisplay.value = `الجيل ${generation} ${generation === 1 ? '(مؤسس)' : generation === 2 ? '(أطفال المؤسس)' : '(أحفاد)'}`;
+            }
+
+            populateRegisterParentSelect() {
+                const select = document.getElementById('registerFatherId');
+                if (!select) return;
+
+                select.innerHTML = '<option value="">-- اختر الوالد (اختياري) --</option>';
+                
+                const maleMembers = this.dataManager.getData('familyMembers').filter(m => m.gender === 'male');
+                
+                // تجميع حسب الأجيال
+                const generations = {};
+                maleMembers.forEach(member => {
+                    const gen = member.generation || 1;
+                    if (!generations[gen]) generations[gen] = [];
+                    generations[gen].push(member);
+                });
+                
+                // إضافة الخيارات مجموعة حسب الأجيال
+                Object.keys(generations).sort((a, b) => parseInt(a) - parseInt(b)).forEach(genNum => {
+                    const genGroup = document.createElement('optgroup');
+                    genGroup.label = `${genNum == '1' ? 'الجيل المؤسس' : 'الجيل ' + genNum}`;
+                    
+                    generations[genNum].forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id;
+                        option.textContent = member.full_name;
+                        genGroup.appendChild(option);
+                    });
+                    
+                    select.appendChild(genGroup);
+                });
+            }
+
+            // معالجة تسجيل الدخول
+            handleLogin() {
+                const identifier = document.getElementById('loginIdentifier').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+
+                if (!identifier || !password) {
+                    this.showToast('يرجى ملء جميع الحقول', 'error');
+                    return;
+                }
+
+                try {
+                    const user = this.userManager.login(identifier, password);
+                    this.showToast(`مرحباً ${user.first_name}! تم تسجيل الدخول بنجاح`, 'success');
+                    hideLoginModal();
+                    this.updateAuthUI();
+                    showSection('home');
+                } catch (error) {
+                    this.showToast('خطأ في تسجيل الدخول: ' + error.message, 'error');
+                }
+            }
+
+            // معالجة التسجيل الجديد
+            handleRegister() {
+                // جمع البيانات
+                const firstName = document.getElementById('registerFirstName').value.trim();
+                const middleName = document.getElementById('registerMiddleName').value.trim();
+                const lastName = document.getElementById('registerLastName').value.trim();
+                const nationalId = document.getElementById('registerNationalId').value.trim();
+                const birthDate = document.getElementById('registerBirthDate').value;
+                const birthPlace = document.getElementById('registerBirthPlace').value.trim();
+                const fatherId = document.getElementById('registerFatherId').value || null;
+                const profession = document.getElementById('registerProfession').value.trim();
+                const specialization = document.getElementById('registerSpecialization').value.trim();
+                const phone = document.getElementById('registerPhone').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const hobbies = document.getElementById('registerHobbies').value.trim();
+                const password = document.getElementById('registerPassword').value.trim();
+                const passwordConfirm = document.getElementById('registerPasswordConfirm').value.trim();
+                const agree = document.getElementById('registerAgree').checked;
+
+                // التحقق من البيانات المطلوبة
+                if (!firstName || !middleName || !lastName || !nationalId || !birthDate || !birthPlace || 
+                    !profession || !specialization || !phone || !email || !hobbies || !password || !passwordConfirm) {
+                    this.showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+                    return;
+                }
+
+                // التحقق من تطابق كلمات المرور
+                if (password !== passwordConfirm) {
+                    this.showToast('كلمات المرور غير متطابقة', 'error');
+                    return;
+                }
+
+                // التحقق من طول كلمة المرور
+                if (password.length < 8) {
+                    this.showToast('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+                    return;
+                }
+
+                // التحقق من رقم الهوية
+                if (!/^[1-2][0-9]{9}$/.test(nationalId)) {
+                    this.showToast('يرجى إدخال رقم هوية صحيح (10 أرقام)', 'error');
+                    return;
+                }
+
+                // التحقق من رقم الجوال
+                if (!/^05\d{8}$/.test(phone)) {
+                    this.showToast('يرجى إدخال رقم جوال صحيح بصيغة 05xxxxxxxx', 'error');
+                    return;
+                }
+
+                // التحقق من البريد الإلكتروني
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    this.showToast('يرجى إدخال بريد إلكتروني صحيح', 'error');
+                    return;
+                }
+
+                // التحقق من الموافقة على الشروط
+                if (!agree) {
+                    this.showToast('يرجى الموافقة على الشروط والأحكام', 'error');
+                    return;
+                }
+
+                // إنشاء كائن البيانات
+                const userData = {
+                    first_name: firstName,
+                    middle_name: middleName,
+                    last_name: lastName,
+                    full_name: `${firstName} ${middleName} ${lastName}`,
+                    national_id: nationalId,
+                    birth_date: birthDate,
+                    birth_place: birthPlace,
+                    father_id: fatherId,
+                    generation: fatherId ? this.dataManager.calculateGeneration(fatherId) : 1,
+                    profession: profession,
+                    specialization: specialization,
+                    phone: phone,
+                    email: email,
+                    hobbies: hobbies,
+                    password: password
+                };
+
+                try {
+                    const newUser = this.userManager.registerUser(userData);
+                    this.showToast(`تم إرسال طلب التسجيل بنجاح! سيتم مراجعة طلبك من قبل الإدارة.`, 'success');
+                    hideRegisterModal();
+                } catch (error) {
+                    this.showToast('خطأ في التسجيل: ' + error.message, 'error');
+                }
             }
 
             refreshAllSections() {
@@ -1827,6 +2821,113 @@
             alert('نموذج المكتبة - قريباً');
         }
 
+        // وظائف المصادقة والتسجيل
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginIdentifier').focus();
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').classList.remove('hidden');
+            if (app) {
+                app.populateRegisterParentSelect();
+            }
+            document.getElementById('registerFirstName').focus();
+        }
+
+        function hideRegisterModal() {
+            document.getElementById('registerModal').classList.add('hidden');
+            document.getElementById('registerForm').reset();
+            updateRegisterFullNamePreview();
+        }
+
+        function resetRegisterForm() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟')) {
+                document.getElementById('registerForm').reset();
+                updateRegisterFullNamePreview();
+                app?.showToast('تم إعادة تعيين النموذج', 'warning');
+            }
+        }
+
+        // تحديث معاينة الاسم في نموذج التسجيل
+        function updateRegisterFullNamePreview() {
+            const firstName = document.getElementById('registerFirstName')?.value.trim() || '';
+            const middleName = document.getElementById('registerMiddleName')?.value.trim() || '';
+            const lastName = document.getElementById('registerLastName')?.value.trim() || '';
+            
+            let fullName = firstName;
+            if (middleName) fullName += ` ${middleName}`;
+            if (lastName) fullName += ` ${lastName}`;
+            
+            const preview = document.getElementById('registerFullNamePreview');
+            if (preview) {
+                preview.textContent = fullName || 'سيتم تكوين الاسم تلقائياً...';
+            }
+        }
+
+        // وظائف الإدارة
+        function approveUser(userId) {
+            if (!app || !app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                alert('ليس لديك صلاحية لهذا الإجراء');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من الموافقة على هذا المستخدم؟')) {
+                try {
+                    app.userManager.approveUser(userId, app.userManager.currentUser.id);
+                    app.displayAdminPanel();
+                    app.showToast('تم تفعيل المستخدم بنجاح', 'success');
+                } catch (error) {
+                    app.showToast('حدث خطأ: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function rejectUser(userId) {
+            if (!app || !app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                alert('ليس لديك صلاحية لهذا الإجراء');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من رفض هذا المستخدم؟ سيتم حذف طلبه نهائياً.')) {
+                try {
+                    app.userManager.rejectUser(userId, app.userManager.currentUser.id);
+                    app.displayAdminPanel();
+                    app.showToast('تم رفض طلب التسجيل', 'warning');
+                } catch (error) {
+                    app.showToast('حدث خطأ: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function refreshPendingUsers() {
+            if (app) {
+                app.displayAdminPanel();
+                app.showToast('تم تحديث قائمة الطلبات', 'success');
+            }
+        }
+
+        function editProfile() {
+            if (app && app.userManager.currentUser) {
+                // يمكن إضافة نموذج تعديل منفصل لاحقاً
+                app.showToast('ميزة تعديل الملف الشخصي ستكون متاحة قريباً', 'warning');
+            }
+        }
+
+        function logout() {
+            if (app && confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                app.userManager.logout();
+                app.updateAuthUI();
+                showSection('home');
+                app.showToast('تم تسجيل الخروج بنجاح', 'success');
+            }
+        }
+
         // وظيفة اختبار استرجاع بيانات الجيل الثاني
         function testSecondGenerationRetrieval() {
             if (!app) {
@@ -1887,6 +2988,12 @@
         document.addEventListener('click', function(e) {
             if (e.target.id === 'familyModal') {
                 hideFamilyModal();
+            }
+            if (e.target.id === 'loginModal') {
+                hideLoginModal();
+            }
+            if (e.target.id === 'registerModal') {
+                hideRegisterModal();
             }
         });
     </script>
