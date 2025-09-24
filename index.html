@@ -708,6 +708,18 @@
                     <button onclick="hideLoginModal(); showRegisterModal()" class="text-blue-600 hover:text-blue-800 font-medium">سجل الآن</button>
                 </p>
             </div>
+            
+            <!-- تشخيص المدير -->
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm font-medium text-gray-700 mb-2">حساب المدير الافتراضي:</p>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div>البريد الإلكتروني: <code class="bg-gray-200 px-1 rounded">admin@salmansaedan.com</code></div>
+                    <div>كلمة المرور: <code class="bg-gray-200 px-1 rounded">admin123</code></div>
+                    <button onclick="resetDefaultAdmin()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+                        إعادة تعيين المدير
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1036,9 +1048,12 @@
             }
 
             initializeDefaultAdmin() {
-                // إضافة حساب إدمن افتراضي
-                const adminExists = this.users.some(u => u.role === 'admin');
-                if (!adminExists) {
+                // التأكد من وجود حساب المدير الافتراضي الصحيح
+                const defaultAdminEmail = 'admin@salmansaedan.com';
+                let adminUser = this.users.find(u => u.email === defaultAdminEmail);
+                
+                if (!adminUser) {
+                    // إنشاء المدير الافتراضي إذا لم يكن موجوداً
                     const defaultAdmin = {
                         id: 'admin_default',
                         national_id: '1000000000',
@@ -1046,9 +1061,9 @@
                         middle_name: 'النظام',
                         last_name: 'الافتراضي',
                         full_name: 'مدير النظام الافتراضي',
-                        email: 'admin@salmansaedan.com',
+                        email: defaultAdminEmail,
                         phone: '0533361154',
-                        password: this.hashPassword('admin123'), // كلمة مرور افتراضية
+                        password: this.hashPassword('admin123'),
                         role: 'admin',
                         status: 'active',
                         birth_date: '1970-01-01',
@@ -1065,6 +1080,25 @@
                     this.users.push(defaultAdmin);
                     this.saveUsers();
                     console.log('✅ تم إنشاء حساب المدير الافتراضي');
+                } else {
+                    // التأكد من أن كلمة المرور صحيحة للمدير الموجود
+                    if (adminUser.role !== 'admin' || adminUser.status !== 'active') {
+                        adminUser.role = 'admin';
+                        adminUser.status = 'active';
+                        adminUser.password = this.hashPassword('admin123');
+                        this.saveUsers();
+                        console.log('✅ تم تحديث صلاحيات المدير الافتراضي');
+                    }
+                }
+                
+                // طباعة معلومات المدير للتأكيد
+                const admin = this.users.find(u => u.email === defaultAdminEmail);
+                if (admin) {
+                    console.log('🔐 معلومات المدير الافتراضي:');
+                    console.log('   البريد الإلكتروني:', admin.email);
+                    console.log('   كلمة المرور: admin123');
+                    console.log('   الحالة:', admin.status);
+                    console.log('   الدور:', admin.role);
                 }
             }
 
@@ -1110,19 +1144,42 @@
 
             // تسجيل دخول
             login(identifier, password) {
+                console.log('🔍 محاولة تسجيل دخول:');
+                console.log('   المعرف:', identifier);
+                console.log('   عدد المستخدمين المحفوظين:', this.users.length);
+                
+                // البحث عن المستخدم
                 const user = this.users.find(u => 
-                    (u.national_id === identifier || u.email === identifier) &&
-                    u.status === 'active'
+                    u.national_id === identifier || u.email === identifier
                 );
 
                 if (!user) {
-                    throw new Error('المستخدم غير موجود أو غير مفعل');
+                    console.log('❌ لم يتم العثور على المستخدم');
+                    console.log('المستخدمون المتاحون:');
+                    this.users.forEach(u => console.log(`   - ${u.email} (${u.national_id})`));
+                    throw new Error('المستخدم غير موجود');
                 }
 
+                console.log('✅ تم العثور على المستخدم:', user.email);
+                console.log('   حالة المستخدم:', user.status);
+                console.log('   دور المستخدم:', user.role);
+
+                if (user.status !== 'active') {
+                    throw new Error('الحساب غير مفعل. يرجى انتظار موافقة الإدارة.');
+                }
+
+                // التحقق من كلمة المرور
+                const passwordHash = this.hashPassword(password);
+                console.log('🔐 التحقق من كلمة المرور...');
+                console.log('   كلمة المرور المدخلة (مشفرة):', passwordHash);
+                console.log('   كلمة المرور المحفوظة:', user.password);
+
                 if (!this.verifyPassword(password, user.password)) {
+                    console.log('❌ كلمة المرور غير صحيحة');
                     throw new Error('كلمة المرور غير صحيحة');
                 }
 
+                console.log('✅ تم تسجيل الدخول بنجاح');
                 this.saveCurrentUser(user);
                 return user;
             }
@@ -1229,6 +1286,46 @@
                 }
 
                 return this.users[userIndex];
+            }
+
+            // دالة لإعادة تعيين المدير الافتراضي (للاستخدام في وحدة التحكم)
+            resetDefaultAdmin() {
+                // حذف المدير الحالي
+                this.users = this.users.filter(u => u.email !== 'admin@salmansaedan.com');
+                
+                // إضافة المدير الجديد
+                const defaultAdmin = {
+                    id: 'admin_default_' + Date.now(),
+                    national_id: '1000000000',
+                    first_name: 'مدير',
+                    middle_name: 'النظام',
+                    last_name: 'الافتراضي',
+                    full_name: 'مدير النظام الافتراضي',
+                    email: 'admin@salmansaedan.com',
+                    phone: '0533361154',
+                    password: this.hashPassword('admin123'),
+                    role: 'admin',
+                    status: 'active',
+                    birth_date: '1970-01-01',
+                    birth_place: 'الرياض',
+                    profession: 'إدارة النظام',
+                    specialization: 'إدارة تقنية المعلومات',
+                    hobbies: 'إدارة الأنظمة، التطوير التقني',
+                    father_id: null,
+                    generation: 1,
+                    created_at: new Date().toISOString(),
+                    approved_at: new Date().toISOString(),
+                    approved_by: 'system'
+                };
+                
+                this.users.push(defaultAdmin);
+                this.saveUsers();
+                
+                console.log('✅ تم إعادة تعيين المدير الافتراضي:');
+                console.log('   البريد الإلكتروني: admin@salmansaedan.com');
+                console.log('   كلمة المرور: admin123');
+                
+                return defaultAdmin;
             }
         }
 
@@ -2925,6 +3022,27 @@
                 app.updateAuthUI();
                 showSection('home');
                 app.showToast('تم تسجيل الخروج بنجاح', 'success');
+            }
+        }
+
+        // دالة لإعادة تعيين المدير الافتراضي (للاستخدام في الكونسول)
+        function resetDefaultAdmin() {
+            if (app && app.userManager) {
+                const admin = app.userManager.resetDefaultAdmin();
+                console.log('تم إعادة تعيين المدير الافتراضي');
+                app.showToast('تم إعادة تعيين المدير الافتراضي بنجاح', 'success');
+                return admin;
+            }
+        }
+
+        // دالة لعرض جميع المستخدمين (للتشخيص)
+        function showAllUsers() {
+            if (app && app.userManager) {
+                console.log('📋 جميع المستخدمين:');
+                app.userManager.users.forEach(u => {
+                    console.log(`- ${u.full_name} (${u.email}) - ${u.role} - ${u.status}`);
+                });
+                return app.userManager.users;
             }
         }
 
