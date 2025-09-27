@@ -431,6 +431,73 @@
                     <i class="fas fa-plus ml-2"></i>إضافة اقتراح جديد
                 </button>
             </div>
+
+            <!-- Filter Bar -->
+            <div class="card p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة الاقتراح</label>
+                        <select id="suggestionStatusFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onchange="filterSuggestionsByStatus(this.value)">
+                            <option value="all">جميع الحالات</option>
+                            <option value="pending">⏳ قيد المراجعة</option>
+                            <option value="approved">✅ مقبول</option>
+                            <option value="rejected">❌ مرفوض</option>
+                            <option value="under_review">🔍 تحت المراجعة</option>
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الفئة</label>
+                        <select id="suggestionCategoryFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onchange="filterSuggestionsByCategory(this.value)">
+                            <option value="all">جميع الفئات</option>
+                            <option value="technology">🔧 تقني</option>
+                            <option value="events">🎉 فعاليات</option>
+                            <option value="services">🛎️ خدمات</option>
+                            <option value="education">📚 تعليمي</option>
+                            <option value="social">👥 اجتماعي</option>
+                            <option value="business">💼 تجاري</option>
+                            <option value="other">📝 أخرى</option>
+                        </select>
+                    </div>
+
+                    <!-- Priority Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الأولوية</label>
+                        <select id="suggestionPriorityFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onchange="filterSuggestionsByPriority(this.value)">
+                            <option value="all">جميع الأولويات</option>
+                            <option value="urgent">🚨 عاجل</option>
+                            <option value="high">🔴 عالية</option>
+                            <option value="medium">🟡 متوسطة</option>
+                            <option value="low">🟢 منخفضة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="suggestions-total">0</div>
+                        <p class="text-sm text-gray-600">إجمالي الاقتراحات</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-yellow-600" id="suggestions-pending">0</div>
+                        <p class="text-sm text-gray-600">قيد المراجعة</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="suggestions-approved">0</div>
+                        <p class="text-sm text-gray-600">مقبولة</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600" id="suggestions-high-priority">0</div>
+                        <p class="text-sm text-gray-600">أولوية عالية</p>
+                    </div>
+                </div>
+            </div>
             
             <div id="suggestions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Suggestions will be displayed here -->
@@ -444,6 +511,59 @@
                 <button onclick="showLibraryModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
                     <i class="fas fa-plus ml-2"></i>إضافة محتوى جديد
                 </button>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="card p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Search -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">البحث في المكتبة</label>
+                        <div class="relative">
+                            <input type="text" id="librarySearch" placeholder="ابحث في العناوين، الوصف، المؤلف، أو الكلمات المفتاحية..." 
+                                   class="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   oninput="searchLibrary(this.value)">
+                            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">فلترة حسب الفئة</label>
+                        <select id="libraryCategoryFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onchange="filterLibraryByCategory(this.value)">
+                            <option value="all">جميع الفئات</option>
+                            <option value="family_history">🏛️ تاريخ العائلة</option>
+                            <option value="genealogy">🌳 الأنساب</option>
+                            <option value="documents">📋 الوثائق الرسمية</option>
+                            <option value="photos">📸 الصور والذكريات</option>
+                            <option value="achievements">🏆 الإنجازات</option>
+                            <option value="stories">📖 القصص والحكايات</option>
+                            <option value="education">🎓 التعليم والمهارات</option>
+                            <option value="business">💼 الأعمال والتجارة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="library-total-items">0</div>
+                        <p class="text-sm text-gray-600">إجمالي المحتويات</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="library-featured-items">0</div>
+                        <p class="text-sm text-gray-600">محتوى مميز</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="library-total-views">0</div>
+                        <p class="text-sm text-gray-600">إجمالي المشاهدات</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-orange-600" id="library-total-downloads">0</div>
+                        <p class="text-sm text-gray-600">إجمالي التحميلات</p>
+                    </div>
+                </div>
             </div>
             
             <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -925,6 +1045,251 @@
         </div>
     </div>
 
+    <!-- Suggestion Modal -->
+    <div id="suggestionModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-2xl max-h-screen overflow-y-auto mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-lightbulb text-yellow-500 ml-2"></i>
+                    إضافة اقتراح جديد
+                </h2>
+                <button onclick="hideSuggestionModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="suggestionForm" onsubmit="handleSuggestionSubmit(event)">
+                <!-- معلومات الاقتراح الأساسية -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle ml-2"></i>معلومات الاقتراح
+                    </h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الاقتراح *</label>
+                            <input type="text" id="suggestionTitle" placeholder="مثال: تطوير تطبيق الجوال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">فئة الاقتراح *</label>
+                            <select id="suggestionCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">-- اختر الفئة --</option>
+                                <option value="technology">🔧 تقني</option>
+                                <option value="events">🎉 فعاليات</option>
+                                <option value="services">🛎️ خدمات</option>
+                                <option value="education">📚 تعليمي</option>
+                                <option value="social">👥 اجتماعي</option>
+                                <option value="business">💼 تجاري</option>
+                                <option value="other">📝 أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الأولوية</label>
+                            <select id="suggestionPriority" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="low">🟢 منخفضة</option>
+                                <option value="medium" selected>🟡 متوسطة</option>
+                                <option value="high">🔴 عالية</option>
+                                <option value="urgent">🚨 عاجل</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- وصف تفصيلي -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-edit ml-2"></i>الوصف التفصيلي
+                    </h4>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">شرح الاقتراح *</label>
+                        <textarea id="suggestionDescription" rows="4" placeholder="اشرح اقتراحك بالتفصيل..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الفوائد المتوقعة</label>
+                        <textarea id="suggestionBenefits" rows="3" placeholder="ما هي الفوائد المتوقعة من هذا الاقتراح؟" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- تفاصيل التنفيذ -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                        <i class="fas fa-cogs ml-2"></i>تفاصيل التنفيذ
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الميزانية المقترحة</label>
+                            <input type="text" id="suggestionBudget" placeholder="مثال: 50,000 ريال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المدة الزمنية المقترحة</label>
+                            <input type="text" id="suggestionTimeline" placeholder="مثال: 3 أشهر" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الموارد المطلوبة</label>
+                        <textarea id="suggestionResources" rows="2" placeholder="ما هي الموارد والأدوات المطلوبة؟" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
+                    <button type="button" onclick="hideSuggestionModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="button" onclick="resetSuggestionForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition font-medium shadow-lg">
+                        <i class="fas fa-lightbulb ml-2"></i>إرسال الاقتراح
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Library Modal -->
+    <div id="libraryModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-2xl max-h-screen overflow-y-auto mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-book text-blue-500 ml-2"></i>
+                    إضافة محتوى للمكتبة الرقمية
+                </h2>
+                <button onclick="hideLibraryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="libraryForm" onsubmit="handleLibrarySubmit(event)">
+                <!-- معلومات المحتوى الأساسية -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle ml-2"></i>معلومات المحتوى
+                    </h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان المحتوى *</label>
+                            <input type="text" id="libraryTitle" placeholder="مثال: تاريخ العائلة" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">نوع المحتوى *</label>
+                                <select id="libraryType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">-- اختر النوع --</option>
+                                    <option value="document">📄 وثيقة</option>
+                                    <option value="book">📚 كتاب</option>
+                                    <option value="article">📝 مقال</option>
+                                    <option value="video">🎥 فيديو</option>
+                                    <option value="audio">🎵 صوتي</option>
+                                    <option value="image">🖼️ صورة</option>
+                                    <option value="presentation">📊 عرض تقديمي</option>
+                                    <option value="research">🔬 بحث</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">الفئة *</label>
+                                <select id="libraryCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">-- اختر الفئة --</option>
+                                    <option value="family_history">🏛️ تاريخ العائلة</option>
+                                    <option value="genealogy">🌳 الأنساب</option>
+                                    <option value="documents">📋 الوثائق الرسمية</option>
+                                    <option value="photos">📸 الصور والذكريات</option>
+                                    <option value="achievements">🏆 الإنجازات</option>
+                                    <option value="stories">📖 القصص والحكايات</option>
+                                    <option value="education">🎓 التعليم والمهارات</option>
+                                    <option value="business">💼 الأعمال والتجارة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المؤلف/المنشئ</label>
+                            <input type="text" id="libraryAuthor" placeholder="اسم المؤلف أو المنشئ" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الوصف والمحتوى -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-edit ml-2"></i>الوصف والمحتوى
+                    </h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">وصف المحتوى *</label>
+                            <textarea id="libraryDescription" rows="4" placeholder="وصف تفصيلي للمحتوى..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الكلمات المفتاحية</label>
+                            <input type="text" id="libraryKeywords" placeholder="فصل الكلمات بفواصل، مثال: تاريخ، عائلة، وثائق" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">استخدم الفواصل لفصل الكلمات المفتاحية</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تفاصيل إضافية -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                        <i class="fas fa-cogs ml-2"></i>تفاصيل إضافية
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
+                            <input type="date" id="libraryDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اللغة</label>
+                            <select id="libraryLanguage" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="arabic">العربية</option>
+                                <option value="english">الإنجليزية</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">رابط المحتوى (اختياري)</label>
+                        <input type="url" id="libraryUrl" placeholder="https://example.com/file.pdf" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">رابط مباشر للملف أو المحتوى على الإنترنت</p>
+                    </div>
+                </div>
+
+                <!-- خصائص الوصول -->
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
+                        <i class="fas fa-lock ml-2"></i>خصائص الوصول
+                    </h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">مستوى الوصول</label>
+                            <select id="libraryAccess" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="public">🌍 عام - متاح للجميع</option>
+                                <option value="family" selected>👨‍👩‍👧‍👦 عائلي - أعضاء العائلة فقط</option>
+                                <option value="admin">🔒 إداري - المديرين فقط</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="libraryFeatured" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="libraryFeatured" class="mr-2 block text-sm text-gray-900">
+                                محتوى مميز (يظهر في المقدمة)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
+                    <button type="button" onclick="hideLibraryModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="button" onclick="resetLibraryForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition font-medium shadow-lg">
+                        <i class="fas fa-book ml-2"></i>إضافة للمكتبة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // بيانات العائلة الأساسية
         const SAMPLE_FAMILY_DATA = {
@@ -986,25 +1351,158 @@
             suggestions: [
                 {
                     id: 'sugg_001',
-                    title: 'تطوير موقع العائلة الإلكتروني',
-                    description: 'إنشاء موقع إلكتروني متقدم لأفراد العائلة',
-                    category: 'تطوير',
+                    title: 'تطوير تطبيق الجوال للعائلة',
+                    category: 'technology',
+                    priority: 'high',
+                    description: 'إنشاء تطبيق جوال متقدم لإدارة شؤون العائلة والتواصل بين الأعضاء',
+                    benefits: 'تسهيل التواصل، إدارة الأحداث، مشاركة الصور والذكريات',
+                    budget: '75,000 ريال',
+                    timeline: '6 أشهر',
+                    resources: 'فريق تطوير، مصمم واجهات، مطور تطبيقات',
+                    status: 'pending',
+                    submitted_by: 'سلمان محمد بن سعيدان',
+                    submitted_date: '2024-01-15',
+                    votes: {
+                        up: 18,
+                        down: 2
+                    },
+                    comments: []
+                },
+                {
+                    id: 'sugg_002',
+                    title: 'تنظيم لقاء عائلي سنوي',
+                    category: 'events',
+                    priority: 'medium',
+                    description: 'تنظيم لقاء عائلي سنوي يجمع جميع أفراد العائلة للتواصل وتقوية الروابط',
+                    benefits: 'تقوية الروابط العائلية، تبادل الخبرات، إحياء التقاليد',
+                    budget: '25,000 ريال',
+                    timeline: '3 أشهر للتحضير',
+                    resources: 'قاعة مناسبة، تنسيق الطعام، برنامج ترفيهي',
                     status: 'approved',
-                    submitted_by: 'سلمان بن سعيدان',
-                    upvotes: 15,
-                    downvotes: 2,
-                    comments: 8
+                    submitted_by: 'محمد بن سعيدان',
+                    submitted_date: '2024-02-01',
+                    votes: {
+                        up: 24,
+                        down: 1
+                    },
+                    comments: []
+                },
+                {
+                    id: 'sugg_003',
+                    title: 'إنشاء صندوق تعاوني للعائلة',
+                    category: 'business',
+                    priority: 'high',
+                    description: 'تأسيس صندوق تعاوني لدعم أفراد العائلة في المشاريع والطوارئ',
+                    benefits: 'الدعم المالي، تطوير المشاريع، التضامن العائلي',
+                    budget: '500,000 ريال رأس مال أولي',
+                    timeline: '4 أشهر للإجراءات القانونية',
+                    resources: 'محامي متخصص، محاسب قانوني، مدير الصندوق',
+                    status: 'under_review',
+                    submitted_by: 'سلمان محمد بن سعيدان',
+                    submitted_date: '2024-01-20',
+                    votes: {
+                        up: 12,
+                        down: 5
+                    },
+                    comments: []
                 }
             ],
             library: [
                 {
                     id: 'lib_001',
-                    title: 'تاريخ عائلة بن سعيدان',
-                    author: 'الباحث التاريخي',
+                    title: 'تاريخ وأصول عائلة آل سعيدان',
+                    author: 'محمد بن سعيدان',
                     type: 'document',
-                    category: 'تاريخ',
-                    file_url: '#',
-                    tags: ['تاريخ', 'نسب', 'عائلة']
+                    category: 'family_history',
+                    description: 'وثيقة شاملة عن تاريخ العائلة وأصولها التي تمتد لقرون من الزمن',
+                    keywords: ['تاريخ', 'نسب', 'عائلة', 'أصول', 'تراث'],
+                    created_date: '2023-12-01',
+                    language: 'arabic',
+                    access_level: 'family',
+                    featured: true,
+                    url: '#',
+                    views: 45,
+                    downloads: 12
+                },
+                {
+                    id: 'lib_002',
+                    title: 'شجرة النسب الكاملة للعائلة',
+                    author: 'نسابة متخصص',
+                    type: 'document',
+                    category: 'genealogy',
+                    description: 'مخطط تفصيلي لشجرة النسب يوضح العلاقات العائلية عبر الأجيال',
+                    keywords: ['نسب', 'شجرة', 'أجيال', 'علاقات عائلية'],
+                    created_date: '2024-01-10',
+                    language: 'arabic',
+                    access_level: 'family',
+                    featured: true,
+                    url: '#',
+                    views: 67,
+                    downloads: 23
+                },
+                {
+                    id: 'lib_003',
+                    title: 'الوثائق الرسمية والسجلات',
+                    author: 'إدارة الأرشيف العائلي',
+                    type: 'document',
+                    category: 'documents',
+                    description: 'مجموعة الوثائق الرسمية والسجلات المهمة للعائلة',
+                    keywords: ['وثائق', 'سجلات', 'رسمي', 'أرشيف'],
+                    created_date: '2024-01-05',
+                    language: 'arabic',
+                    access_level: 'admin',
+                    featured: false,
+                    url: '#',
+                    views: 28,
+                    downloads: 8
+                },
+                {
+                    id: 'lib_004',
+                    title: 'صور وذكريات العائلة عبر التاريخ',
+                    author: 'أرشيف العائلة',
+                    type: 'image',
+                    category: 'photos',
+                    description: 'مجموعة نادرة من الصور التاريخية والذكريات العائلية الثمينة',
+                    keywords: ['صور', 'ذكريات', 'تاريخ', 'عائلة', 'تراث'],
+                    created_date: '2024-02-01',
+                    language: 'arabic',
+                    access_level: 'public',
+                    featured: true,
+                    url: '#',
+                    views: 89,
+                    downloads: 34
+                },
+                {
+                    id: 'lib_005',
+                    title: 'إنجازات العائلة في مجال الأعمال',
+                    author: 'سلمان محمد بن سعيدان',
+                    type: 'presentation',
+                    category: 'achievements',
+                    description: 'عرض تقديمي يبرز الإنجازات التجارية والاستثمارية للعائلة',
+                    keywords: ['إنجازات', 'أعمال', 'استثمار', 'نجاح', 'تجارة'],
+                    created_date: '2024-01-25',
+                    language: 'arabic',
+                    access_level: 'family',
+                    featured: true,
+                    url: '#',
+                    views: 52,
+                    downloads: 19
+                },
+                {
+                    id: 'lib_006',
+                    title: 'حكايات وقصص من التراث العائلي',
+                    author: 'رواة العائلة',
+                    type: 'audio',
+                    category: 'stories',
+                    description: 'مجموعة من القصص والحكايات المتوارثة التي تحكي تاريخ العائلة',
+                    keywords: ['حكايات', 'قصص', 'تراث', 'موروث', 'شفهي'],
+                    created_date: '2024-02-10',
+                    language: 'arabic',
+                    access_level: 'family',
+                    featured: false,
+                    url: '#',
+                    views: 31,
+                    downloads: 7
                 }
             ]
         };
@@ -2608,7 +3106,7 @@
                 `).join('');
             }
 
-            displaySuggestions() {
+            renderSuggestions() {
                 const suggestions = this.dataManager.getData('suggestions');
                 const container = document.getElementById('suggestions-grid');
                 if (!container) return;
@@ -2628,30 +3126,124 @@
                     return;
                 }
 
-                container.innerHTML = suggestions.map(suggestion => `
-                    <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">${suggestion.title}</h3>
-                        <p class="text-gray-600 mb-4">${suggestion.description}</p>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                                <span class="text-green-600">
-                                    <i class="fas fa-thumbs-up ml-1"></i>
-                                    ${suggestion.upvotes || 0}
-                                </span>
-                                <span class="text-red-600">
-                                    <i class="fas fa-thumbs-down ml-1"></i>
-                                    ${suggestion.downvotes || 0}
-                                </span>
-                            </div>
-                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
-                                ${suggestion.category}
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
+                container.innerHTML = suggestions.map(suggestion => this.renderSuggestionCard(suggestion)).join('');
+                this.updateSuggestionsStats();
             }
 
-            displayLibrary() {
+            renderSuggestionCard(suggestion) {
+                const statusBadges = {
+                    'pending': '<span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">⏳ قيد المراجعة</span>',
+                    'approved': '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">✅ مقبول</span>',
+                    'rejected': '<span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">❌ مرفوض</span>',
+                    'under_review': '<span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">🔍 تحت المراجعة</span>'
+                };
+
+                const priorityColors = {
+                    'low': 'text-green-600',
+                    'medium': 'text-yellow-600', 
+                    'high': 'text-red-600',
+                    'urgent': 'text-red-800'
+                };
+
+                const categoryIcons = {
+                    'technology': '🔧',
+                    'events': '🎉',
+                    'services': '🛎️',
+                    'education': '📚',
+                    'social': '👥',
+                    'business': '💼',
+                    'other': '📝'
+                };
+
+                const isAdmin = this.userManager.currentUser && this.userManager.currentUser.role === 'admin';
+
+                return `
+                    <div class="card p-6 hover:shadow-lg transition-shadow">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">${suggestion.title}</h3>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <span class="${priorityColors[suggestion.priority]}">
+                                        ${categoryIcons[suggestion.category]} ${this.getCategoryText(suggestion.category)}
+                                    </span>
+                                    • 
+                                    <span>بواسطة ${suggestion.submitted_by}</span>
+                                    • 
+                                    <span>${suggestion.submitted_date}</span>
+                                </div>
+                            </div>
+                            ${statusBadges[suggestion.status] || ''}
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-gray-700 mb-4 line-clamp-3">${suggestion.description}</p>
+
+                        <!-- Benefits -->
+                        ${suggestion.benefits ? `
+                            <div class="mb-4">
+                                <h5 class="text-sm font-semibold text-gray-800 mb-2">الفوائد المتوقعة:</h5>
+                                <p class="text-sm text-gray-600">${suggestion.benefits}</p>
+                            </div>
+                        ` : ''}
+
+                        <!-- Budget and Timeline -->
+                        ${suggestion.budget || suggestion.timeline ? `
+                            <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                ${suggestion.budget ? `<div><span class="text-sm font-medium">الميزانية:</span> <span class="text-sm text-gray-600">${suggestion.budget}</span></div>` : ''}
+                                ${suggestion.timeline ? `<div><span class="text-sm font-medium">المدة:</span> <span class="text-sm text-gray-600">${suggestion.timeline}</span></div>` : ''}
+                            </div>
+                        ` : ''}
+
+                        <!-- Voting and Actions -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                                <button onclick="voteSuggestion('${suggestion.id}', 'up')" class="flex items-center text-green-600 hover:text-green-700 transition">
+                                    <i class="fas fa-thumbs-up ml-1"></i>
+                                    <span>${suggestion.votes.up}</span>
+                                </button>
+                                <button onclick="voteSuggestion('${suggestion.id}', 'down')" class="flex items-center text-red-600 hover:text-red-700 transition">
+                                    <i class="fas fa-thumbs-down ml-1"></i>
+                                    <span>${suggestion.votes.down}</span>
+                                </button>
+                                <span class="text-gray-500">
+                                    <i class="fas fa-comments ml-1"></i>
+                                    ${suggestion.comments.length}
+                                </span>
+                            </div>
+
+                            <!-- Admin Actions -->
+                            ${isAdmin ? `
+                                <div class="flex gap-2">
+                                    ${suggestion.status === 'pending' ? `
+                                        <button onclick="updateSuggestionStatus('${suggestion.id}', 'approved')" class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">
+                                            قبول
+                                        </button>
+                                        <button onclick="updateSuggestionStatus('${suggestion.id}', 'rejected')" class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                            رفض
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            getCategoryText(category) {
+                const categories = {
+                    'technology': 'تقني',
+                    'events': 'فعاليات',
+                    'services': 'خدمات',
+                    'education': 'تعليمي',
+                    'social': 'اجتماعي',
+                    'business': 'تجاري',
+                    'other': 'أخرى'
+                };
+                return categories[category] || category;
+            }
+
+            renderLibrary() {
                 const library = this.dataManager.getData('library');
                 const container = document.getElementById('library-grid');
                 if (!container) return;
@@ -2671,23 +3263,158 @@
                     return;
                 }
 
-                container.innerHTML = library.map(item => `
-                    <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">${item.title}</h3>
-                        <p class="text-gray-600 mb-2">بقلم: ${item.author}</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${(item.tags || []).map(tag => `
-                                <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">${tag}</span>
-                            `).join('')}
+                // فرز المحتوى: المميز أولاً، ثم حسب التاريخ
+                const sortedLibrary = library.sort((a, b) => {
+                    if (a.featured && !b.featured) return -1;
+                    if (!a.featured && b.featured) return 1;
+                    return new Date(b.created_date) - new Date(a.created_date);
+                });
+
+                container.innerHTML = sortedLibrary.map(item => this.renderLibraryCard(item)).join('');
+                this.updateLibraryStats();
+            }
+
+            renderLibraryCard(item) {
+                const typeIcons = {
+                    'document': '📄',
+                    'book': '📚',
+                    'article': '📝',
+                    'video': '🎥',
+                    'audio': '🎵',
+                    'image': '🖼️',
+                    'presentation': '📊',
+                    'research': '🔬'
+                };
+
+                const categoryTexts = {
+                    'family_history': 'تاريخ العائلة',
+                    'genealogy': 'الأنساب',
+                    'documents': 'الوثائق الرسمية',
+                    'photos': 'الصور والذكريات',
+                    'achievements': 'الإنجازات',
+                    'stories': 'القصص والحكايات',
+                    'education': 'التعليم والمهارات',
+                    'business': 'الأعمال والتجارة'
+                };
+
+                const accessBadges = {
+                    'public': '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">🌍 عام</span>',
+                    'family': '<span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">👨‍👩‍👧‍👦 عائلي</span>',
+                    'admin': '<span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">🔒 إداري</span>'
+                };
+
+                const canAccess = this.checkLibraryAccess(item);
+
+                return `
+                    <div class="card p-6 hover:shadow-lg transition-shadow ${item.featured ? 'ring-2 ring-yellow-400' : ''}">
+                        <!-- Featured Badge -->
+                        ${item.featured ? '<div class="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">⭐ مميز</div>' : ''}
+                        
+                        <!-- Header -->
+                        <div class="flex items-start gap-3 mb-4">
+                            <div class="text-3xl">${typeIcons[item.type] || '📄'}</div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-1">${item.title}</h3>
+                                <p class="text-sm text-gray-600">بقلم: ${item.author}</p>
+                                <p class="text-xs text-gray-500">${item.created_date}</p>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
-                                ${item.category}
+
+                        <!-- Description -->
+                        <p class="text-gray-700 mb-4 line-clamp-3">${item.description}</p>
+
+                        <!-- Keywords -->
+                        ${item.keywords && item.keywords.length > 0 ? `
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${item.keywords.map(keyword => `
+                                    <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">${keyword}</span>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- Category and Access -->
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700">
+                                ${categoryTexts[item.category] || item.category}
                             </span>
-                            <i class="fas fa-file text-2xl text-gray-400"></i>
+                            ${accessBadges[item.access_level] || ''}
+                        </div>
+
+                        <!-- Stats and Actions -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-4 text-sm text-gray-500">
+                                <span><i class="fas fa-eye ml-1"></i>${item.views || 0}</span>
+                                <span><i class="fas fa-download ml-1"></i>${item.downloads || 0}</span>
+                                <span><i class="fas fa-globe ml-1"></i>${item.language === 'arabic' ? 'العربية' : item.language}</span>
+                            </div>
+
+                            <div class="flex gap-2">
+                                ${canAccess ? `
+                                    ${item.url && item.url !== '#' ? `
+                                        <button onclick="openLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">
+                                            <i class="fas fa-external-link-alt ml-1"></i>فتح
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="downloadLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
+                                        <i class="fas fa-download ml-1"></i>تحميل
+                                    </button>
+                                ` : `
+                                    <span class="px-3 py-1 text-xs bg-gray-100 text-gray-500 rounded">غير متاح</span>
+                                `}
+                            </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+            }
+
+            checkLibraryAccess(item) {
+                if (item.access_level === 'public') return true;
+                if (!this.userManager.currentUser) return false;
+                if (item.access_level === 'family') return true;
+                if (item.access_level === 'admin') return this.userManager.currentUser.role === 'admin';
+                return false;
+            }
+
+            updateLibraryStats() {
+                const library = this.dataManager.getData('library');
+                
+                // حساب الإحصائيات
+                const totalItems = library.length;
+                const featuredItems = library.filter(item => item.featured).length;
+                const totalViews = library.reduce((sum, item) => sum + (item.views || 0), 0);
+                const totalDownloads = library.reduce((sum, item) => sum + (item.downloads || 0), 0);
+
+                // تحديث العناصر في الواجهة
+                const totalElement = document.getElementById('library-total-items');
+                const featuredElement = document.getElementById('library-featured-items');
+                const viewsElement = document.getElementById('library-total-views');
+                const downloadsElement = document.getElementById('library-total-downloads');
+
+                if (totalElement) totalElement.textContent = totalItems;
+                if (featuredElement) featuredElement.textContent = featuredItems;
+                if (viewsElement) viewsElement.textContent = totalViews;
+                if (downloadsElement) downloadsElement.textContent = totalDownloads;
+            }
+
+            updateSuggestionsStats() {
+                const suggestions = this.dataManager.getData('suggestions');
+                
+                // حساب الإحصائيات
+                const totalSuggestions = suggestions.length;
+                const pendingSuggestions = suggestions.filter(item => item.status === 'pending').length;
+                const approvedSuggestions = suggestions.filter(item => item.status === 'approved').length;
+                const highPrioritySuggestions = suggestions.filter(item => item.priority === 'high' || item.priority === 'urgent').length;
+
+                // تحديث العناصر في الواجهة
+                const totalElement = document.getElementById('suggestions-total');
+                const pendingElement = document.getElementById('suggestions-pending');
+                const approvedElement = document.getElementById('suggestions-approved');
+                const highPriorityElement = document.getElementById('suggestions-high-priority');
+
+                if (totalElement) totalElement.textContent = totalSuggestions;
+                if (pendingElement) pendingElement.textContent = pendingSuggestions;
+                if (approvedElement) approvedElement.textContent = approvedSuggestions;
+                if (highPriorityElement) highPriorityElement.textContent = highPrioritySuggestions;
             }
 
             // الرسوم البيانية
@@ -2875,11 +3602,36 @@
                 navButton.classList.add('active');
             }
 
-            // تحديث الرسوم البيانية إذا كان في الصفحة الرئيسية
-            if (sectionName === 'home' && app) {
-                setTimeout(() => {
-                    app.updateCharts();
-                }, 100);
+            // تحديث المحتوى حسب القسم
+            if (app) {
+                switch(sectionName) {
+                    case 'home':
+                        setTimeout(() => {
+                            app.updateCharts();
+                            app.updateStats();
+                        }, 100);
+                        break;
+                    case 'family':
+                        app.displayFamilyTree();
+                        break;
+                    case 'events':
+                        app.displayEvents();
+                        break;
+                    case 'suggestions':
+                        app.renderSuggestions();
+                        break;
+                    case 'library':
+                        app.renderLibrary();
+                        break;
+                    case 'profile':
+                        app.displayUserProfile();
+                        break;
+                    case 'admin':
+                        if (app.userManager.currentUser && app.userManager.currentUser.role === 'admin') {
+                            app.displayAdminPanel();
+                        }
+                        break;
+                }
             }
         }
 
@@ -2938,12 +3690,295 @@
             alert('نموذج الأحداث - قريباً');
         }
 
+        // وظائف إدارة الاقتراحات
         function showSuggestionModal() {
-            alert('نموذج الاقتراحات - قريباً');
+            document.getElementById('suggestionModal').classList.remove('hidden');
+            document.getElementById('suggestionTitle').focus();
         }
 
+        function hideSuggestionModal() {
+            document.getElementById('suggestionModal').classList.add('hidden');
+            document.getElementById('suggestionForm').reset();
+        }
+
+        function resetSuggestionForm() {
+            document.getElementById('suggestionForm').reset();
+            document.getElementById('suggestionTitle').focus();
+        }
+
+        function handleSuggestionSubmit(event) {
+            event.preventDefault();
+            
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لإضافة اقتراح', 'error');
+                return;
+            }
+
+            const formData = {
+                title: document.getElementById('suggestionTitle').value,
+                category: document.getElementById('suggestionCategory').value,
+                priority: document.getElementById('suggestionPriority').value,
+                description: document.getElementById('suggestionDescription').value,
+                benefits: document.getElementById('suggestionBenefits').value,
+                budget: document.getElementById('suggestionBudget').value,
+                timeline: document.getElementById('suggestionTimeline').value,
+                resources: document.getElementById('suggestionResources').value
+            };
+
+            const suggestion = {
+                id: 'sugg_' + Date.now(),
+                ...formData,
+                status: 'pending',
+                submitted_by: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name,
+                submitted_date: new Date().toISOString().split('T')[0],
+                votes: { up: 0, down: 0 },
+                comments: []
+            };
+
+            const suggestions = app.dataManager.getData('suggestions');
+            suggestions.push(suggestion);
+            app.dataManager.setData('suggestions', suggestions);
+            
+            app.showToast('تم إرسال الاقتراح بنجاح!', 'success');
+            hideSuggestionModal();
+            app.renderSuggestions();
+            app.updateStats();
+        }
+
+        // وظائف إدارة المكتبة الرقمية
         function showLibraryModal() {
-            alert('نموذج المكتبة - قريباً');
+            document.getElementById('libraryModal').classList.remove('hidden');
+            document.getElementById('libraryTitle').focus();
+        }
+
+        function hideLibraryModal() {
+            document.getElementById('libraryModal').classList.add('hidden');
+            document.getElementById('libraryForm').reset();
+        }
+
+        function resetLibraryForm() {
+            document.getElementById('libraryForm').reset();
+            document.getElementById('libraryTitle').focus();
+        }
+
+        function handleLibrarySubmit(event) {
+            event.preventDefault();
+            
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لإضافة محتوى للمكتبة', 'error');
+                return;
+            }
+
+            const formData = {
+                title: document.getElementById('libraryTitle').value,
+                type: document.getElementById('libraryType').value,
+                category: document.getElementById('libraryCategory').value,
+                author: document.getElementById('libraryAuthor').value || (app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name),
+                description: document.getElementById('libraryDescription').value,
+                keywords: document.getElementById('libraryKeywords').value.split(',').map(k => k.trim()).filter(k => k),
+                created_date: document.getElementById('libraryDate').value || new Date().toISOString().split('T')[0],
+                language: document.getElementById('libraryLanguage').value,
+                url: document.getElementById('libraryUrl').value,
+                access_level: document.getElementById('libraryAccess').value,
+                featured: document.getElementById('libraryFeatured').checked
+            };
+
+            const libraryItem = {
+                id: 'lib_' + Date.now(),
+                ...formData,
+                views: 0,
+                downloads: 0,
+                added_by: app.userManager.currentUser.email,
+                added_date: new Date().toISOString().split('T')[0]
+            };
+
+            const library = app.dataManager.getData('library');
+            library.push(libraryItem);
+            app.dataManager.setData('library', library);
+            
+            app.showToast('تم إضافة المحتوى للمكتبة بنجاح!', 'success');
+            hideLibraryModal();
+            app.renderLibrary();
+            app.updateStats();
+        }
+
+        // وظائف التفاعل مع الاقتراحات
+        function voteSuggestion(suggestionId, voteType) {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول للتصويت', 'error');
+                return;
+            }
+
+            const suggestions = app.dataManager.getData('suggestions');
+            const suggestion = suggestions.find(s => s.id === suggestionId);
+            
+            if (suggestion) {
+                if (voteType === 'up') {
+                    suggestion.votes.up++;
+                    app.showToast('تم تسجيل صوتك مع الاقتراح', 'success');
+                } else {
+                    suggestion.votes.down++;
+                    app.showToast('تم تسجيل صوتك ضد الاقتراح', 'warning');
+                }
+                
+                app.dataManager.setData('suggestions', suggestions);
+                app.renderSuggestions();
+            }
+        }
+
+        function updateSuggestionStatus(suggestionId, newStatus) {
+            if (!app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                app.showToast('غير مخول لتحديث حالة الاقتراحات', 'error');
+                return;
+            }
+
+            const suggestions = app.dataManager.getData('suggestions');
+            const suggestion = suggestions.find(s => s.id === suggestionId);
+            
+            if (suggestion) {
+                suggestion.status = newStatus;
+                app.dataManager.setData('suggestions', suggestions);
+                app.renderSuggestions();
+                app.showToast(`تم تحديث حالة الاقتراح إلى: ${newStatus}`, 'success');
+            }
+        }
+
+        // وظائف التفاعل مع المكتبة الرقمية
+        function openLibraryItem(itemId) {
+            const library = app.dataManager.getData('library');
+            const item = library.find(i => i.id === itemId);
+            
+            if (!item) return;
+
+            // تسجيل المشاهدة
+            item.views = (item.views || 0) + 1;
+            app.dataManager.setData('library', library);
+            
+            if (item.url && item.url !== '#') {
+                window.open(item.url, '_blank');
+                app.showToast(`تم فتح: ${item.title}`, 'success');
+                app.renderLibrary();
+            } else {
+                app.showToast('الرابط غير متوفر حالياً', 'warning');
+            }
+        }
+
+        function downloadLibraryItem(itemId) {
+            const library = app.dataManager.getData('library');
+            const item = library.find(i => i.id === itemId);
+            
+            if (!item) return;
+
+            // التحقق من صلاحية الوصول
+            if (!app.checkLibraryAccess(item)) {
+                app.showToast('ليس لديك صلاحية للوصول لهذا المحتوى', 'error');
+                return;
+            }
+
+            // تسجيل التحميل
+            item.downloads = (item.downloads || 0) + 1;
+            app.dataManager.setData('library', library);
+            
+            if (item.url && item.url !== '#') {
+                // محاولة تحميل الملف
+                const link = document.createElement('a');
+                link.href = item.url;
+                link.download = item.title;
+                link.click();
+                
+                app.showToast(`تم بدء تحميل: ${item.title}`, 'success');
+                app.renderLibrary();
+            } else {
+                app.showToast('ملف التحميل غير متوفر حالياً', 'warning');
+            }
+        }
+
+        function searchLibrary(query) {
+            const library = app.dataManager.getData('library');
+            const container = document.getElementById('library-grid');
+            
+            if (!query.trim()) {
+                app.renderLibrary();
+                return;
+            }
+
+            const filteredLibrary = library.filter(item => 
+                item.title.toLowerCase().includes(query.toLowerCase()) ||
+                item.description.toLowerCase().includes(query.toLowerCase()) ||
+                item.author.toLowerCase().includes(query.toLowerCase()) ||
+                (item.keywords && item.keywords.some(keyword => 
+                    keyword.toLowerCase().includes(query.toLowerCase())
+                ))
+            );
+
+            if (filteredLibrary.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-6xl text-white mb-4 opacity-50">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <p class="text-white text-xl mb-4">لم يتم العثور على نتائج للبحث: "${query}"</p>
+                        <button onclick="app.renderLibrary()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                            عرض جميع المحتويات
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = filteredLibrary.map(item => app.renderLibraryCard(item)).join('');
+            }
+        }
+
+        function filterLibraryByCategory(category) {
+            const library = app.dataManager.getData('library');
+            const container = document.getElementById('library-grid');
+            
+            if (!category || category === 'all') {
+                app.renderLibrary();
+                return;
+            }
+
+            const filteredLibrary = library.filter(item => item.category === category);
+            container.innerHTML = filteredLibrary.map(item => app.renderLibraryCard(item)).join('');
+        }
+
+        // وظائف فلترة الاقتراحات
+        function filterSuggestionsByStatus(status) {
+            const suggestions = app.dataManager.getData('suggestions');
+            const container = document.getElementById('suggestions-grid');
+            
+            if (!status || status === 'all') {
+                app.renderSuggestions();
+                return;
+            }
+
+            const filteredSuggestions = suggestions.filter(item => item.status === status);
+            container.innerHTML = filteredSuggestions.map(item => app.renderSuggestionCard(item)).join('');
+        }
+
+        function filterSuggestionsByCategory(category) {
+            const suggestions = app.dataManager.getData('suggestions');
+            const container = document.getElementById('suggestions-grid');
+            
+            if (!category || category === 'all') {
+                app.renderSuggestions();
+                return;
+            }
+
+            const filteredSuggestions = suggestions.filter(item => item.category === category);
+            container.innerHTML = filteredSuggestions.map(item => app.renderSuggestionCard(item)).join('');
+        }
+
+        function filterSuggestionsByPriority(priority) {
+            const suggestions = app.dataManager.getData('suggestions');
+            const container = document.getElementById('suggestions-grid');
+            
+            if (!priority || priority === 'all') {
+                app.renderSuggestions();
+                return;
+            }
+
+            const filteredSuggestions = suggestions.filter(item => item.priority === priority);
+            container.innerHTML = filteredSuggestions.map(item => app.renderSuggestionCard(item)).join('');
         }
 
         // وظائف المصادقة والتسجيل
