@@ -7,12 +7,12 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
-# Root redirect to test file temporarily (2024-09-28 DEBUG)
+# Root redirect to main application
 [[redirects]]
   from = "/"
-  to = "/netlify-index.html"
+  to = "/index.html"
   status = 200
-  force = true
+  force = false
 
 # Pretty URLs
 [[redirects]]
