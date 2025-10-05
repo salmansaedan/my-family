@@ -436,12 +436,36 @@
         <!-- Events Section -->
         <section id="events-section" class="section">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">إدارة الأحداث</h2>
+                <h2 class="text-3xl font-bold text-white">إدارة الأحداث العائلية</h2>
                 <button onclick="showEventModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
                     <i class="fas fa-plus ml-2"></i>إضافة حدث جديد
                 </button>
             </div>
+
+            <!-- Event Categories -->
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">فئات الأحداث</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="filterEventsByType('wedding')" class="p-4 bg-pink-100 rounded-lg hover:bg-pink-200 transition">
+                        <i class="fas fa-heart text-pink-600 text-2xl mb-2"></i>
+                        <p class="text-pink-700 font-semibold">الأفراح والزواج</p>
+                    </button>
+                    <button onclick="filterEventsByType('birth')" class="p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition">
+                        <i class="fas fa-baby text-blue-600 text-2xl mb-2"></i>
+                        <p class="text-blue-700 font-semibold">المواليد</p>
+                    </button>
+                    <button onclick="filterEventsByType('graduation')" class="p-4 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                        <i class="fas fa-graduation-cap text-green-600 text-2xl mb-2"></i>
+                        <p class="text-green-700 font-semibold">التخرج والإنجازات</p>
+                    </button>
+                    <button onclick="filterEventsByType('gathering')" class="p-4 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition">
+                        <i class="fas fa-users text-yellow-600 text-2xl mb-2"></i>
+                        <p class="text-yellow-700 font-semibold">الاجتماعات العائلية</p>
+                    </button>
+                </div>
+            </div>
             
+            <!-- Events Grid -->
             <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Events will be displayed here -->
             </div>
@@ -531,10 +555,57 @@
         <!-- Library Section -->
         <section id="library-section" class="section">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">المكتبة الرقمية</h2>
-                <button onclick="showLibraryModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                    <i class="fas fa-plus ml-2"></i>إضافة محتوى جديد
-                </button>
+                <h2 class="text-3xl font-bold text-white">المكتبة الرقمية ومكتبة الفيديو</h2>
+                <div class="flex gap-3">
+                    <button onclick="showVideoUploadModal()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
+                        <i class="fas fa-video ml-2"></i>رفع فيديو
+                    </button>
+                    <button onclick="showLibraryModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                        <i class="fas fa-plus ml-2"></i>إضافة محتوى
+                    </button>
+                </div>
+            </div>
+
+            <!-- Library Tabs -->
+            <div class="card p-6 mb-8">
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="tab-all" onclick="switchLibraryTab('all')" class="library-tab px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
+                        <i class="fas fa-th-large ml-2"></i>جميع المحتويات
+                    </button>
+                    <button id="tab-videos" onclick="switchLibraryTab('videos')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-video ml-2"></i>مكتبة الفيديو
+                    </button>
+                    <button id="tab-photos" onclick="switchLibraryTab('photos')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-image ml-2"></i>الصور والذكريات
+                    </button>
+                    <button id="tab-documents" onclick="switchLibraryTab('documents')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-file-alt ml-2"></i>الوثائق
+                    </button>
+                </div>
+                
+                <!-- Video Library Stats -->
+                <div id="video-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="text-center p-4 bg-red-50 rounded-lg">
+                        <i class="fas fa-video text-red-600 text-2xl mb-2"></i>
+                        <div class="text-2xl font-bold text-red-600" id="total-videos">0</div>
+                        <p class="text-sm text-gray-600">مقاطع الفيديو</p>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <i class="fas fa-play text-blue-600 text-2xl mb-2"></i>
+                        <div class="text-2xl font-bold text-blue-600" id="total-views">0</div>
+                        <p class="text-sm text-gray-600">إجمالي المشاهدات</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <i class="fas fa-calendar text-green-600 text-2xl mb-2"></i>
+                        <div class="text-2xl font-bold text-green-600" id="recent-uploads">0</div>
+                        <p class="text-sm text-gray-600">رُفع هذا الشهر</p>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                        <i class="fas fa-star text-yellow-600 text-2xl mb-2"></i>
+                        <div class="text-2xl font-bold text-yellow-600" id="featured-videos">0</div>
+                        <p class="text-sm text-gray-600">فيديوهات مميزة</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Search and Filter Bar -->
@@ -1308,6 +1379,255 @@
                     </button>
                     <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition font-medium shadow-lg">
                         <i class="fas fa-book ml-2"></i>إضافة للمكتبة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Video Upload Modal -->
+    <div id="videoUploadModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-video text-red-600 ml-3"></i>
+                    رفع فيديو جديد
+                </h2>
+                <button onclick="hideVideoUploadModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="videoUploadForm" onsubmit="handleVideoUpload(event)">
+                <!-- معلومات الفيديو الأساسية -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 mx-6 mt-6">
+                    <h4 class="text-lg font-semibold text-red-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle ml-2"></i>
+                        معلومات الفيديو
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الفيديو</label>
+                            <input type="text" id="videoTitle" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="مثال: لقاء عائلي 2024">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ التصوير</label>
+                            <input type="date" id="videoDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">وصف الفيديو</label>
+                        <textarea id="videoDescription" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="وصف مختصر للفيديو والمناسبة..."></textarea>
+                    </div>
+                </div>
+
+                <!-- رفع الفيديو -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 mx-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-upload ml-2"></i>
+                        رفع الفيديو
+                    </h4>
+                    
+                    <div class="text-center">
+                        <div class="border-2 border-dashed border-blue-300 rounded-lg p-8 mb-4">
+                            <i class="fas fa-video text-blue-500 text-4xl mb-4"></i>
+                            <p class="text-gray-600 mb-2">اسحب الفيديو هنا أو انقر للاختيار</p>
+                            <p class="text-sm text-gray-500">يدعم: MP4, MOV, AVI (حد أقصى: 100MB)</p>
+                            <input type="file" id="videoFile" accept="video/*" class="hidden" onchange="handleVideoFileSelect(this)">
+                            <button type="button" onclick="document.getElementById('videoFile').click()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                اختيار فيديو
+                            </button>
+                        </div>
+                        <div id="videoPreview" class="hidden">
+                            <video id="previewVideo" controls class="w-full max-w-md mx-auto rounded-lg">
+                                <source id="videoSource" type="video/mp4">
+                            </video>
+                            <p id="videoFileName" class="text-sm text-gray-600 mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تصنيف الفيديو -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 mx-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-tags ml-2"></i>
+                        تصنيف الفيديو
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع المناسبة</label>
+                            <select id="videoCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                <option value="family_gathering">تجمع عائلي</option>
+                                <option value="wedding">زفاف</option>
+                                <option value="celebration">احتفال</option>
+                                <option value="graduation">تخرج</option>
+                                <option value="birthday">عيد ميلاد</option>
+                                <option value="religious">مناسبة دينية</option>
+                                <option value="travel">سفر ورحلات</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">مستوى الخصوصية</label>
+                            <select id="videoPrivacy" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                <option value="family">العائلة فقط</option>
+                                <option value="close_family">العائلة المقربة</option>
+                                <option value="public">عام لجميع الأعضاء</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الكلمات المفتاحية</label>
+                        <input type="text" id="videoTags" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="مثال: عائلة، احتفال، 2024 (افصل بالفواصل)">
+                    </div>
+
+                    <div class="mt-4 flex items-center">
+                        <input type="checkbox" id="videoFeatured" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="videoFeatured" class="ml-2 text-sm text-gray-700">فيديو مميز (سيظهر في المقدمة)</label>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200 mx-6 mb-6">
+                    <button type="button" onclick="hideVideoUploadModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="button" onclick="resetVideoForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:from-red-600 hover:to-pink-700 transition font-medium shadow-lg">
+                        <i class="fas fa-upload ml-2"></i>رفع الفيديو
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-calendar-plus text-blue-600 ml-3"></i>
+                    إضافة حدث عائلي جديد
+                </h2>
+                <button onclick="hideEventModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="eventForm" onsubmit="handleEventSubmit(event)">
+                <!-- معلومات الحدث الأساسية -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 mx-6 mt-6">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle ml-2"></i>
+                        تفاصيل الحدث
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم الحدث</label>
+                            <input type="text" id="eventTitle" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: اجتماع عائلي شهري">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع الحدث</label>
+                            <select id="eventType" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">اختر نوع الحدث</option>
+                                <option value="wedding">💒 زفاف</option>
+                                <option value="birth">👶 مولود جديد</option>
+                                <option value="graduation">🎓 تخرج</option>
+                                <option value="gathering">👨‍👩‍👧‍👦 تجمع عائلي</option>
+                                <option value="celebration">🎉 احتفال</option>
+                                <option value="religious">🕌 مناسبة دينية</option>
+                                <option value="travel">✈️ رحلة/سفر</option>
+                                <option value="business">💼 حدث تجاري</option>
+                                <option value="other">📝 أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الحدث</label>
+                            <input type="date" id="eventDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">وقت الحدث</label>
+                            <input type="time" id="eventTime" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">موقع الحدث</label>
+                        <input type="text" id="eventLocation" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: قاعة الأفراح، المنزل، الحديقة العامة">
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">وصف الحدث</label>
+                        <textarea id="eventDescription" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="وصف مفصل للحدث والترتيبات..."></textarea>
+                    </div>
+                </div>
+
+                <!-- تفاصيل التنظيم -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 mx-6">
+                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-users ml-2"></i>
+                        تفاصيل التنظيم والحضور
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المنظم/المسؤول</label>
+                            <input type="text" id="eventOrganizer" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="اسم المنظم">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">العدد المتوقع للحضور</label>
+                            <input type="number" id="eventCapacity" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="50">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">رقم التواصل للاستفسارات</label>
+                        <input type="tel" id="eventContact" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="05xxxxxxxx">
+                    </div>
+
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="eventRSVP" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                            <label for="eventRSVP" class="ml-2 text-sm text-gray-700">يتطلب تأكيد الحضور (RSVP)</label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="eventPublic" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" checked>
+                            <label for="eventPublic" class="ml-2 text-sm text-gray-700">حدث عام لجميع أفراد العائلة</label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="eventReminder" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" checked>
+                            <label for="eventReminder" class="ml-2 text-sm text-gray-700">إرسال تذكير قبل الموعد</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200 mx-6 mb-6">
+                    <button type="button" onclick="hideEventModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="button" onclick="resetEventForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
+                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-green-600 text-white rounded-lg hover:from-blue-600 hover:to-green-700 transition font-medium shadow-lg">
+                        <i class="fas fa-calendar-plus ml-2"></i>إضافة الحدث
                     </button>
                 </div>
             </form>
@@ -3435,39 +3755,257 @@
                 }
             }
 
-            // وظائف الأحداث والأقسام الأخرى (مبسطة)
+            // وظائف الأحداث والأقسام الأخرى (مطورة)
             displayEvents() {
+                this.renderEvents();
+            }
+
+            renderEvents(filterType = 'all') {
                 const events = this.dataManager.getData('events');
                 const container = document.getElementById('events-grid');
                 if (!container) return;
 
-                if (events.length === 0) {
+                // فلترة الأحداث حسب النوع
+                let filteredEvents = events;
+                if (filterType !== 'all') {
+                    filteredEvents = events.filter(event => event.type === filterType);
+                }
+
+                // فرز الأحداث: الأحداث القادمة أولاً، ثم حسب التاريخ
+                const sortedEvents = filteredEvents.sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    return dateB - dateA; // الأحدث أولاً
+                });
+
+                if (sortedEvents.length === 0) {
+                    const emptyMessages = {
+                        'all': 'لا توجد أحداث مسجلة',
+                        'family_gathering': 'لا توجد تجمعات عائلية مسجلة',
+                        'wedding': 'لا توجد أفراح مسجلة',
+                        'graduation': 'لا توجد حفلات تخرج مسجلة',
+                        'birthday': 'لا توجد أعياد ميلاد مسجلة',
+                        'religious': 'لا توجد مناسبات دينية مسجلة',
+                        'celebration': 'لا توجد احتفالات مسجلة',
+                        'travel': 'لا توجد رحلات مسجلة'
+                    };
+
                     container.innerHTML = `
                         <div class="col-span-full text-center py-12">
                             <div class="text-6xl text-white mb-4 opacity-50">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>
-                            <p class="text-white text-xl mb-4">لا توجد أحداث</p>
-                            <button onclick="loadSampleData()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
-                                تحميل بيانات نموذجية
+                            <p class="text-white text-xl mb-4">${emptyMessages[filterType] || emptyMessages['all']}</p>
+                            ${filterType === 'all' ? `
+                                <button onclick="loadSampleData()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 ml-2">
+                                    تحميل بيانات نموذجية
+                                </button>
+                            ` : ''}
+                            <button onclick="showEventModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                                إضافة حدث جديد
                             </button>
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = events.map(event => `
-                    <div class="card p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">${event.title}</h3>
-                        <p class="text-gray-600 mb-4">${event.description}</p>
-                        <div class="space-y-2 text-sm text-gray-500">
-                            <div><i class="fas fa-calendar ml-2"></i>${event.date}</div>
-                            <div><i class="fas fa-clock ml-2"></i>${event.time || 'غير محدد'}</div>
-                            <div><i class="fas fa-map-marker-alt ml-2"></i>${event.location}</div>
-                            <div><i class="fas fa-users ml-2"></i>${event.attendees || 0} مشارك</div>
+                container.innerHTML = sortedEvents.map(event => this.renderEventCard(event)).join('');
+                this.updateEventsStats();
+            }
+
+            renderEventCard(event) {
+                const typeIcons = {
+                    'family_gathering': '👨‍👩‍👧‍👦',
+                    'wedding': '💍',
+                    'graduation': '🎓', 
+                    'birthday': '🎂',
+                    'religious': '🕌',
+                    'celebration': '🎉',
+                    'travel': '✈️',
+                    'other': '📅'
+                };
+
+                const typeTexts = {
+                    'family_gathering': 'تجمع عائلي',
+                    'wedding': 'زفاف',
+                    'graduation': 'تخرج',
+                    'birthday': 'عيد ميلاد',
+                    'religious': 'مناسبة دينية',
+                    'celebration': 'احتفال',
+                    'travel': 'رحلة',
+                    'other': 'مناسبة أخرى'
+                };
+
+                const statusBadges = {
+                    'upcoming': '<span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">📅 قادم</span>',
+                    'active': '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">🔴 جاري الآن</span>',
+                    'completed': '<span class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">✅ مكتمل</span>',
+                    'cancelled': '<span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">❌ ملغي</span>'
+                };
+
+                // تحديد حالة الحدث بناءً على التاريخ
+                const eventDate = new Date(event.date);
+                const now = new Date();
+                let status = event.status;
+                
+                if (!status) {
+                    if (eventDate > now) {
+                        status = 'upcoming';
+                    } else if (eventDate.toDateString() === now.toDateString()) {
+                        status = 'active';
+                    } else {
+                        status = 'completed';
+                    }
+                }
+
+                const isAdmin = this.userManager.currentUser && this.userManager.currentUser.role === 'admin';
+                const canEdit = isAdmin || (this.userManager.currentUser && event.created_by === (this.userManager.currentUser.first_name + ' ' + this.userManager.currentUser.last_name));
+
+                return `
+                    <div class="card p-6 hover:shadow-lg transition-shadow ${status === 'active' ? 'ring-2 ring-green-400' : ''}">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="text-3xl">${typeIcons[event.type] || '📅'}</div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800 mb-1">${event.title}</h3>
+                                    <p class="text-sm text-gray-600">${typeTexts[event.type] || event.type}</p>
+                                </div>
+                            </div>
+                            ${statusBadges[status] || ''}
+                        </div>
+
+                        <!-- Event Details -->
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-calendar-alt w-5 ml-2 text-blue-600"></i>
+                                <span>${new Date(event.date).toLocaleDateString('ar-SA')}</span>
+                            </div>
+                            
+                            ${event.time ? `
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-clock w-5 ml-2 text-green-600"></i>
+                                    <span>${event.time}</span>
+                                </div>
+                            ` : ''}
+                            
+                            ${event.location ? `
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-map-marker-alt w-5 ml-2 text-red-600"></i>
+                                    <span>${event.location}</span>
+                                </div>
+                            ` : ''}
+                            
+                            ${event.organizer ? `
+                                <div class="flex items-center text-gray-700">
+                                    <i class="fas fa-user-tie w-5 ml-2 text-purple-600"></i>
+                                    <span>منظم الحدث: ${event.organizer}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Description -->
+                        ${event.description ? `
+                            <p class="text-gray-700 mb-4 line-clamp-2">${event.description}</p>
+                        ` : ''}
+
+                        <!-- Attendees and Capacity -->
+                        <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse text-sm">
+                                <span class="flex items-center text-blue-600">
+                                    <i class="fas fa-users ml-1"></i>
+                                    ${(event.attendees || []).length} مشارك
+                                </span>
+                                ${event.capacity ? `
+                                    <span class="text-gray-500">من أصل ${event.capacity}</span>
+                                ` : ''}
+                                <span class="flex items-center text-gray-500">
+                                    <i class="fas fa-eye ml-1"></i>
+                                    ${event.views || 0}
+                                </span>
+                            </div>
+                            
+                            ${event.rsvp_required ? `
+                                <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">
+                                    📝 يتطلب تأكيد الحضور
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                            <div class="flex gap-2">
+                                ${this.userManager.currentUser ? `
+                                    ${status === 'upcoming' && event.rsvp_required ? `
+                                        <button onclick="rsvpEvent('${event.id}', true)" class="px-4 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200">
+                                            <i class="fas fa-check ml-1"></i>سأحضر
+                                        </button>
+                                        <button onclick="rsvpEvent('${event.id}', false)" class="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                            <i class="fas fa-times ml-1"></i>لن أحضر
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="shareEvent('${event.id}')" class="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                        <i class="fas fa-share ml-1"></i>مشاركة
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            <!-- Admin/Creator Actions -->
+                            ${canEdit ? `
+                                <div class="flex gap-2">
+                                    <button onclick="editEvent('${event.id}')" class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200">
+                                        <i class="fas fa-edit ml-1"></i>تعديل
+                                    </button>
+                                    ${isAdmin ? `
+                                        <button onclick="deleteEvent('${event.id}')" class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                            <i class="fas fa-trash ml-1"></i>حذف
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Event Creator Info -->
+                        <div class="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                            أضيف بواسطة ${event.created_by || 'غير محدد'} • ${event.created_at || ''}
                         </div>
                     </div>
-                `).join('');
+                `;
+            }
+
+            updateEventsStats() {
+                const events = this.dataManager.getData('events');
+                const now = new Date();
+                
+                const stats = {
+                    total: events.length,
+                    upcoming: events.filter(e => new Date(e.date) > now).length,
+                    thisMonth: events.filter(e => {
+                        const eventDate = new Date(e.date);
+                        return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear();
+                    }).length
+                };
+
+                // تحديث إحصائيات في واجهة الأحداث إذا كان هناك عنصر إحصائيات
+                const statsContainer = document.getElementById('events-stats');
+                if (statsContainer) {
+                    statsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                                <div class="text-2xl font-bold text-white">${stats.total}</div>
+                                <div class="text-sm text-white opacity-80">إجمالي الأحداث</div>
+                            </div>
+                            <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                                <div class="text-2xl font-bold text-white">${stats.upcoming}</div>
+                                <div class="text-sm text-white opacity-80">أحداث قادمة</div>
+                            </div>
+                            <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                                <div class="text-2xl font-bold text-white">${stats.thisMonth}</div>
+                                <div class="text-sm text-white opacity-80">هذا الشهر</div>
+                            </div>
+                        </div>
+                    `;
+                }
             }
 
             renderSuggestions() {
@@ -3607,35 +4145,77 @@
                 return categories[category] || category;
             }
 
-            renderLibrary() {
+            renderLibrary(filter = 'all') {
                 const library = this.dataManager.getData('library');
                 const container = document.getElementById('library-grid');
                 if (!container) return;
 
-                if (library.length === 0) {
+                // فلترة المحتوى حسب النوع
+                let filteredLibrary = library;
+                if (filter === 'videos') {
+                    filteredLibrary = library.filter(item => item.type === 'video');
+                } else if (filter === 'photos') {
+                    filteredLibrary = library.filter(item => item.category === 'photos' || item.type === 'image');
+                } else if (filter === 'documents') {
+                    filteredLibrary = library.filter(item => item.category === 'documents' || item.type === 'document');
+                }
+
+                if (filteredLibrary.length === 0) {
+                    const emptyMessages = {
+                        'all': 'لا توجد محتويات في المكتبة',
+                        'videos': 'لا توجد فيديوهات مرفوعة',
+                        'photos': 'لا توجد صور مرفوعة',
+                        'documents': 'لا توجد وثائق مرفوعة'
+                    };
+                    
+                    const emptyIcons = {
+                        'all': 'fas fa-book',
+                        'videos': 'fas fa-video',
+                        'photos': 'fas fa-image',
+                        'documents': 'fas fa-file-alt'
+                    };
+
                     container.innerHTML = `
                         <div class="col-span-full text-center py-12">
                             <div class="text-6xl text-white mb-4 opacity-50">
-                                <i class="fas fa-book"></i>
+                                <i class="${emptyIcons[filter]}"></i>
                             </div>
-                            <p class="text-white text-xl mb-4">لا توجد محتويات في المكتبة</p>
-                            <button onclick="loadSampleData()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
-                                تحميل بيانات نموذجية
-                            </button>
+                            <p class="text-white text-xl mb-4">${emptyMessages[filter]}</p>
+                            ${filter === 'all' ? `
+                                <button onclick="loadSampleData()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+                                    تحميل بيانات نموذجية
+                                </button>
+                            ` : `
+                                <button onclick="showLibraryModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 ml-2">
+                                    إضافة محتوى
+                                </button>
+                                ${filter === 'videos' ? `
+                                    <button onclick="showVideoUploadModal()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
+                                        رفع فيديو
+                                    </button>
+                                ` : ''}
+                            `}
                         </div>
                     `;
                     return;
                 }
 
                 // فرز المحتوى: المميز أولاً، ثم حسب التاريخ
-                const sortedLibrary = library.sort((a, b) => {
+                const sortedLibrary = filteredLibrary.sort((a, b) => {
                     if (a.featured && !b.featured) return -1;
                     if (!a.featured && b.featured) return 1;
-                    return new Date(b.created_date) - new Date(a.created_date);
+                    return new Date(b.created_date || b.uploaded_at) - new Date(a.created_date || a.uploaded_at);
                 });
 
                 container.innerHTML = sortedLibrary.map(item => this.renderLibraryCard(item)).join('');
                 this.updateLibraryStats();
+                
+                // تحديث إحصائيات الفيديو
+                setTimeout(() => {
+                    if (typeof updateVideoStats === 'function') {
+                        updateVideoStats();
+                    }
+                }, 100);
             }
 
             renderLibraryCard(item) {
@@ -3658,12 +4238,21 @@
                     'achievements': 'الإنجازات',
                     'stories': 'القصص والحكايات',
                     'education': 'التعليم والمهارات',
-                    'business': 'الأعمال والتجارة'
+                    'business': 'الأعمال والتجارة',
+                    'family_gathering': 'تجمع عائلي',
+                    'wedding': 'زفاف',
+                    'celebration': 'احتفال',
+                    'graduation': 'تخرج',
+                    'birthday': 'عيد ميلاد',
+                    'religious': 'مناسبة دينية',
+                    'travel': 'سفر ورحلات',
+                    'other': 'أخرى'
                 };
 
                 const accessBadges = {
                     'public': '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">🌍 عام</span>',
                     'family': '<span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">👨‍👩‍👧‍👦 عائلي</span>',
+                    'close_family': '<span class="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full">👥 العائلة المقربة</span>',
                     'admin': '<span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">🔒 إداري</span>'
                 };
 
@@ -3675,12 +4264,29 @@
                         ${item.featured ? '<div class="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">⭐ مميز</div>' : ''}
                         
                         <!-- Header -->
+                        <!-- Video Thumbnail for videos -->
+                        ${item.type === 'video' ? `
+                            <div class="mb-4 relative">
+                                <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-300 transition" onclick="playVideo('${item.id}')">
+                                    <div class="text-center">
+                                        <i class="fas fa-play-circle text-4xl text-blue-600 mb-2"></i>
+                                        <p class="text-sm text-gray-600">انقر لتشغيل الفيديو</p>
+                                    </div>
+                                </div>
+                                ${item.featured ? '<div class="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-bold">⭐ مميز</div>' : ''}
+                                <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                                    ${item.duration ? formatDuration(item.duration) : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Header -->
                         <div class="flex items-start gap-3 mb-4">
                             <div class="text-3xl">${typeIcons[item.type] || '📄'}</div>
                             <div class="flex-1">
                                 <h3 class="text-xl font-bold text-gray-800 mb-1">${item.title}</h3>
-                                <p class="text-sm text-gray-600">بقلم: ${item.author}</p>
-                                <p class="text-xs text-gray-500">${item.created_date}</p>
+                                <p class="text-sm text-gray-600">${item.type === 'video' ? `رفع بواسطة: ${item.uploaded_by || item.author}` : `بقلم: ${item.author}`}</p>
+                                <p class="text-xs text-gray-500">${item.date || item.created_date || item.uploaded_at}</p>
                             </div>
                         </div>
 
@@ -3708,20 +4314,31 @@
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-4 text-sm text-gray-500">
                                 <span><i class="fas fa-eye ml-1"></i>${item.views || 0}</span>
-                                <span><i class="fas fa-download ml-1"></i>${item.downloads || 0}</span>
-                                <span><i class="fas fa-globe ml-1"></i>${item.language === 'arabic' ? 'العربية' : item.language}</span>
+                                ${item.type === 'video' ? `
+                                    <span><i class="fas fa-heart ml-1"></i>${item.likes || 0}</span>
+                                    ${item.file_size ? `<span><i class="fas fa-file ml-1"></i>${(item.file_size / 1024 / 1024).toFixed(1)}MB</span>` : ''}
+                                ` : `
+                                    <span><i class="fas fa-download ml-1"></i>${item.downloads || 0}</span>
+                                    <span><i class="fas fa-globe ml-1"></i>${item.language === 'arabic' ? 'العربية' : item.language || 'العربية'}</span>
+                                `}
                             </div>
 
                             <div class="flex gap-2">
                                 ${canAccess ? `
-                                    ${item.url && item.url !== '#' ? `
-                                        <button onclick="openLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">
-                                            <i class="fas fa-external-link-alt ml-1"></i>فتح
+                                    ${item.type === 'video' ? `
+                                        <button onclick="playVideo('${item.id}')" class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition">
+                                            <i class="fas fa-play ml-1"></i>تشغيل
                                         </button>
-                                    ` : ''}
-                                    <button onclick="downloadLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
-                                        <i class="fas fa-download ml-1"></i>تحميل
-                                    </button>
+                                    ` : `
+                                        ${item.url && item.url !== '#' ? `
+                                            <button onclick="openLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">
+                                                <i class="fas fa-external-link-alt ml-1"></i>فتح
+                                            </button>
+                                        ` : ''}
+                                        <button onclick="downloadLibraryItem('${item.id}')" class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
+                                            <i class="fas fa-download ml-1"></i>تحميل
+                                        </button>
+                                    `}
                                 ` : `
                                     <span class="px-3 py-1 text-xs bg-gray-100 text-gray-500 rounded">غير متاح</span>
                                 `}
@@ -3881,6 +4498,23 @@
             }
 
             // وظائف مساعدة
+            getMembershipTypeText(type) {
+                const types = {
+                    'founder': '👑 مؤسس',
+                    'chairman': '🎖️ رئيس مجلس الإدارة',
+                    'board_member': '👔 عضو مجلس الإدارة',
+                    'general_assembly': '👥 عضو الجمعية العمومية',
+                    'family_member': '👨‍👩‍👧‍👦 عضو عائلة',
+                    'honorary': '🏅 عضو شرفي'
+                };
+                return types[type] || type;
+            }
+
+            checkLibraryAccess(item) {
+                // لوجيك التحقق من صلاحيات الوصول للمكتبة
+                return true; // مبسط الآن
+            }
+
             showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
@@ -3901,6 +4535,72 @@
             // إنشاء النماذج (مبسط)
             createModals() {
                 // تتم إضافة النماذج في HTML
+            }
+
+            // عرض الاقتراحات
+            displaySuggestions() {
+                this.renderSuggestions();
+            }
+
+            // عرض المكتبة
+            displayLibrary() {
+                this.renderLibrary();
+            }
+
+            // عرض الملف الشخصي
+            displayProfile() {
+                const user = this.userManager.currentUser;
+                if (!user) return;
+
+                const profileContainer = document.getElementById('profile-info');
+                if (profileContainer) {
+                    profileContainer.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4">معلومات شخصية</h3>
+                                <div class="space-y-3">
+                                    <div><strong>الاسم:</strong> ${user.full_name}</div>
+                                    <div><strong>البريد الإلكتروني:</strong> ${user.email}</div>
+                                    <div><strong>رقم الجوال:</strong> ${user.phone}</div>
+                                    <div><strong>المهنة:</strong> ${user.profession || 'غير محدد'}</div>
+                                    <div><strong>التخصص:</strong> ${user.specialization || 'غير محدد'}</div>
+                                    <div><strong>تاريخ الميلاد:</strong> ${user.birth_date || 'غير محدد'}</div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4">معلومات العضوية</h3>
+                                <div class="space-y-3">
+                                    <div><strong>نوع العضوية:</strong> ${this.getMembershipTypeText(user.membership_type)}</div>
+                                    <div><strong>تاريخ التسجيل:</strong> ${user.created_at || 'غير محدد'}</div>
+                                    <div><strong>الحالة:</strong> <span class="text-green-600">نشط</span></div>
+                                    <div><strong>الجيل:</strong> ${user.generation || 'غير محدد'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // عرض لوحة الإدارة
+            displayAdminPanel() {
+                if (!this.userManager.currentUser || this.userManager.currentUser.role !== 'admin') {
+                    return;
+                }
+
+                const pendingUsers = this.userManager.getPendingUsers();
+                const adminContainer = document.getElementById('admin-content');
+                
+                if (adminContainer) {
+                    adminContainer.innerHTML = `
+                        <div class="card p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">طلبات العضوية المعلقة (${pendingUsers.length})</h3>
+                            ${pendingUsers.length === 0 ? 
+                                '<p class="text-gray-500">لا توجد طلبات معلقة</p>' :
+                                '<div id="pending-users-list">' + this.renderPendingUsers() + '</div>'
+                            }
+                        </div>
+                    `;
+                }
             }
 
             // تحميل البيانات النموذجية
@@ -4584,8 +5284,445 @@
         }
 
         // وظائف النماذج الأخرى (مبسطة)
+        // وظائف إدارة الأحداث
         function showEventModal() {
-            alert('نموذج الأحداث - قريباً');
+            document.getElementById('eventModal').classList.remove('hidden');
+            document.getElementById('eventTitle').focus();
+            
+            // تعيين التاريخ الحالي كافتراضي
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = today;
+        }
+
+        function hideEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+            document.getElementById('eventForm').reset();
+        }
+
+        function resetEventForm() {
+            document.getElementById('eventForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = today;
+            document.getElementById('eventTitle').focus();
+        }
+
+
+
+        function filterEventsByType(type) {
+            app.renderEvents(type);
+        }
+
+        // وظائف إضافية لإدارة الأحداث
+        function rsvpEvent(eventId, attending) {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+
+            const events = app.dataManager.getData('events');
+            const eventIndex = events.findIndex(e => e.id === eventId);
+            
+            if (eventIndex === -1) {
+                app.showToast('الحدث غير موجود', 'error');
+                return;
+            }
+
+            const event = events[eventIndex];
+            if (!event.attendees) event.attendees = [];
+
+            const userId = app.userManager.currentUser.id;
+            const existingRSVP = event.attendees.findIndex(a => a.userId === userId);
+
+            if (attending) {
+                if (existingRSVP === -1) {
+                    event.attendees.push({
+                        userId: userId,
+                        name: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name,
+                        status: 'attending',
+                        rsvp_date: new Date().toISOString()
+                    });
+                    app.showToast('تم تأكيد حضورك للحدث', 'success');
+                } else {
+                    event.attendees[existingRSVP].status = 'attending';
+                    app.showToast('تم تحديث حضورك للحدث', 'success');
+                }
+            } else {
+                if (existingRSVP !== -1) {
+                    event.attendees[existingRSVP].status = 'not_attending';
+                    app.showToast('تم تسجيل عدم حضورك للحدث', 'warning');
+                }
+            }
+
+            app.dataManager.setData('events', events);
+            app.renderEvents();
+        }
+
+        function shareEvent(eventId) {
+            const events = app.dataManager.getData('events');
+            const event = events.find(e => e.id === eventId);
+            
+            if (!event) {
+                app.showToast('الحدث غير موجود', 'error');
+                return;
+            }
+
+            const shareText = `🎉 ${event.title}\n📅 ${new Date(event.date).toLocaleDateString('ar-SA')}\n📍 ${event.location || ''}\n\n${event.description || ''}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: event.title,
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    app.showToast('تم نسخ تفاصيل الحدث', 'success');
+                });
+            }
+        }
+
+        function editEvent(eventId) {
+            const events = app.dataManager.getData('events');
+            const event = events.find(e => e.id === eventId);
+            
+            if (!event) {
+                app.showToast('الحدث غير موجود', 'error');
+                return;
+            }
+
+            // ملء النموذج بالبيانات الحالية
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventType').value = event.type;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventTime').value = event.time || '';
+            document.getElementById('eventLocation').value = event.location || '';
+            document.getElementById('eventDescription').value = event.description || '';
+            document.getElementById('eventOrganizer').value = event.organizer || '';
+            document.getElementById('eventCapacity').value = event.capacity || '';
+            document.getElementById('eventContact').value = event.contact || '';
+            document.getElementById('eventRSVP').checked = event.rsvp_required || false;
+            document.getElementById('eventPublic').checked = event.is_public || false;
+            document.getElementById('eventReminder').checked = event.reminder_enabled || false;
+
+            // تعيين ID للتعديل
+            document.getElementById('eventForm').dataset.editId = eventId;
+            
+            // عرض النموذج
+            showEventModal();
+        }
+
+        function deleteEvent(eventId) {
+            if (!app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                app.showToast('ليس لديك صلاحية لحذف الأحداث', 'error');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من حذف هذا الحدث؟')) {
+                const events = app.dataManager.getData('events');
+                const filteredEvents = events.filter(e => e.id !== eventId);
+                app.dataManager.setData('events', filteredEvents);
+                app.showToast('تم حذف الحدث بنجاح', 'success');
+                app.renderEvents();
+            }
+        }
+
+        // تحديث معالج إرسال الحدث للدعم التعديل
+        function handleEventSubmit(event) {
+            event.preventDefault();
+            
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لإضافة حدث', 'error');
+                return;
+            }
+
+            const form = document.getElementById('eventForm');
+            const editId = form.dataset.editId;
+
+            const formData = {
+                title: document.getElementById('eventTitle').value,
+                type: document.getElementById('eventType').value,
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                location: document.getElementById('eventLocation').value,
+                description: document.getElementById('eventDescription').value,
+                organizer: document.getElementById('eventOrganizer').value,
+                capacity: document.getElementById('eventCapacity').value,
+                contact: document.getElementById('eventContact').value,
+                rsvp_required: document.getElementById('eventRSVP').checked,
+                is_public: document.getElementById('eventPublic').checked,
+                reminder_enabled: document.getElementById('eventReminder').checked
+            };
+
+            const events = app.dataManager.getData('events');
+
+            if (editId) {
+                // تعديل حدث موجود
+                const eventIndex = events.findIndex(e => e.id === editId);
+                if (eventIndex !== -1) {
+                    events[eventIndex] = {
+                        ...events[eventIndex],
+                        ...formData,
+                        updated_at: new Date().toISOString().split('T')[0],
+                        updated_by: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name
+                    };
+                    app.showToast('تم تحديث الحدث بنجاح!', 'success');
+                }
+                delete form.dataset.editId;
+            } else {
+                // إضافة حدث جديد
+                const newEvent = {
+                    id: 'event_' + Date.now(),
+                    ...formData,
+                    created_by: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name,
+                    created_at: new Date().toISOString().split('T')[0],
+                    status: 'upcoming',
+                    attendees: [],
+                    views: 0
+                };
+                events.push(newEvent);
+                app.showToast('تم إضافة الحدث بنجاح!', 'success');
+            }
+
+            app.dataManager.setData('events', events);
+            hideEventModal();
+            app.renderEvents();
+        }
+
+        // وظائف إدارة مكتبة الفيديو
+        function showVideoUploadModal() {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لرفع فيديو', 'error');
+                return;
+            }
+            document.getElementById('videoUploadModal').classList.remove('hidden');
+        }
+
+        function hideVideoUploadModal() {
+            document.getElementById('videoUploadModal').classList.add('hidden');
+            document.getElementById('videoUploadForm').reset();
+        }
+
+        function handleVideoUpload(event) {
+            event.preventDefault();
+            
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لرفع فيديو', 'error');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const videoFile = formData.get('videoFile');
+            
+            if (!videoFile || videoFile.size === 0) {
+                app.showToast('يرجى اختيار ملف فيديو', 'error');
+                return;
+            }
+
+            // التحقق من نوع الملف
+            const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/webm'];
+            if (!allowedTypes.includes(videoFile.type)) {
+                app.showToast('نوع الملف غير مدعوم. يرجى اختيار ملف فيديو صالح', 'error');
+                return;
+            }
+
+            // التحقق من حجم الملف (حد أقصى 100MB)
+            const maxSize = 100 * 1024 * 1024; // 100MB
+            if (videoFile.size > maxSize) {
+                app.showToast('حجم الملف كبير جداً. الحد الأقصى 100MB', 'error');
+                return;
+            }
+
+            // محاكاة رفع الفيديو (في التطبيق الحقيقي سيتم رفعه للخادم)
+            const videoData = {
+                id: 'video_' + Date.now(),
+                type: 'video',
+                title: document.getElementById('videoTitle').value,
+                description: document.getElementById('videoDescription').value,
+                category: document.getElementById('videoCategory').value,
+                access_level: document.getElementById('videoAccess').value,
+                keywords: document.getElementById('videoKeywords').value.split(',').map(k => k.trim()).filter(k => k),
+                file_name: videoFile.name,
+                file_size: videoFile.size,
+                file_type: videoFile.type,
+                duration: null, // سيتم حسابها لاحقاً
+                thumbnail: null, // سيتم إنشاؤها لاحقاً
+                uploaded_by: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name,
+                uploaded_at: new Date().toISOString().split('T')[0],
+                views: 0,
+                likes: 0,
+                featured: false,
+                url: URL.createObjectURL(videoFile) // رابط مؤقت للمعاينة
+            };
+
+            const library = app.dataManager.getData('library');
+            library.push(videoData);
+            app.dataManager.setData('library', library);
+
+            app.showToast('تم رفع الفيديو بنجاح!', 'success');
+            hideVideoUploadModal();
+            app.renderLibrary('videos');
+            
+            // تحديث إحصائيات الفيديو
+            updateVideoStats();
+        }
+
+        function playVideo(videoId) {
+            const library = app.dataManager.getData('library');
+            const video = library.find(v => v.id === videoId);
+            
+            if (!video || video.type !== 'video') {
+                app.showToast('الفيديو غير موجود', 'error');
+                return;
+            }
+
+            // زيادة عدد المشاهدات
+            video.views = (video.views || 0) + 1;
+            app.dataManager.setData('library', library);
+
+            // إنشاء مشغل فيديو منبثق
+            const videoPlayer = document.createElement('div');
+            videoPlayer.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
+            videoPlayer.innerHTML = `
+                <div class="relative max-w-4xl w-full mx-4">
+                    <button onclick="this.parentElement.parentElement.remove()" class="absolute -top-10 right-0 text-white text-2xl hover:text-red-400">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="bg-white rounded-lg p-4">
+                        <h3 class="text-xl font-bold mb-4">${video.title}</h3>
+                        ${video.url ? `
+                            <video controls class="w-full max-h-96 rounded">
+                                <source src="${video.url}" type="${video.file_type}">
+                                المتصفح لا يدعم تشغيل الفيديو
+                            </video>
+                        ` : `
+                            <div class="w-full h-64 bg-gray-200 flex items-center justify-center rounded">
+                                <div class="text-center">
+                                    <i class="fas fa-play-circle text-6xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600">معاينة الفيديو غير متاحة</p>
+                                    <p class="text-sm text-gray-500 mt-2">اسم الملف: ${video.file_name}</p>
+                                </div>
+                            </div>
+                        `}
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="text-sm text-gray-600">
+                                <span><i class="fas fa-eye ml-1"></i>${video.views}</span>
+                                <span class="mr-4"><i class="fas fa-heart ml-1"></i>${video.likes || 0}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="likeVideo('${video.id}')" class="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                    <i class="fas fa-heart ml-1"></i>إعجاب
+                                </button>
+                                <button onclick="shareVideo('${video.id}')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                    <i class="fas fa-share ml-1"></i>مشاركة
+                                </button>
+                            </div>
+                        </div>
+                        ${video.description ? `<p class="mt-4 text-gray-700">${video.description}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(videoPlayer);
+            
+            // إغلاق عند النقر على الخلفية
+            videoPlayer.addEventListener('click', (e) => {
+                if (e.target === videoPlayer) {
+                    videoPlayer.remove();
+                }
+            });
+        }
+
+        function likeVideo(videoId) {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+
+            const library = app.dataManager.getData('library');
+            const video = library.find(v => v.id === videoId);
+            
+            if (video) {
+                video.likes = (video.likes || 0) + 1;
+                app.dataManager.setData('library', library);
+                app.showToast('تم إضافة إعجابك!', 'success');
+                
+                // تحديث العرض
+                const likeButton = document.querySelector(`[onclick="likeVideo('${videoId}')"]`);
+                if (likeButton) {
+                    likeButton.innerHTML = `<i class="fas fa-heart ml-1"></i>${video.likes}`;
+                }
+            }
+        }
+
+        function shareVideo(videoId) {
+            const library = app.dataManager.getData('library');
+            const video = library.find(v => v.id === videoId);
+            
+            if (!video) {
+                app.showToast('الفيديو غير موجود', 'error');
+                return;
+            }
+
+            const shareText = `🎥 ${video.title}\n👤 رفع بواسطة: ${video.uploaded_by}\n📅 ${video.uploaded_at}\n\n${video.description || ''}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: video.title,
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    app.showToast('تم نسخ معلومات الفيديو', 'success');
+                });
+            }
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '';
+            
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateVideoStats() {
+            if (!app || !app.dataManager) return; // التحقق من وجود التطبيق أولاً
+            
+            const library = app.dataManager.getData('library');
+            const videos = library.filter(item => item.type === 'video');
+            
+            const stats = {
+                total: videos.length,
+                totalViews: videos.reduce((sum, v) => sum + (v.views || 0), 0),
+                totalLikes: videos.reduce((sum, v) => sum + (v.likes || 0), 0),
+                totalSize: videos.reduce((sum, v) => sum + (v.file_size || 0), 0)
+            };
+
+            // تحديث إحصائيات في واجهة المكتبة
+            const videoStatsContainer = document.getElementById('video-stats');
+            if (videoStatsContainer) {
+                videoStatsContainer.innerHTML = `
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                            <div class="text-2xl font-bold text-white">${stats.total}</div>
+                            <div class="text-sm text-white opacity-80">مقاطع فيديو</div>
+                        </div>
+                        <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                            <div class="text-2xl font-bold text-white">${stats.totalViews}</div>
+                            <div class="text-sm text-white opacity-80">مشاهدة</div>
+                        </div>
+                        <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                            <div class="text-2xl font-bold text-white">${stats.totalLikes}</div>
+                            <div class="text-sm text-white opacity-80">إعجاب</div>
+                        </div>
+                        <div class="text-center p-4 bg-white bg-opacity-20 rounded-lg">
+                            <div class="text-2xl font-bold text-white">${(stats.totalSize / 1024 / 1024).toFixed(1)}MB</div>
+                            <div class="text-sm text-white opacity-80">حجم المحتوى</div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // وظائف إدارة الاقتراحات
@@ -4597,6 +5734,36 @@
         function hideSuggestionModal() {
             document.getElementById('suggestionModal').classList.add('hidden');
             document.getElementById('suggestionForm').reset();
+        }
+
+        // وظائف إدارة المكتبة العامة
+        function showLibraryModal() {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لإضافة محتوى', 'error');
+                return;
+            }
+            document.getElementById('libraryModal').classList.remove('hidden');
+        }
+
+        function hideLibraryModal() {
+            document.getElementById('libraryModal').classList.add('hidden');
+            document.getElementById('libraryForm').reset();
+        }
+
+        function filterLibraryByType(type) {
+            app.renderLibrary(type);
+            
+            // تحديث الأزرار النشطة
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-600');
+                btn.classList.add('bg-white', 'bg-opacity-20', 'text-white');
+            });
+            
+            const activeBtn = document.querySelector(`[data-filter="${type}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-opacity-20', 'text-white');
+                activeBtn.classList.add('bg-white', 'text-blue-600');
+            }
         }
 
         function resetSuggestionForm() {
@@ -4788,6 +5955,238 @@
                 app.renderLibrary();
             } else {
                 app.showToast('ملف التحميل غير متوفر حالياً', 'warning');
+            }
+        }
+
+        // وظائف مكتبة الفيديو
+        function showVideoUploadModal() {
+            if (!app.userManager.currentUser) {
+                app.showToast('يجب تسجيل الدخول أولاً لرفع الفيديوهات', 'error');
+                return;
+            }
+            
+            document.getElementById('videoUploadModal').classList.remove('hidden');
+            document.getElementById('videoTitle').focus();
+            
+            // تعيين التاريخ الحالي كافتراضي
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('videoDate').value = today;
+        }
+
+        function hideVideoUploadModal() {
+            document.getElementById('videoUploadModal').classList.add('hidden');
+            document.getElementById('videoUploadForm').reset();
+            
+            // إخفاء معاينة الفيديو
+            document.getElementById('videoPreview').classList.add('hidden');
+        }
+
+        function resetVideoForm() {
+            document.getElementById('videoUploadForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('videoDate').value = today;
+            document.getElementById('videoPreview').classList.add('hidden');
+            document.getElementById('videoTitle').focus();
+        }
+
+        function handleVideoFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // التحقق من نوع الملف
+            if (!file.type.startsWith('video/')) {
+                app.showToast('يرجى اختيار ملف فيديو صحيح', 'error');
+                return;
+            }
+
+            // التحقق من حجم الملف (100MB)
+            const maxSize = 100 * 1024 * 1024;
+            if (file.size > maxSize) {
+                app.showToast('حجم الملف كبير جداً. الحد الأقصى 100MB', 'error');
+                return;
+            }
+
+            // عرض معاينة الفيديو
+            const videoPreview = document.getElementById('videoPreview');
+            const previewVideo = document.getElementById('previewVideo');
+            const videoSource = document.getElementById('videoSource');
+            const fileName = document.getElementById('videoFileName');
+
+            const fileURL = URL.createObjectURL(file);
+            videoSource.src = fileURL;
+            previewVideo.load();
+            fileName.textContent = `الملف: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            
+            videoPreview.classList.remove('hidden');
+        }
+
+        function handleVideoUpload(event) {
+            event.preventDefault();
+            
+            const fileInput = document.getElementById('videoFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                app.showToast('يرجى اختيار ملف فيديو أولاً', 'error');
+                return;
+            }
+
+            const formData = {
+                title: document.getElementById('videoTitle').value,
+                date: document.getElementById('videoDate').value,
+                description: document.getElementById('videoDescription').value,
+                category: document.getElementById('videoCategory').value,
+                privacy: document.getElementById('videoPrivacy').value,
+                tags: document.getElementById('videoTags').value,
+                featured: document.getElementById('videoFeatured').checked
+            };
+
+            // محاكاة رفع الفيديو (في التطبيق الحقيقي سيتم رفعه لخدمة سحابية)
+            const videoItem = {
+                id: 'video_' + Date.now(),
+                type: 'video',
+                ...formData,
+                file_name: file.name,
+                file_size: file.size,
+                file_type: file.type,
+                url: URL.createObjectURL(file), // مؤقت - في الإنتاج سيكون رابط السحابة
+                thumbnail: '', // سيتم إنشاؤه تلقائياً
+                duration: 0, // سيتم حسابه
+                views: 0,
+                likes: 0,
+                uploaded_by: app.userManager.currentUser.first_name + ' ' + app.userManager.currentUser.last_name,
+                uploaded_at: new Date().toISOString().split('T')[0],
+                status: 'active'
+            };
+
+            // إضافة الفيديو للمكتبة
+            const library = app.dataManager.getData('library');
+            library.push(videoItem);
+            app.dataManager.setData('library', library);
+            
+            app.showToast('تم رفع الفيديو بنجاح!', 'success');
+            hideVideoUploadModal();
+            app.renderLibrary();
+            
+            // تحديث إحصائيات الفيديو
+            updateVideoStats();
+        }
+
+        function switchLibraryTab(tab) {
+            // إزالة التأكيد من جميع التابات
+            document.querySelectorAll('.library-tab').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // تأكيد التاب الحالي
+            const activeTab = document.getElementById(`tab-${tab}`);
+            activeTab.classList.remove('text-gray-600');
+            activeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            
+            // عرض المحتوى المناسب
+            app.renderLibrary(tab);
+        }
+
+        function updateVideoStats() {
+            if (!app || !app.dataManager) return; // التحقق من وجود التطبيق أولاً
+            
+            const library = app.dataManager.getData('library');
+            const videos = library.filter(item => item.type === 'video');
+            
+            const totalVideos = videos.length;
+            const totalViews = videos.reduce((sum, video) => sum + (video.views || 0), 0);
+            const thisMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+            const recentUploads = videos.filter(video => video.uploaded_at?.startsWith(thisMonth)).length;
+            const featuredVideos = videos.filter(video => video.featured).length;
+            
+            document.getElementById('total-videos').textContent = totalVideos;
+            document.getElementById('total-views').textContent = totalViews;
+            document.getElementById('recent-uploads').textContent = recentUploads;
+            document.getElementById('featured-videos').textContent = featuredVideos;
+        }
+
+        function playVideo(videoId) {
+            const library = app.dataManager.getData('library');
+            const video = library.find(item => item.id === videoId && item.type === 'video');
+            
+            if (!video) return;
+            
+            // تسجيل المشاهدة
+            video.views = (video.views || 0) + 1;
+            app.dataManager.setData('library', library);
+            
+            // فتح مشغل الفيديو (مودال)
+            showVideoPlayer(video);
+            
+            // تحديث الإحصائيات
+            updateVideoStats();
+        }
+
+        function showVideoPlayer(video) {
+            // إنشاء مودال مشغل الفيديو
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800">${video.title}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <video controls class="w-full rounded-lg mb-4" autoplay>
+                            <source src="${video.url}" type="${video.file_type}">
+                            متصفحك لا يدعم تشغيل الفيديو.
+                        </video>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div><strong>التاريخ:</strong> ${video.date}</div>
+                            <div><strong>المشاهدات:</strong> ${video.views}</div>
+                            <div><strong>الفئة:</strong> ${getVideoCategoryText(video.category)}</div>
+                            <div><strong>رفع بواسطة:</strong> ${video.uploaded_by}</div>
+                        </div>
+                        ${video.description ? `<div class="mt-4"><strong>الوصف:</strong><p class="text-gray-700 mt-2">${video.description}</p></div>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // إغلاق عند النقر خارج المودال
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function getVideoCategoryText(category) {
+            const categories = {
+                'family_gathering': 'تجمع عائلي',
+                'wedding': 'زفاف',
+                'celebration': 'احتفال',
+                'graduation': 'تخرج',
+                'birthday': 'عيد ميلاد',
+                'religious': 'مناسبة دينية',
+                'travel': 'سفر ورحلات',
+                'other': 'أخرى'
+            };
+            return categories[category] || category;
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '';
+            
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            
+            if (minutes < 60) {
+                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
         }
 
