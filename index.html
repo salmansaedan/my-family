@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>تطبيق آل سعيدان الشامل - مع الأجيال المترابطة (محدث 2024-09-28)</title>
     
     <!-- CSS Libraries -->
@@ -40,6 +40,84 @@
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Mobile Navigation Styles */
+        .nav-item-mobile.active {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white !important;
+            font-weight: 600;
+        }
+        
+        .nav-item-mobile {
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+        
+        .nav-item-mobile:hover {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+        }
+
+        /* Mobile-specific responsive improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            .card {
+                margin: 8px 0;
+                padding: 16px !important;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            
+            .stat-card {
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .modal .max-w-4xl {
+                max-width: 95% !important;
+                margin: 10px;
+            }
+            
+            .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .text-3xl {
+                font-size: 1.5rem !important;
+            }
+            
+            .px-8 {
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+            
+            /* Hide desktop-specific elements on mobile */
+            .hidden-mobile {
+                display: none !important;
+            }
+        }
+
+        /* Touch-friendly buttons for mobile */
+        @media (max-width: 768px) {
+            button, .btn {
+                min-height: 44px;
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+            
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
         }
         
         .section { display: none; }
@@ -237,18 +315,18 @@
                         </button>
                     </div>
 
-                    <!-- User Menu -->
+                    <!-- Desktop User Menu -->
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                         <!-- Admin Panel (admin only) -->
-                        <button id="nav-admin" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden" onclick="showSection('admin')">
+                        <button id="nav-admin-desktop" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden" onclick="showSection('admin')">
                             <i class="fas fa-cog ml-2"></i>لوحة الإدارة
                         </button>
                         
                         <!-- User Profile -->
-                        <div class="relative" id="userProfileMenu">
+                        <div class="relative" id="userProfileMenuDesktop">
                             <button onclick="showSection('profile')" class="flex items-center px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
                                 <i class="fas fa-user ml-2"></i>
-                                <span id="currentUserName">الملف الشخصي</span>
+                                <span id="currentUserNameDesktop">الملف الشخصي</span>
                             </button>
                         </div>
                         
@@ -258,19 +336,73 @@
                         </button>
                     </div>
                     
-                    <!-- Login/Register buttons (shown when not logged in) -->
-                    <div id="authButtons" class="flex items-center space-x-4 rtl:space-x-reverse">
+                    <!-- Desktop Login/Register buttons (shown when not logged in) -->
+                    <div id="authButtonsDesktop" class="flex items-center space-x-4 rtl:space-x-reverse">
                         <button onclick="showLoginModal()" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
                             <i class="fas fa-sign-in-alt ml-2"></i>دخول
                         </button>
                         <button onclick="showRegisterModal()" class="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
                             <i class="fas fa-user-plus ml-2"></i>تسجيل جديد
                         </button>
-                        <button onclick="forceShowRegisterModal()" class="px-6 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition">
-                            <i class="fas fa-user-plus ml-2"></i>تشخيص شامل
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" onclick="toggleMobileMenu()" class="p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                        <i id="mobileMenuIcon" class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Menu -->
+            <div id="mobileNavigation" class="md:hidden hidden bg-white border-t border-gray-200">
+                <div class="px-4 py-4 space-y-2">
+                    <!-- Mobile Main Navigation -->
+                    <div id="mainNavigationMobile" class="space-y-2 border-b border-gray-200 pb-4">
+                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile active" onclick="showSection('home'); toggleMobileMenu();">
+                            <i class="fas fa-home ml-2 text-blue-600"></i>الرئيسية
                         </button>
-                        <button onclick="createTestModal()" class="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
-                            <i class="fas fa-vial ml-2"></i>نموذج اختبار
+                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('family'); toggleMobileMenu();">
+                            <i class="fas fa-users ml-2 text-green-600"></i>الشجرة العائلية
+                        </button>
+                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('events'); toggleMobileMenu();">
+                            <i class="fas fa-calendar ml-2 text-purple-600"></i>الأحداث
+                        </button>
+                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('suggestions'); toggleMobileMenu();">
+                            <i class="fas fa-lightbulb ml-2 text-yellow-600"></i>الاقتراحات
+                        </button>
+                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('library'); toggleMobileMenu();">
+                            <i class="fas fa-book ml-2 text-indigo-600"></i>المكتبة الرقمية
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile User Menu (logged in) -->
+                    <div id="userMenuMobile" class="space-y-2 border-b border-gray-200 pb-4">
+                        <!-- Admin Panel (admin only) -->
+                        <button id="nav-admin-mobile" class="w-full text-right py-3 px-4 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition hidden" onclick="showSection('admin'); toggleMobileMenu();">
+                            <i class="fas fa-cog ml-2"></i>لوحة الإدارة
+                        </button>
+                        
+                        <!-- User Profile -->
+                        <button class="w-full text-right py-3 px-4 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition" onclick="showSection('profile'); toggleMobileMenu();">
+                            <i class="fas fa-user ml-2"></i>
+                            <span id="currentUserNameMobile">الملف الشخصي</span>
+                        </button>
+                        
+                        <!-- Logout -->
+                        <button onclick="logout(); toggleMobileMenu();" class="w-full text-right py-3 px-4 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition">
+                            <i class="fas fa-sign-out-alt ml-2"></i>خروج
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile Login/Register buttons (not logged in) -->
+                    <div id="authButtonsMobile" class="space-y-2">
+                        <button onclick="showLoginModal(); toggleMobileMenu();" class="w-full py-3 px-4 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                            <i class="fas fa-sign-in-alt ml-2"></i>دخول
+                        </button>
+                        <button onclick="showRegisterModal(); toggleMobileMenu();" class="w-full py-3 px-4 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
+                            <i class="fas fa-user-plus ml-2"></i>تسجيل جديد
                         </button>
                     </div>
                 </div>
@@ -288,7 +420,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
         <!-- Home Section -->
         <section id="home-section" class="section active">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -2800,33 +2932,63 @@
                 const isLoggedIn = this.userManager.currentUser !== null;
                 const isAdmin = this.userManager.currentUser?.role === 'admin';
 
-                // إظهار/إخفاء العناصر حسب حالة تسجيل الدخول
+                // عناصر سطح المكتب
                 const mainNavigation = document.getElementById('mainNavigation');
-                const userProfileMenu = document.getElementById('userProfileMenu');
-                const authButtons = document.getElementById('authButtons');
-                const adminButton = document.getElementById('nav-admin');
-                const currentUserName = document.getElementById('currentUserName');
+                const userProfileMenu = document.getElementById('userProfileMenuDesktop');
+                const authButtons = document.getElementById('authButtonsDesktop');
+                const adminButton = document.getElementById('nav-admin-desktop');
+                const currentUserName = document.getElementById('currentUserNameDesktop');
+
+                // عناصر الجوال
+                const mainNavigationMobile = document.getElementById('mainNavigationMobile');
+                const userMenuMobile = document.getElementById('userMenuMobile');
+                const authButtonsMobile = document.getElementById('authButtonsMobile');
+                const adminButtonMobile = document.getElementById('nav-admin-mobile');
+                const currentUserNameMobile = document.getElementById('currentUserNameMobile');
 
                 if (isLoggedIn) {
-                    mainNavigation.classList.remove('hidden');
-                    userProfileMenu.classList.remove('hidden');
-                    authButtons.classList.add('hidden');
+                    // سطح المكتب
+                    if (mainNavigation) mainNavigation.classList.remove('hidden');
+                    if (userProfileMenu) userProfileMenu.classList.remove('hidden');
+                    if (authButtons) authButtons.classList.add('hidden');
                     
+                    // الجوال
+                    if (mainNavigationMobile) mainNavigationMobile.classList.remove('hidden');
+                    if (userMenuMobile) userMenuMobile.classList.remove('hidden');
+                    if (authButtonsMobile) authButtonsMobile.classList.add('hidden');
+                    
+                    // تحديث أسماء المستخدمين
+                    const userName = this.userManager.currentUser.first_name;
                     if (currentUserName) {
-                        currentUserName.textContent = this.userManager.currentUser.first_name;
+                        currentUserName.textContent = userName;
+                    }
+                    if (currentUserNameMobile) {
+                        currentUserNameMobile.textContent = `${userName} - الملف الشخصي`;
                     }
                     
-                    if (isAdmin && adminButton) {
-                        adminButton.classList.remove('hidden');
+                    // إظهار لوحة الإدارة للمديرين
+                    if (isAdmin) {
+                        if (adminButton) adminButton.classList.remove('hidden');
+                        if (adminButtonMobile) adminButtonMobile.classList.remove('hidden');
+                    } else {
+                        if (adminButton) adminButton.classList.add('hidden');
+                        if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
                     }
                 } else {
-                    mainNavigation.classList.add('hidden');
-                    userProfileMenu.classList.add('hidden');
-                    authButtons.classList.remove('hidden');
-                    if (adminButton) {
-                        adminButton.classList.add('hidden');
-                    }
+                    // المستخدم غير مسجل دخول - إخفاء عناصر المستخدمين
+                    // سطح المكتب
+                    if (mainNavigation) mainNavigation.classList.add('hidden');
+                    if (userProfileMenu) userProfileMenu.classList.add('hidden');
+                    if (authButtons) authButtons.classList.remove('hidden');
+                    if (adminButton) adminButton.classList.add('hidden');
+                    
+                    // الجوال
+                    if (mainNavigationMobile) mainNavigationMobile.classList.add('hidden');
+                    if (userMenuMobile) userMenuMobile.classList.add('hidden');
+                    if (authButtonsMobile) authButtonsMobile.classList.remove('hidden');
+                    if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
                 }
+            }
             }
 
             // عرض الملف الشخصي
@@ -4693,6 +4855,31 @@
             }
         });
 
+        // وظائف إدارة القائمة المتنقلة
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNavigation');
+            const menuIcon = document.getElementById('mobileMenuIcon');
+            
+            if (mobileNav.classList.contains('hidden')) {
+                mobileNav.classList.remove('hidden');
+                menuIcon.className = 'fas fa-times text-xl';
+            } else {
+                mobileNav.classList.add('hidden');
+                menuIcon.className = 'fas fa-bars text-xl';
+            }
+        }
+
+        // إغلاق القائمة المتنقلة عند النقر خارجها
+        document.addEventListener('click', function(event) {
+            const mobileNav = document.getElementById('mobileNavigation');
+            const menuButton = document.getElementById('mobileMenuButton');
+            
+            if (!mobileNav.contains(event.target) && !menuButton.contains(event.target)) {
+                mobileNav.classList.add('hidden');
+                document.getElementById('mobileMenuIcon').className = 'fas fa-bars text-xl';
+            }
+        });
+
         // وظائف التنقل
         function showSection(sectionName) {
             // إزالة الفئة النشطة من جميع الأقسام
@@ -4700,7 +4887,12 @@
                 section.classList.remove('active');
             });
             
+            // إزالة الفئة النشطة من جميع أزرار التنقل (سطح المكتب والجوال)
             document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-item-mobile').forEach(item => {
                 item.classList.remove('active');
             });
             
@@ -4710,19 +4902,28 @@
                 targetSection.classList.add('active');
             }
             
-            // تفعيل زر التنقل
+            // تفعيل زر التنقل في سطح المكتب
             const navButton = document.getElementById(`nav-${sectionName}`);
             if (navButton) {
                 navButton.classList.add('active');
             }
+            
+            // تفعيل زر التنقل في الجوال
+            const mobileNavButtons = document.querySelectorAll('.nav-item-mobile');
+            mobileNavButtons.forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                if (onclick && onclick.includes(`showSection('${sectionName}')`)) {
+                    btn.classList.add('active');
+                }
+            });
 
             // تحديث المحتوى حسب القسم
             if (app) {
                 switch(sectionName) {
                     case 'home':
                         setTimeout(() => {
-                            app.updateCharts();
-                            app.updateStats();
+                            if (app.updateCharts) app.updateCharts();
+                            if (app.displayHomeStatistics) app.displayHomeStatistics();
                         }, 100);
                         break;
                     case 'family':
