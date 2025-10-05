@@ -3199,8 +3199,17 @@
                 try {
                     const user = this.userManager.login(identifier, password);
                     this.showToast(`مرحباً ${user.first_name}! تم تسجيل الدخول بنجاح`, 'success');
-                    hideLoginModal();
+                    
+                    // إخفاء النموذج بطريقة محسنة
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.classList.add('hidden');
+                        document.getElementById('loginForm').reset();
+                    }
+                    
+                    // تحديث الواجهة وتحديث البيانات
                     this.updateAuthUI();
+                    this.refreshAllSections(); // إضافة تحديث شامل
                     showSection('home');
                 } catch (error) {
                     this.showToast('خطأ في تسجيل الدخول: ' + error.message, 'error');
@@ -3291,7 +3300,21 @@
                 try {
                     const newUser = this.userManager.registerUser(userData);
                     this.showToast(`تم إرسال طلب التسجيل بنجاح! سيتم مراجعة طلبك من قبل الإدارة.`, 'success');
-                    hideRegisterModal();
+                    
+                    // إخفاء النموذج بطريقة محسنة
+                    const registerModal = document.getElementById('registerModal');
+                    if (registerModal) {
+                        registerModal.classList.add('hidden');
+                        document.getElementById('registerForm').reset();
+                        updateRegisterFullNamePreview();
+                    }
+                    
+                    // تحديث لوحة التحكم إذا كان المستخدم الحالي أدمن
+                    if (this.userManager.currentUser && this.userManager.currentUser.role === 'admin') {
+                        this.displayAdminPanel(); // تحديث لوحة التحكم لإظهار المستخدم الجديد
+                        this.refreshAllSections();
+                    }
+                    
                 } catch (error) {
                     this.showToast('خطأ في التسجيل: ' + error.message, 'error');
                 }
@@ -4588,16 +4611,43 @@
                 }
 
                 const pendingUsers = this.userManager.getPendingUsers();
+                const allUsers = this.userManager.getActiveUsers();
                 const adminContainer = document.getElementById('admin-content');
                 
                 if (adminContainer) {
                     adminContainer.innerHTML = `
-                        <div class="card p-6">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">طلبات العضوية المعلقة (${pendingUsers.length})</h3>
-                            ${pendingUsers.length === 0 ? 
-                                '<p class="text-gray-500">لا توجد طلبات معلقة</p>' :
-                                '<div id="pending-users-list">' + this.renderPendingUsers() + '</div>'
-                            }
+                        <div class="space-y-6">
+                            <!-- طلبات العضوية المعلقة -->
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-clock text-yellow-600 ml-2"></i>
+                                    طلبات العضوية المعلقة (${pendingUsers.length})
+                                </h3>
+                                ${pendingUsers.length === 0 ? 
+                                    '<p class="text-gray-500">✅ لا توجد طلبات معلقة</p>' :
+                                    '<div id="pending-users-list">' + this.renderPendingUsers() + '</div>'
+                                }
+                            </div>
+                            
+                            <!-- الأعضاء النشطين -->
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-users text-green-600 ml-2"></i>
+                                    الأعضاء النشطين (${allUsers.length})
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    ${allUsers.map(user => `
+                                        <div class="p-3 border border-gray-200 rounded-lg">
+                                            <h4 class="font-semibold text-gray-800">${user.full_name}</h4>
+                                            <p class="text-sm text-gray-600">${user.email}</p>
+                                            <p class="text-xs text-gray-500">انضم: ${new Date(user.created_at).toLocaleDateString('ar-SA')}</p>
+                                            <span class="inline-block mt-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                                                ${user.role === 'admin' ? '👑 مدير' : '👤 عضو'}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
                     `;
                 }
@@ -6287,18 +6337,75 @@
                 event.stopPropagation();
             }
             
-            const modal = document.getElementById('loginModal');
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
+            // إغلاق جميع النماذج الأخرى أولاً
+            hideAllModals();
             
-            setTimeout(() => {
-                document.getElementById('loginIdentifier').focus();
-            }, 100);
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                
+                setTimeout(() => {
+                    document.getElementById('loginIdentifier').focus();
+                }, 100);
+                console.log('✅ تم عرض نموذج تسجيل الدخول بنجاح');
+            }
+        }
+
+        function showRegisterModal() {
+            console.log('🔍 محاولة فتح نموذج التسجيل...');
+            
+            // منع أي event listeners من التدخل مؤقتاً
+            if (typeof event !== 'undefined' && event.stopPropagation) {
+                event.stopPropagation();
+            }
+            
+            // إغلاق جميع النماذج الأخرى أولاً
+            hideAllModals();
+            
+            const modal = document.getElementById('registerModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                
+                setTimeout(() => {
+                    document.getElementById('registerFirstName').focus();
+                }, 100);
+                console.log('✅ تم عرض نموذج التسجيل بنجاح');
+            }
+        }
+
+        // إغلاق جميع النماذج المنبثقة
+        function hideAllModals() {
+            const modals = ['loginModal', 'registerModal', 'familyModal', 'eventModal', 'suggestionModal', 'videoUploadModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                }
+            });
         }
 
         function hideLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('loginForm').reset();
+            console.log('🚪 إخفاء نموذج تسجيل الدخول...');
+            const modal = document.getElementById('loginModal');
+            const form = document.getElementById('loginForm');
+            
+            if (modal) {
+                // إزالة النموذج فوراً
+                modal.classList.add('hidden');
+                modal.style.display = 'none'; // إضافة حماية إضافية
+                
+                // إعادة تعيين النموذج
+                if (form) {
+                    form.reset();
+                }
+                
+                console.log('✅ تم إخفاء نموذج تسجيل الدخول بنجاح');
+            } else {
+                console.error('❌ لم يتم العثور على نموذج تسجيل الدخول');
+            }
         }
 
         // تشخيص شامل للمشكلة
@@ -6547,9 +6654,25 @@
         }
 
         function hideRegisterModal() {
-            document.getElementById('registerModal').classList.add('hidden');
-            document.getElementById('registerForm').reset();
-            updateRegisterFullNamePreview();
+            console.log('🚪 إخفاء نموذج التسجيل...');
+            const modal = document.getElementById('registerModal');
+            const form = document.getElementById('registerForm');
+            
+            if (modal) {
+                // إزالة النموذج فوراً
+                modal.classList.add('hidden');
+                modal.style.display = 'none'; // إضافة حماية إضافية
+                
+                // إعادة تعيين النموذج
+                if (form) {
+                    form.reset();
+                    updateRegisterFullNamePreview();
+                }
+                
+                console.log('✅ تم إخفاء نموذج التسجيل بنجاح');
+            } else {
+                console.error('❌ لم يتم العثور على نموذج التسجيل');
+            }
         }
 
         function resetRegisterForm() {
