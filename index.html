@@ -59,64 +59,441 @@
             border-color: #e5e7eb;
         }
 
-        /* Mobile-specific responsive improvements */
+        /* Enhanced Mobile-Responsive Design */
         @media (max-width: 768px) {
+            /* Basic Layout */
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
             .container {
-                padding-left: 12px;
-                padding-right: 12px;
+                padding-left: 8px;
+                padding-right: 8px;
             }
             
+            /* Cards & Content */
             .card {
-                margin: 8px 0;
-                padding: 16px !important;
+                margin: 6px 0;
+                padding: 12px !important;
+                border-radius: 8px;
             }
             
+            /* Grid Layouts */
             .grid {
                 grid-template-columns: 1fr !important;
-                gap: 12px !important;
+                gap: 8px !important;
             }
             
+            .grid-cols-2 {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+            
+            .grid-cols-1 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Statistics Cards */
             .stat-card {
-                padding: 20px;
+                padding: 16px;
                 text-align: center;
+                margin-bottom: 8px;
             }
             
-            .modal .max-w-4xl {
+            /* Modal Improvements */
+            .modal .max-w-4xl, .modal .max-w-6xl, .modal .max-w-2xl {
                 max-width: 95% !important;
-                margin: 10px;
+                margin: 8px;
+                border-radius: 8px;
             }
             
-            .text-2xl {
-                font-size: 1.25rem !important;
+            .modal-content {
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+            
+            /* Typography Scaling */
+            .text-4xl {
+                font-size: 1.75rem !important;
+                line-height: 1.2;
             }
             
             .text-3xl {
                 font-size: 1.5rem !important;
+                line-height: 1.3;
             }
             
-            .px-8 {
-                padding-left: 16px !important;
-                padding-right: 16px !important;
+            .text-2xl {
+                font-size: 1.25rem !important;
+                line-height: 1.4;
             }
             
-            /* Hide desktop-specific elements on mobile */
+            .text-xl {
+                font-size: 1.125rem !important;
+            }
+            
+            /* Spacing Adjustments */
+            .px-8, .px-6 {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+            
+            .py-8, .py-6 {
+                padding-top: 16px !important;
+                padding-bottom: 16px !important;
+            }
+            
+            .mb-8, .mb-6 {
+                margin-bottom: 16px !important;
+            }
+            
+            .space-y-6 > * + * {
+                margin-top: 12px !important;
+            }
+            
+            .space-y-4 > * + * {
+                margin-top: 8px !important;
+            }
+            
+            /* Hide desktop-specific elements */
             .hidden-mobile {
                 display: none !important;
             }
+            
+            /* Mobile-specific visibility */
+            .show-mobile {
+                display: block !important;
+            }
+            
+            /* Navigation improvements */
+            .nav-header {
+                padding: 8px 12px !important;
+            }
+            
+            /* Enhanced Data Display for Mobile */
+            .family-member-card {
+                padding: 10px;
+                margin: 3px;
+                font-size: 13px;
+                border-radius: 6px;
+                border: 1px solid #e5e7eb;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s ease;
+            }
+            
+            .family-member-card:active {
+                transform: scale(0.98);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            
+            .generation-title {
+                font-size: 1rem !important;
+                padding: 6px 0;
+                text-align: center;
+                background: rgba(59, 130, 246, 0.1);
+                border-radius: 6px;
+                margin: 8px 0;
+            }
+            
+            /* Card Grid Improvements */
+            .grid.grid-cols-1 .family-member-card,
+            .grid.grid-cols-2 .family-member-card,
+            .grid.grid-cols-3 .family-member-card {
+                min-height: 120px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+            
+            /* Stats Cards */
+            .stat-card {
+                padding: 12px !important;
+                border-radius: 8px;
+                text-align: center;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(59, 130, 246, 0.2);
+            }
+            
+            .stat-card h4 {
+                font-size: 0.875rem;
+                margin-bottom: 4px;
+            }
+            
+            .stat-card .text-3xl {
+                font-size: 1.5rem !important;
+                font-weight: 700;
+            }
+            
+            /* Event Cards */
+            .event-card {
+                padding: 12px;
+                margin: 6px 0;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.95);
+                border-left: 4px solid #3b82f6;
+            }
+            
+            /* Suggestion Cards */
+            .suggestion-card {
+                padding: 10px;
+                margin: 4px 0;
+                border-radius: 6px;
+                font-size: 14px;
+                background: rgba(255, 255, 255, 0.9);
+            }
+            
+            /* Library Cards */
+            .library-item {
+                padding: 12px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.95);
+                margin-bottom: 8px;
+            }
+            
+            .library-item h4 {
+                font-size: 1rem;
+                line-height: 1.3;
+                margin-bottom: 6px;
+            }
+            
+            .library-item p {
+                font-size: 0.875rem;
+                line-height: 1.4;
+                color: #6b7280;
+            }
+            
+            /* Table Alternatives for Mobile */
+            .mobile-table {
+                display: block;
+            }
+            
+            .mobile-table-row {
+                display: block;
+                padding: 12px;
+                margin: 6px 0;
+                background: white;
+                border-radius: 6px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mobile-table-cell {
+                display: block;
+                padding: 4px 0;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            
+            .mobile-table-cell:last-child {
+                border-bottom: none;
+            }
+            
+            .mobile-table-label {
+                font-weight: 600;
+                color: #374151;
+                font-size: 0.875rem;
+                margin-bottom: 2px;
+            }
+            
+            .mobile-table-value {
+                color: #6b7280;
+                font-size: 0.875rem;
+            }
+            
+            /* Bottom Navigation for Mobile */
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid #e5e7eb;
+                padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+                z-index: 100;
+                display: none;
+            }
+            
+            .bottom-nav-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 0;
+                max-width: 500px;
+                margin: 0 auto;
+                padding: 0 8px;
+            }
+            
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 4px;
+                border-radius: 6px;
+                text-decoration: none;
+                color: #6b7280;
+                font-size: 11px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+                min-height: 48px;
+            }
+            
+            .bottom-nav-item i {
+                font-size: 18px;
+                margin-bottom: 2px;
+            }
+            
+            .bottom-nav-item.active {
+                color: #3b82f6;
+                background: rgba(59, 130, 246, 0.1);
+            }
+            
+            .bottom-nav-item:active {
+                transform: scale(0.95);
+            }
+            
+            /* Show bottom nav on mobile */
+            @media (max-width: 768px) {
+                .bottom-nav {
+                    display: block;
+                }
+                
+                /* Add bottom padding to content to avoid overlap */
+                .main-content {
+                    padding-bottom: 80px;
+                }
+            }
         }
 
-        /* Touch-friendly buttons for mobile */
+        /* Enhanced Touch-Friendly Elements */
         @media (max-width: 768px) {
+            /* Buttons */
+            button, .btn, .nav-item-mobile {
+                min-height: 48px;
+                padding: 14px 18px;
+                font-size: 16px;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+            }
+            
+            /* Form Elements */
+            input, select, textarea {
+                min-height: 48px;
+                padding: 14px 16px;
+                font-size: 16px;
+                border-radius: 6px;
+                border: 2px solid #e5e7eb;
+                transition: border-color 0.2s ease;
+            }
+            
+            input:focus, select:focus, textarea:focus {
+                border-color: #3b82f6;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Mobile Menu Enhancements */
+            #mobileNavigation {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+                transform: translateY(0);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 1000;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            
+            #mobileNavigation.show {
+                transform: translateY(-100%);
+            }
+            
+            .nav-item-mobile {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                margin-bottom: 4px;
+                font-weight: 500;
+                border: 2px solid transparent;
+            }
+            
+            .nav-item-mobile:active {
+                transform: scale(0.98);
+            }
+            
+            .nav-item-mobile.active {
+                background: linear-gradient(135deg, #3b82f6, #10b981);
+                color: white !important;
+                border-color: transparent;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            }
+            
+            .nav-item-mobile i {
+                width: 24px;
+                text-align: center;
+                margin-left: 12px;
+                font-size: 18px;
+            }
+            
+            /* Mobile Menu Button */
+            #mobileMenuButton {
+                min-height: 44px;
+                min-width: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+            }
+            
+            #mobileMenuButton:active {
+                transform: scale(0.95);
+            }
+            
+            /* Toast Positioning for Mobile */
+            .toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Extra Small Screens (phones in portrait) */
+        @media (max-width: 480px) {
+            .container {
+                padding: 4px;
+            }
+            
+            .card {
+                padding: 8px !important;
+                margin: 4px 0;
+            }
+            
             button, .btn {
                 min-height: 44px;
                 padding: 12px 16px;
-                font-size: 16px;
+                font-size: 15px;
             }
             
-            input, select, textarea {
-                min-height: 44px;
-                padding: 12px;
-                font-size: 16px;
+            .text-3xl {
+                font-size: 1.375rem !important;
+            }
+            
+            .text-2xl {
+                font-size: 1.125rem !important;
             }
         }
         
@@ -135,7 +512,67 @@
             transform: translateY(-2px);
         }
 
-        .modal { backdrop-filter: blur(5px); }
+        .modal { 
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Enhanced Modal Styles for Mobile */
+        @media (max-width: 768px) {
+            .modal {
+                padding: 8px;
+            }
+            
+            .modal .bg-white {
+                max-height: 90vh;
+                border-radius: 12px 12px 0 0;
+                margin-top: auto;
+                margin-bottom: 0;
+            }
+            
+            .modal .max-w-4xl, .modal .max-w-6xl, .modal .max-w-2xl, .modal .max-w-lg {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0;
+            }
+            
+            /* Modal Header */
+            .modal h3 {
+                font-size: 1.25rem;
+                line-height: 1.4;
+            }
+            
+            /* Modal Content */
+            .modal .overflow-y-auto {
+                max-height: 75vh;
+            }
+            
+            /* Form Grid in Modals */
+            .modal .grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .modal .grid-cols-3 {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            /* Modal Buttons */
+            .modal button {
+                min-height: 48px;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            .modal .flex.gap-4 {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .modal .flex.gap-4 button {
+                width: 100%;
+            }
+        }
 
         .btn-primary {
             background: linear-gradient(135deg, #3b82f6, #10b981);
@@ -422,7 +859,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
+    <div class="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8 main-content">
         <!-- Home Section -->
         <section id="home-section" class="section active">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -5260,24 +5697,85 @@
         function toggleMobileMenu() {
             const mobileNav = document.getElementById('mobileNavigation');
             const menuIcon = document.getElementById('mobileMenuIcon');
+            const menuButton = document.getElementById('mobileMenuButton');
             
             if (mobileNav.classList.contains('hidden')) {
+                // فتح القائمة
                 mobileNav.classList.remove('hidden');
+                // انتظار قصير للتأكد من عرض العنصر قبل إضافة الحركة
+                setTimeout(() => {
+                    mobileNav.classList.add('show');
+                }, 10);
+                
                 menuIcon.className = 'fas fa-times text-xl';
+                menuButton.classList.add('bg-gray-200');
+                
+                // منع التمرير في الخلفية
+                document.body.style.overflow = 'hidden';
             } else {
-                mobileNav.classList.add('hidden');
+                // إغلاق القائمة
+                mobileNav.classList.remove('show');
                 menuIcon.className = 'fas fa-bars text-xl';
+                menuButton.classList.remove('bg-gray-200');
+                
+                // إخفاء القائمة بعد انتهاء الحركة
+                setTimeout(() => {
+                    mobileNav.classList.add('hidden');
+                }, 300);
+                
+                // السماح بالتمرير مرة أخرى
+                document.body.style.overflow = 'auto';
             }
         }
 
-        // إغلاق القائمة المتنقلة عند النقر خارجها
+        // إغلاق القائمة المتنقلة عند النقر خارجها أو عند الإيماءات
         document.addEventListener('click', function(event) {
             const mobileNav = document.getElementById('mobileNavigation');
             const menuButton = document.getElementById('mobileMenuButton');
             
-            if (!mobileNav.contains(event.target) && !menuButton.contains(event.target)) {
-                mobileNav.classList.add('hidden');
-                document.getElementById('mobileMenuIcon').className = 'fas fa-bars text-xl';
+            if (mobileNav && !mobileNav.classList.contains('hidden') && 
+                !mobileNav.contains(event.target) && !menuButton.contains(event.target)) {
+                closeMobileMenu();
+            }
+        });
+        
+        // دالة مساعدة لإغلاق القائمة المتنقلة
+        function closeMobileMenu() {
+            const mobileNav = document.getElementById('mobileNavigation');
+            const menuIcon = document.getElementById('mobileMenuIcon');
+            const menuButton = document.getElementById('mobileMenuButton');
+            
+            if (mobileNav && !mobileNav.classList.contains('hidden')) {
+                mobileNav.classList.remove('show');
+                menuIcon.className = 'fas fa-bars text-xl';
+                menuButton.classList.remove('bg-gray-200');
+                
+                setTimeout(() => {
+                    mobileNav.classList.add('hidden');
+                }, 300);
+                
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // إضافة دعم للوحة اللمس (swipe gestures)
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        document.addEventListener('touchstart', function(event) {
+            touchStartY = event.changedTouches[0].screenY;
+        });
+        
+        document.addEventListener('touchend', function(event) {
+            const mobileNav = document.getElementById('mobileNavigation');
+            if (!mobileNav || mobileNav.classList.contains('hidden')) return;
+            
+            touchEndY = event.changedTouches[0].screenY;
+            const swipeDistance = touchStartY - touchEndY;
+            
+            // إغلاق القائمة عند السحب لأسفل (swipe down)
+            if (swipeDistance < -50) {
+                closeMobileMenu();
             }
         });
 
@@ -7572,5 +8070,79 @@
         }, 1000); // تأخير ثانية واحدة لتفعيل المستمعي
         */
     </script>
+
+    <!-- Bottom Navigation for Mobile -->
+    <div class="bottom-nav" id="bottomNav">
+        <div class="bottom-nav-grid">
+            <button class="bottom-nav-item active" onclick="showSection('home'); updateBottomNav('home');">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('family'); updateBottomNav('family');">
+                <i class="fas fa-users"></i>
+                <span>العائلة</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('events'); updateBottomNav('events');">
+                <i class="fas fa-calendar"></i>
+                <span>الأحداث</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('suggestions'); updateBottomNav('suggestions');">
+                <i class="fas fa-lightbulb"></i>
+                <span>اقتراحات</span>
+            </button>
+            <button class="bottom-nav-item" onclick="showSection('library'); updateBottomNav('library');">
+                <i class="fas fa-book"></i>
+                <span>المكتبة</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Update bottom navigation active state
+        function updateBottomNav(sectionName) {
+            const navItems = document.querySelectorAll('.bottom-nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // Map section names to button indices
+            const sectionMap = {
+                'home': 0,
+                'family': 1,
+                'events': 2,
+                'suggestions': 3,
+                'library': 4
+            };
+            
+            const index = sectionMap[sectionName];
+            if (index !== undefined) {
+                navItems[index].classList.add('active');
+            }
+        }
+        
+        // Show bottom nav only for logged in users on mobile
+        function updateBottomNavVisibility() {
+            const bottomNav = document.getElementById('bottomNav');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (app && app.userManager && app.userManager.currentUser && isMobile) {
+                bottomNav.style.display = 'block';
+            } else if (isMobile && (!app || !app.userManager || !app.userManager.currentUser)) {
+                bottomNav.style.display = 'none';
+            }
+        }
+        
+        // Update visibility on resize and auth state changes
+        window.addEventListener('resize', updateBottomNavVisibility);
+        document.addEventListener('DOMContentLoaded', updateBottomNavVisibility);
+        
+        // Override showSection to update bottom nav
+        const originalShowSection = window.showSection;
+        window.showSection = function(sectionName) {
+            if (originalShowSection) {
+                originalShowSection(sectionName);
+            }
+            updateBottomNav(sectionName);
+        };
+    </script>
+
 </body>
 </html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار التصميم المتجاوب - آل سعيدان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-white text-center mb-8">
+            <i class="fas fa-mobile-alt mr-2"></i>
+            اختبار التصميم المتجاوب
+        </h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Mobile Portrait -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-mobile-alt text-blue-600 mr-2"></i>
+                    جوال عمودي (375×667)
+                </h3>
+                <div class="border border-gray-300 rounded-lg overflow-hidden" style="width: 187px; height: 334px; margin: 0 auto;">
+                    <iframe src="/index.html" width="375" height="667" style="transform: scale(0.5); transform-origin: 0 0; border: none;"></iframe>
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p><strong>الدقة:</strong> 375×667 (iPhone SE)</p>
+                    <p><strong>نسبة العرض:</strong> 9:16</p>
+                </div>
+            </div>
+            
+            <!-- Mobile Landscape -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-mobile-alt fa-rotate-90 text-green-600 mr-2"></i>
+                    جوال أفقي (667×375)
+                </h3>
+                <div class="border border-gray-300 rounded-lg overflow-hidden" style="width: 334px; height: 187px; margin: 0 auto;">
+                    <iframe src="/index.html" width="667" height="375" style="transform: scale(0.5); transform-origin: 0 0; border: none;"></iframe>
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p><strong>الدقة:</strong> 667×375 (iPhone SE أفقي)</p>
+                    <p><strong>نسبة العرض:</strong> 16:9</p>
+                </div>
+            </div>
+            
+            <!-- Tablet -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-tablet-alt text-purple-600 mr-2"></i>
+                    تابلت (768×1024)
+                </h3>
+                <div class="border border-gray-300 rounded-lg overflow-hidden" style="width: 192px; height: 256px; margin: 0 auto;">
+                    <iframe src="/index.html" width="768" height="1024" style="transform: scale(0.25); transform-origin: 0 0; border: none;"></iframe>
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p><strong>الدقة:</strong> 768×1024 (iPad)</p>
+                    <p><strong>نسبة العرض:</strong> 3:4</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature Checklist -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                قائمة التحسينات المطبقة
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-3">
+                    <h4 class="font-bold text-gray-700 mb-3">🎯 التنقل والواجهة</h4>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">قائمة تنقل متجاوبة للجوال</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">شريط تنقل سفلي للجوال</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">حركات انتقال سلسة</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">إيماءات اللمس (swipe)</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <h4 class="font-bold text-gray-700 mb-3">📱 العناصر التفاعلية</h4>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">أزرار صديقة للمس (48px+)</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">حقول إدخال محسنة</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">نماذج متجاوبة</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">تأثيرات نشطة للمس</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <h4 class="font-bold text-gray-700 mb-3">🎨 التخطيط والعرض</h4>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">شبكات متجاوبة</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">بطاقات محسنة للجوال</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">مودالز ملائمة للجوال</span>
+                    </div>
+                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <i class="fas fa-check text-green-600"></i>
+                        <span class="text-sm">خطوط مقروءة ومناسبة</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Access Links -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-external-link-alt text-blue-600 mr-2"></i>
+                روابط سريعة للاختبار
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="/index.html" class="flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    التطبيق الرئيسي
+                </a>
+                <a href="/index.html?test_pending=true&auto_login=admin&show_admin=true#admin" class="flex items-center justify-center bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-user-shield mr-2"></i>
+                    دخول كمدير
+                </a>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-bold text-blue-800 mb-4">📋 تعليمات الاختبار</h3>
+            <ul class="text-blue-700 space-y-2">
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-blue-600 mr-2 mt-1"></i>
+                    <span>اختبر التطبيق على أجهزة مختلفة (جوال، تابلت، كمبيوتر)</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-blue-600 mr-2 mt-1"></i>
+                    <span>جرب تدوير الشاشة من عمودي لأفقي</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-blue-600 mr-2 mt-1"></i>
+                    <span>اختبر جميع العناصر التفاعلية (أزرار، قوائم، نماذج)</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-arrow-right text-blue-600 mr-2 mt-1"></i>
+                    <span>تأكد من سهولة القراءة والتنقل</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
