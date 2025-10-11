@@ -1,22 +1,17 @@
-# Cloudflare Pages Configuration
 name = "saedan-family-tree"
-compatibility_date = "2024-09-01"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
 
-# Static site configuration
-[env.production]
-compatibility_date = "2024-09-01"
+# Static site configuration for Cloudflare Pages
+# The app uses a single index.html with all functionality
+# No additional Workers or API endpoints needed
 
-[build]
-# No build command needed for static HTML
-command = ""
-# The files to upload are in the root directory
-publish = "./"
+# Environment variables (optional)
+# [env.production.vars]
+# APP_VERSION = "2.0.0"
+# DEBUG = "false"
 
-# Route configuration
-[[env.production.routes]]
-pattern = "*"
-custom_domain = "saedan-familyapp.com"
-
-# Environment variables (if needed)
-[env.production.vars]
-ENVIRONMENT = "production"
+# Build configuration
+# Since this is a static HTML app, no complex build process needed
+# Just copy index.html and assets to dist directory

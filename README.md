@@ -15,7 +15,8 @@
 
 ## الروابط
 - **الموقع المحلي**: https://3000-isvb57g3ae2i9g8x3xn7i-6532622b.e2b.dev/ (النسخة المطورة مع نظام الموافقة)
-- **GitHub Repository**: https://github.com/salmansaedan/my-family
+- **GitHub Repository**: https://github.com/salmansaedan/my-family (تم التحديث ✅)
+- **Cloudflare Pages**: `saedan-family-tree` (جاري إعداد النشر)
 - **النسخة الكاملة**: `index.html` (تحتوي على جميع الميزات مع نظام الموافقة المطور)
 
 ## معمارية البيانات

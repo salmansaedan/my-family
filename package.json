@@ -1,19 +1,29 @@
 {
-  "name": "family-alsaedan",
+  "name": "saedan-family-tree",
   "version": "2.0.0",
-  "description": "تطبيق إدارة عائلة آل سعدان - Static HTML Application",
+  "description": "تطبيق آل سعيدان الشامل - Enhanced Family Management Application with Registration Approval System",
   "main": "index.html",
-  "type": "module",
   "scripts": {
-    "build": "echo 'Static site - no build required'",
-    "start": "echo 'Static site - no server required'",
-    "test": "echo 'Tests passed - static HTML validated'"
+    "build": "mkdir -p dist && cp index.html dist/ && cp -r assets dist/ 2>/dev/null || true",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name saedan-family-tree",
+    "preview": "wrangler pages dev dist --project-name saedan-family-tree",
+    "clean": "rm -rf dist"
   },
-  "keywords": ["family-tree", "arabic", "static-site"],
-  "author": "سلمان آل سعدان <info@salmansaedan.com>",
+  "keywords": [
+    "family-tree",
+    "arabic",
+    "genealogy", 
+    "family-management",
+    "registration-approval",
+    "saudi-arabia"
+  ],
+  "author": "Salman Saedan <info@salmansaedan.com>",
   "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salmansaedan/my-family.git"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   }
 }
