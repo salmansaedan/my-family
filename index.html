@@ -2980,20 +2980,19 @@
                         if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
                     }
                 } else {
-                    // المستخدم غير مسجل دخول - إخفاء عناصر المستخدمين
+                    // المستخدم غير مسجل دخول - إظهار الأقسام العامة وإخفاء المحمية فقط
                     // سطح المكتب
-                    if (mainNavigation) mainNavigation.classList.add('hidden');
+                    if (mainNavigation) mainNavigation.classList.remove('hidden'); // إظهار الأقسام العامة
                     if (userProfileMenu) userProfileMenu.classList.add('hidden');
                     if (authButtons) authButtons.classList.remove('hidden');
                     if (adminButton) adminButton.classList.add('hidden');
                     
                     // الجوال
-                    if (mainNavigationMobile) mainNavigationMobile.classList.add('hidden');
+                    if (mainNavigationMobile) mainNavigationMobile.classList.remove('hidden'); // إظهار الأقسام العامة
                     if (userMenuMobile) userMenuMobile.classList.add('hidden');
                     if (authButtonsMobile) authButtonsMobile.classList.remove('hidden');
                     if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
                 }
-            }
             }
 
             // عرض الملف الشخصي
@@ -4889,17 +4888,17 @@
                                     </div>
 
                                     <div class="flex gap-2">
-                                        <button onclick="app.approveUser('${user.id}')" 
+                                        <button onclick="app.approveUser('` + user.id + `')" 
                                                 class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
                                             <i class="fas fa-check ml-1"></i>
                                             موافقة
                                         </button>
-                                        <button onclick="app.rejectUser('${user.id}')" 
+                                        <button onclick="app.rejectUser('` + user.id + `')" 
                                                 class="flex-1 bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors">
                                             <i class="fas fa-times ml-1"></i>
                                             رفض
                                         </button>
-                                        <button onclick="app.viewUserDetails('${user.id}')" 
+                                        <button onclick="app.viewUserDetails('` + user.id + `')" 
                                                 class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
                                             <i class="fas fa-eye"></i>
                                         </button>
@@ -5077,12 +5076,12 @@
                                 </div>
                                 
                                 <div class="modal-footer">
-                                    <button onclick="app.approveUser('${user.id}'); closeModal('userDetailsModal')" 
+                                    <button onclick="app.approveUser('` + user.id + `'); closeModal('userDetailsModal')" 
                                             class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                                         <i class="fas fa-check ml-1"></i>
                                         موافقة
                                     </button>
-                                    <button onclick="app.rejectUser('${user.id}'); closeModal('userDetailsModal')" 
+                                    <button onclick="app.rejectUser('` + user.id + `'); closeModal('userDetailsModal')" 
                                             class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                                         <i class="fas fa-times ml-1"></i>
                                         رفض
