@@ -318,8 +318,9 @@
                     <!-- Desktop User Menu -->
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                         <!-- Admin Panel (admin only) -->
-                        <button id="nav-admin-desktop" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden" onclick="showSection('admin')">
+                        <button id="nav-admin-desktop" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden relative" onclick="showSection('admin')">
                             <i class="fas fa-cog ml-2"></i>لوحة الإدارة
+                            <span id="pending-badge-desktop" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse"></span>
                         </button>
                         
                         <!-- User Profile -->
@@ -380,8 +381,9 @@
                     <!-- Mobile User Menu (logged in) -->
                     <div id="userMenuMobile" class="space-y-2 border-b border-gray-200 pb-4">
                         <!-- Admin Panel (admin only) -->
-                        <button id="nav-admin-mobile" class="w-full text-right py-3 px-4 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition hidden" onclick="showSection('admin'); toggleMobileMenu();">
+                        <button id="nav-admin-mobile" class="w-full text-right py-3 px-4 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition hidden relative" onclick="showSection('admin'); toggleMobileMenu();">
                             <i class="fas fa-cog ml-2"></i>لوحة الإدارة
+                            <span id="pending-badge-mobile" class="hidden absolute top-2 left-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse"></span>
                         </button>
                         
                         <!-- User Profile -->
@@ -2970,6 +2972,9 @@
                     if (isAdmin) {
                         if (adminButton) adminButton.classList.remove('hidden');
                         if (adminButtonMobile) adminButtonMobile.classList.remove('hidden');
+                        
+                        // تحديث شارات الإشعارات
+                        this.updatePendingBadges();
                     } else {
                         if (adminButton) adminButton.classList.add('hidden');
                         if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
@@ -4812,6 +4817,9 @@
                             </div>
                         </div>
                     `;
+                    
+                    // تحديث شارات الإشعارات
+                    this.updatePendingBadges();
                 }
             }
 
@@ -4838,6 +4846,373 @@
                     
                 } catch (error) {
                     this.showToast('حدث خطأ أثناء تحميل البيانات: ' + error.message, 'error');
+                }
+            }
+
+            // === نظام إدارة الموافقة على التسجيل ===
+
+            // عرض الطلبات المعلقة
+            renderPendingUsers() {
+                try {
+                    const pendingUsers = this.userManager.users.filter(u => u.status === 'pending');
+                    
+                    if (pendingUsers.length === 0) {
+                        return `
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                <p>لا توجد طلبات انتظار حالياً</p>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${pendingUsers.map(user => `
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800">${user.full_name}</h4>
+                                            <p class="text-sm text-gray-600">${user.email}</p>
+                                            <p class="text-xs text-gray-500">رقم الهوية: ${user.national_id}</p>
+                                            <p class="text-xs text-gray-500">الهاتف: ${user.phone}</p>
+                                        </div>
+                                        <span class="bg-amber-100 text-amber-800 px-2 py-1 text-xs rounded-full">
+                                            في الانتظار
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="text-xs text-gray-500 mb-3">
+                                        <p>تاريخ الميلاد: ${new Date(user.birth_date).toLocaleDateString('ar-SA')}</p>
+                                        <p>مكان الميلاد: ${user.birth_place}</p>
+                                        <p>المهنة: ${user.profession}</p>
+                                        <p>تاريخ الطلب: ${new Date(user.created_at).toLocaleDateString('ar-SA')}</p>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button onclick="app.approveUser('${user.id}')" 
+                                                class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
+                                            <i class="fas fa-check ml-1"></i>
+                                            موافقة
+                                        </button>
+                                        <button onclick="app.rejectUser('${user.id}')" 
+                                                class="flex-1 bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors">
+                                            <i class="fas fa-times ml-1"></i>
+                                            رفض
+                                        </button>
+                                        <button onclick="app.viewUserDetails('${user.id}')" 
+                                                class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('خطأ في عرض الطلبات المعلقة:', error);
+                    return '<div class="text-red-600 p-4">حدث خطأ في تحميل الطلبات المعلقة</div>';
+                }
+            }
+
+            // موافقة على مستخدم
+            approveUser(userId) {
+                try {
+                    const user = this.userManager.users.find(u => u.id === userId);
+                    if (!user) {
+                        this.showToast('المستخدم غير موجود', 'error');
+                        return;
+                    }
+
+                    if (user.status !== 'pending') {
+                        this.showToast('هذا الطلب تم البت فيه مسبقاً', 'warning');
+                        return;
+                    }
+
+                    // تحديث حالة المستخدم
+                    user.status = 'active';
+                    user.approved_at = new Date().toISOString();
+                    user.approved_by = this.userManager.currentUser.id;
+
+                    // حفظ التغييرات
+                    if (this.userManager.saveUsers()) {
+                        this.showToast(`✅ تم قبول طلب ${user.full_name} بنجاح!`, 'success');
+                        
+                        // إرسال إيميل موافقة
+                        this.sendApprovalEmail(user, true);
+                        
+                        // تحديث العرض
+                        this.displayAdminPanel();
+                        
+                        // إضافة المستخدم كعضو في العائلة إذا لم يكن موجوداً
+                        this.addUserToFamily(user);
+                        
+                    } else {
+                        this.showToast('حدث خطأ في حفظ البيانات', 'error');
+                    }
+                } catch (error) {
+                    console.error('خطأ في الموافقة على المستخدم:', error);
+                    this.showToast('حدث خطأ في الموافقة على الطلب', 'error');
+                }
+            }
+
+            // رفض مستخدم
+            rejectUser(userId) {
+                try {
+                    const user = this.userManager.users.find(u => u.id === userId);
+                    if (!user) {
+                        this.showToast('المستخدم غير موجود', 'error');
+                        return;
+                    }
+
+                    if (user.status !== 'pending') {
+                        this.showToast('هذا الطلب تم البت فيه مسبقاً', 'warning');
+                        return;
+                    }
+
+                    // تأكيد الرفض
+                    if (confirm(`هل أنت متأكد من رفض طلب ${user.full_name}؟\nسيتم حذف الطلب نهائياً.`)) {
+                        // إرسال إيميل رفض قبل الحذف
+                        this.sendApprovalEmail(user, false);
+                        
+                        // حذف المستخدم من القائمة
+                        const userIndex = this.userManager.users.findIndex(u => u.id === userId);
+                        if (userIndex > -1) {
+                            this.userManager.users.splice(userIndex, 1);
+                            
+                            if (this.userManager.saveUsers()) {
+                                this.showToast(`❌ تم رفض طلب ${user.full_name}`, 'info');
+                                this.displayAdminPanel();
+                            } else {
+                                this.showToast('حدث خطأ في حفظ البيانات', 'error');
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('خطأ في رفض المستخدم:', error);
+                    this.showToast('حدث خطأ في رفض الطلب', 'error');
+                }
+            }
+
+            // عرض تفاصيل المستخدم
+            viewUserDetails(userId) {
+                try {
+                    const user = this.userManager.users.find(u => u.id === userId);
+                    if (!user) {
+                        this.showToast('المستخدم غير موجود', 'error');
+                        return;
+                    }
+
+                    const modalHTML = `
+                        <div class="modal-overlay" onclick="closeModal('userDetailsModal')">
+                            <div class="modal-content max-w-2xl" onclick="event.stopPropagation()">
+                                <div class="modal-header">
+                                    <h2 class="text-xl font-bold">تفاصيل طلب التسجيل</h2>
+                                    <button onclick="closeModal('userDetailsModal')" class="modal-close">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="modal-body max-h-96 overflow-y-auto">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">الاسم الكامل</label>
+                                                <p class="text-gray-800">${user.full_name}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">البريد الإلكتروني</label>
+                                                <p class="text-gray-800">${user.email}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">رقم الهوية</label>
+                                                <p class="text-gray-800">${user.national_id}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">رقم الهاتف</label>
+                                                <p class="text-gray-800">${user.phone}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">تاريخ الميلاد</label>
+                                                <p class="text-gray-800">${new Date(user.birth_date).toLocaleDateString('ar-SA')}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">مكان الميلاد</label>
+                                                <p class="text-gray-800">${user.birth_place}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">المهنة</label>
+                                                <p class="text-gray-800">${user.profession}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">التخصص</label>
+                                                <p class="text-gray-800">${user.specialization || 'غير محدد'}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">الهوايات</label>
+                                                <p class="text-gray-800">${user.hobbies || 'غير محدد'}</p>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-600">تاريخ الطلب</label>
+                                                <p class="text-gray-800">${new Date(user.created_at).toLocaleDateString('ar-SA', { 
+                                                    year: 'numeric', 
+                                                    month: 'long', 
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button onclick="app.approveUser('${user.id}'); closeModal('userDetailsModal')" 
+                                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                        <i class="fas fa-check ml-1"></i>
+                                        موافقة
+                                    </button>
+                                    <button onclick="app.rejectUser('${user.id}'); closeModal('userDetailsModal')" 
+                                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                        <i class="fas fa-times ml-1"></i>
+                                        رفض
+                                    </button>
+                                    <button onclick="closeModal('userDetailsModal')" 
+                                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                                        إغلاق
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // إضافة النافذة المنبثقة
+                    const existingModal = document.getElementById('userDetailsModal');
+                    if (existingModal) {
+                        existingModal.remove();
+                    }
+
+                    const modalDiv = document.createElement('div');
+                    modalDiv.id = 'userDetailsModal';
+                    modalDiv.innerHTML = modalHTML;
+                    document.body.appendChild(modalDiv);
+
+                } catch (error) {
+                    console.error('خطأ في عرض تفاصيل المستخدم:', error);
+                    this.showToast('حدث خطأ في عرض التفاصيل', 'error');
+                }
+            }
+
+            // إرسال إيميل الموافقة/الرفض (محاكاة)
+            sendApprovalEmail(user, approved) {
+                try {
+                    const emailData = {
+                        to: user.email,
+                        subject: approved ? 'تم قبول طلب انضمامك لموقع عائلة السعدان' : 'لم يتم قبول طلب الانضمام',
+                        body: approved 
+                            ? `مرحباً ${user.full_name},\n\nنحن سعداء لإبلاغك بأنه تم قبول طلب انضمامك لموقع عائلة السعدان.\n\nيمكنك الآن تسجيل الدخول واستكشاف الموقع.\n\nأهلاً وسهلاً بك في العائلة!\n\nإدارة موقع عائلة السعدان`
+                            : `مرحباً ${user.full_name},\n\nنعتذر لإبلاغك بأنه لم يتم قبول طلب انضمامك لموقع عائلة السعدان في الوقت الحالي.\n\nيمكنك المحاولة مرة أخرى أو التواصل مع الإدارة للاستفسار.\n\nشكراً لاهتمامك\n\nإدارة موقع عائلة السعدان`,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // حفظ السجل محلياً (محاكاة)
+                    const emailLogs = JSON.parse(localStorage.getItem('email_logs') || '[]');
+                    emailLogs.push(emailData);
+                    localStorage.setItem('email_logs', JSON.stringify(emailLogs));
+
+                    console.log('📧 تم إرسال إيميل:', approved ? 'موافقة' : 'رفض', 'إلى:', user.email);
+                    
+                } catch (error) {
+                    console.error('خطأ في إرسال الإيميل:', error);
+                }
+            }
+
+            // إضافة المستخدم المقبول كعضو في العائلة
+            addUserToFamily(user) {
+                try {
+                    const familyMembers = this.dataManager.getData('familyMembers');
+                    
+                    // التحقق من عدم وجود العضو مسبقاً
+                    const existingMember = familyMembers.find(m => 
+                        m.national_id === user.national_id || 
+                        m.email === user.email
+                    );
+                    
+                    if (!existingMember) {
+                        const newFamilyMember = {
+                            id: user.id,
+                            name: user.full_name,
+                            email: user.email,
+                            phone: user.phone,
+                            national_id: user.national_id,
+                            birth_date: user.birth_date,
+                            birth_place: user.birth_place,
+                            profession: user.profession,
+                            specialization: user.specialization || '',
+                            hobbies: user.hobbies || '',
+                            father_id: user.father_id,
+                            generation: user.generation || 3, // افتراضياً الجيل الثالث للأعضاء الجدد
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        familyMembers.push(newFamilyMember);
+                        this.dataManager.saveData('familyMembers', familyMembers);
+                        
+                        console.log('✅ تم إضافة المستخدم كعضو في العائلة:', user.full_name);
+                    }
+                } catch (error) {
+                    console.error('خطأ في إضافة المستخدم للعائلة:', error);
+                }
+            }
+
+            // الحصول على عدد الطلبات المعلقة للشارة
+            getPendingUsersCount() {
+                try {
+                    return this.userManager.users.filter(u => u.status === 'pending').length;
+                } catch (error) {
+                    console.error('خطأ في حساب الطلبات المعلقة:', error);
+                    return 0;
+                }
+            }
+
+            // تحديث شارات الإشعارات
+            updatePendingBadges() {
+                try {
+                    const pendingCount = this.getPendingUsersCount();
+                    const badgeDesktop = document.getElementById('pending-badge-desktop');
+                    const badgeMobile = document.getElementById('pending-badge-mobile');
+
+                    if (pendingCount > 0) {
+                        // إظهار الشارات مع العدد
+                        if (badgeDesktop) {
+                            badgeDesktop.textContent = pendingCount;
+                            badgeDesktop.classList.remove('hidden');
+                        }
+                        if (badgeMobile) {
+                            badgeMobile.textContent = pendingCount;
+                            badgeMobile.classList.remove('hidden');
+                        }
+                    } else {
+                        // إخفاء الشارات
+                        if (badgeDesktop) {
+                            badgeDesktop.classList.add('hidden');
+                        }
+                        if (badgeMobile) {
+                            badgeMobile.classList.add('hidden');
+                        }
+                    }
+                } catch (error) {
+                    console.error('خطأ في تحديث شارات الإشعارات:', error);
                 }
             }
         }
