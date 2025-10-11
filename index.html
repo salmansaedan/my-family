@@ -3367,11 +3367,7 @@
                     this.showToast(`مرحباً ${user.first_name}! تم تسجيل الدخول بنجاح`, 'success');
                     
                     // إخفاء النموذج بطريقة محسنة
-                    const loginModal = document.getElementById('loginModal');
-                    if (loginModal) {
-                        loginModal.classList.add('hidden');
-                        document.getElementById('loginForm').reset();
-                    }
+                    hideLoginModal(); // استخدام الدالة المخصصة لضمان الإخفاء الكامل
                     
                     // تحديث الواجهة وتحديث البيانات
                     this.updateAuthUI();
@@ -3468,12 +3464,7 @@
                     this.showToast(`تم إرسال طلب التسجيل بنجاح! سيتم مراجعة طلبك من قبل الإدارة.`, 'success');
                     
                     // إخفاء النموذج بطريقة محسنة
-                    const registerModal = document.getElementById('registerModal');
-                    if (registerModal) {
-                        registerModal.classList.add('hidden');
-                        document.getElementById('registerForm').reset();
-                        updateRegisterFullNamePreview();
-                    }
+                    hideRegisterModal(); // استخدام الدالة المخصصة لضمان الإخفاء الكامل
                     
                     // تحديث لوحة التحكم إذا كان المستخدم الحالي أدمن
                     if (this.userManager.currentUser && this.userManager.currentUser.role === 'admin') {
