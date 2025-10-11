@@ -1,1774 +1,4 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق آل سعيدان الشامل - مع الأجيال المترابطة (محدث 2024-09-28)</title>
-    
-    <!-- CSS Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
-    
-    <!-- Arabic Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    
-    <!-- Chart.js for Statistics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
-        body { 
-            font-family: 'Noto Sans Arabic', Arial, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .loading-spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .nav-item.active {
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
 
-        /* Mobile Navigation Styles */
-        .nav-item-mobile.active {
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            color: white !important;
-            font-weight: 600;
-        }
-        
-        .nav-item-mobile {
-            border: 1px solid transparent;
-            font-weight: 500;
-        }
-        
-        .nav-item-mobile:hover {
-            background: #f3f4f6;
-            border-color: #e5e7eb;
-        }
-
-        /* Mobile-specific responsive improvements */
-        @media (max-width: 768px) {
-            .container {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            
-            .card {
-                margin: 8px 0;
-                padding: 16px !important;
-            }
-            
-            .grid {
-                grid-template-columns: 1fr !important;
-                gap: 12px !important;
-            }
-            
-            .stat-card {
-                padding: 20px;
-                text-align: center;
-            }
-            
-            .modal .max-w-4xl {
-                max-width: 95% !important;
-                margin: 10px;
-            }
-            
-            .text-2xl {
-                font-size: 1.25rem !important;
-            }
-            
-            .text-3xl {
-                font-size: 1.5rem !important;
-            }
-            
-            .px-8 {
-                padding-left: 16px !important;
-                padding-right: 16px !important;
-            }
-            
-            /* Hide desktop-specific elements on mobile */
-            .hidden-mobile {
-                display: none !important;
-            }
-        }
-
-        /* Touch-friendly buttons for mobile */
-        @media (max-width: 768px) {
-            button, .btn {
-                min-height: 44px;
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-            
-            input, select, textarea {
-                min-height: 44px;
-                padding: 12px;
-                font-size: 16px;
-            }
-        }
-        
-        .section { display: none; }
-        .section.active { display: block; }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        .card:hover {
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .modal { backdrop-filter: blur(5px); }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            transition: all 0.3s;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb, #059669);
-            transform: translateY(-1px);
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-        .toast.show { transform: translateX(0); }
-        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
-        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
-
-        /* إصلاح مشكلة الرسوم البيانية */
-        canvas {
-            max-height: 300px !important;
-            width: 100% !important;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            overflow: hidden;
-        }
-
-        /* تصميم الشجرة العائلية المحسن */
-        .generation {
-            margin-bottom: 40px;
-            border-left: 4px solid #3b82f6;
-            padding-left: 25px;
-            position: relative;
-        }
-        
-        .generation::before {
-            content: '';
-            position: absolute;
-            left: -2px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, #3b82f6, #10b981);
-        }
-        
-        .generation-header {
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-        
-        .member-card {
-            margin: 15px 0;
-            border-right: 3px solid #10b981;
-            padding-right: 20px;
-            position: relative;
-        }
-        
-        .founder-card {
-            border-right: 3px solid #fbbf24;
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(59, 130, 246, 0.05));
-        }
-        
-        .connection-line {
-            border-left: 2px dashed #cbd5e1;
-            margin-right: 25px;
-            padding-left: 25px;
-            position: relative;
-        }
-        
-        .connection-line::before {
-            content: '↳';
-            position: absolute;
-            left: -15px;
-            top: 20px;
-            color: #3b82f6;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .member-actions {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .member-card:hover .member-actions {
-            opacity: 1;
-        }
-        
-        .edit-btn, .delete-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            padding: 8px;
-            margin: 2px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .edit-btn:hover { background: #3b82f6; color: white; }
-        .delete-btn:hover { background: #ef4444; color: white; }
-
-        /* تحسين الإحصائيات */
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 ml-4">
-                        <i class="fas fa-home text-blue-600 ml-2"></i>
-                        تطبيق آل سعيدان الشامل
-                    </h1>
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-                    <!-- Navigation Items (shown when logged in) -->
-                    <div id="mainNavigation" class="flex space-x-8 rtl:space-x-reverse">
-                        <button id="nav-home" class="nav-item active px-4 py-2 rounded-lg transition" onclick="showSection('home')">
-                            <i class="fas fa-home ml-2"></i>الرئيسية
-                        </button>
-                        <button id="nav-family" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('family')">
-                            <i class="fas fa-users ml-2"></i>الشجرة العائلية
-                        </button>
-                        <button id="nav-events" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('events')">
-                            <i class="fas fa-calendar ml-2"></i>الأحداث
-                        </button>
-                        <button id="nav-suggestions" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('suggestions')">
-                            <i class="fas fa-lightbulb ml-2"></i>الاقتراحات
-                        </button>
-                        <button id="nav-library" class="nav-item px-4 py-2 rounded-lg transition" onclick="showSection('library')">
-                            <i class="fas fa-book ml-2"></i>المكتبة الرقمية
-                        </button>
-                    </div>
-
-                    <!-- Desktop User Menu -->
-                    <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                        <!-- Admin Panel (admin only) -->
-                        <button id="nav-admin-desktop" class="nav-item px-4 py-2 rounded-lg transition bg-red-100 text-red-700 border border-red-300 hidden relative" onclick="showSection('admin')">
-                            <i class="fas fa-cog ml-2"></i>لوحة الإدارة
-                            <span id="pending-badge-desktop" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse"></span>
-                        </button>
-                        
-                        <!-- User Profile -->
-                        <div class="relative" id="userProfileMenuDesktop">
-                            <button onclick="showSection('profile')" class="flex items-center px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                                <i class="fas fa-user ml-2"></i>
-                                <span id="currentUserNameDesktop">الملف الشخصي</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Logout -->
-                        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                            <i class="fas fa-sign-out-alt ml-2"></i>خروج
-                        </button>
-                    </div>
-                    
-                    <!-- Desktop Login/Register buttons (shown when not logged in) -->
-                    <div id="authButtonsDesktop" class="flex items-center space-x-4 rtl:space-x-reverse">
-                        <button onclick="showLoginModal()" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-                            <i class="fas fa-sign-in-alt ml-2"></i>دخول
-                        </button>
-                        <button onclick="showRegisterModal()" class="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
-                            <i class="fas fa-user-plus ml-2"></i>تسجيل جديد
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button id="mobileMenuButton" onclick="toggleMobileMenu()" class="p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                        <i id="mobileMenuIcon" class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Mobile Navigation Menu -->
-            <div id="mobileNavigation" class="md:hidden hidden bg-white border-t border-gray-200">
-                <div class="px-4 py-4 space-y-2">
-                    <!-- Mobile Main Navigation -->
-                    <div id="mainNavigationMobile" class="space-y-2 border-b border-gray-200 pb-4">
-                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile active" onclick="showSection('home'); toggleMobileMenu();">
-                            <i class="fas fa-home ml-2 text-blue-600"></i>الرئيسية
-                        </button>
-                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('family'); toggleMobileMenu();">
-                            <i class="fas fa-users ml-2 text-green-600"></i>الشجرة العائلية
-                        </button>
-                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('events'); toggleMobileMenu();">
-                            <i class="fas fa-calendar ml-2 text-purple-600"></i>الأحداث
-                        </button>
-                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('suggestions'); toggleMobileMenu();">
-                            <i class="fas fa-lightbulb ml-2 text-yellow-600"></i>الاقتراحات
-                        </button>
-                        <button class="w-full text-right py-3 px-4 rounded-lg hover:bg-gray-100 transition nav-item-mobile" onclick="showSection('library'); toggleMobileMenu();">
-                            <i class="fas fa-book ml-2 text-indigo-600"></i>المكتبة الرقمية
-                        </button>
-                    </div>
-                    
-                    <!-- Mobile User Menu (logged in) -->
-                    <div id="userMenuMobile" class="space-y-2 border-b border-gray-200 pb-4">
-                        <!-- Admin Panel (admin only) -->
-                        <button id="nav-admin-mobile" class="w-full text-right py-3 px-4 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition hidden relative" onclick="showSection('admin'); toggleMobileMenu();">
-                            <i class="fas fa-cog ml-2"></i>لوحة الإدارة
-                            <span id="pending-badge-mobile" class="hidden absolute top-2 left-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse"></span>
-                        </button>
-                        
-                        <!-- User Profile -->
-                        <button class="w-full text-right py-3 px-4 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition" onclick="showSection('profile'); toggleMobileMenu();">
-                            <i class="fas fa-user ml-2"></i>
-                            <span id="currentUserNameMobile">الملف الشخصي</span>
-                        </button>
-                        
-                        <!-- Logout -->
-                        <button onclick="logout(); toggleMobileMenu();" class="w-full text-right py-3 px-4 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition">
-                            <i class="fas fa-sign-out-alt ml-2"></i>خروج
-                        </button>
-                    </div>
-                    
-                    <!-- Mobile Login/Register buttons (not logged in) -->
-                    <div id="authButtonsMobile" class="space-y-2">
-                        <button onclick="showLoginModal(); toggleMobileMenu();" class="w-full py-3 px-4 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-                            <i class="fas fa-sign-in-alt ml-2"></i>دخول
-                        </button>
-                        <button onclick="showRegisterModal(); toggleMobileMenu();" class="w-full py-3 px-4 rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
-                            <i class="fas fa-user-plus ml-2"></i>تسجيل جديد
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Sync Status Bar -->
-    <div class="bg-blue-50 border-b border-blue-200">
-        <div class="max-w-7xl mx-auto px-4 py-2">
-            <div id="syncStatus" class="text-center text-blue-700">
-                <span class="font-medium">🔄 تطبيق آل سعيدان الشامل - مع الأجيال المترابطة</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
-        <!-- Home Section -->
-        <section id="home-section" class="section active">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Statistics Cards -->
-                <div class="stat-card">
-                    <i class="fas fa-users stat-icon text-blue-600"></i>
-                    <div class="stat-number text-blue-600" id="total-members">0</div>
-                    <p class="text-gray-600 font-medium">أعضاء العائلة</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-calendar-alt stat-icon text-green-600"></i>
-                    <div class="stat-number text-green-600" id="total-events">0</div>
-                    <p class="text-gray-600 font-medium">الأحداث</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-lightbulb stat-icon text-yellow-600"></i>
-                    <div class="stat-number text-yellow-600" id="total-suggestions">0</div>
-                    <p class="text-gray-600 font-medium">الاقتراحات</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-book stat-icon text-purple-600"></i>
-                    <div class="stat-number text-purple-600" id="total-library">0</div>
-                    <p class="text-gray-600 font-medium">المكتبة الرقمية</p>
-                </div>
-            </div>
-            
-            <!-- Additional Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card">
-                    <i class="fas fa-layer-group stat-icon text-indigo-600"></i>
-                    <div class="stat-number text-indigo-600" id="total-generations">1</div>
-                    <p class="text-gray-600 font-medium">الأجيال</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-crown stat-icon text-amber-600"></i>
-                    <div class="stat-number text-amber-600" id="board-members">0</div>
-                    <p class="text-gray-600 font-medium">أعضاء الإدارة</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-chart-line stat-icon text-rose-600"></i>
-                    <div class="stat-number text-rose-600" id="active-events">0</div>
-                    <p class="text-gray-600 font-medium">أحداث نشطة</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-thumbs-up stat-icon text-emerald-600"></i>
-                    <div class="stat-number text-emerald-600" id="approved-suggestions">0</div>
-                    <p class="text-gray-600 font-medium">اقتراحات مقبولة</p>
-                </div>
-            </div>
-            
-            <!-- Welcome Message -->
-            <div class="card p-8 text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">مرحباً بكم في تطبيق آل سعيدان الشامل</h2>
-                <p class="text-xl text-gray-600 mb-6">إدارة متكاملة للشجرة العائلية مع ربط الأجيال، الأحداث، الاقتراحات والمكتبة الرقمية</p>
-                
-                <div class="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-bold text-blue-800 mb-3">
-                        <i class="fas fa-sitemap ml-2"></i>
-                        الميزة الجديدة: الأجيال المترابطة
-                    </h3>
-                    <p class="text-blue-700 font-medium mb-2">🌳 كل عضو جديد يُربط تلقائياً بالجيل السابق</p>
-                    <p class="text-blue-700 font-medium mb-2">🔢 حساب تلقائي للأجيال: الجيل = جيل الوالد + 1</p>
-                    <p class="text-blue-700 font-medium">👨‍👩‍👧‍👦 عرض هرمي منظم للعائلة حسب الأجيال</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onclick="showSection('family')" class="btn-primary text-white px-8 py-4 rounded-lg text-lg">
-                        <i class="fas fa-sitemap ml-2"></i>استكشف الشجرة العائلية
-                    </button>
-                    <button onclick="loadSampleData()" class="bg-amber-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-amber-700">
-                        <i class="fas fa-database ml-2"></i>تحميل البيانات الأساسية
-                    </button>
-                    <button onclick="resetAndReloadFamily()" class="bg-red-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-red-700">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين كامل
-                    </button>
-                    <button onclick="checkMemberCount()" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700">
-                        <i class="fas fa-info-circle ml-2"></i>فحص العدد
-                    </button>
-                    <button onclick="forceLoadRealFamily()" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-green-700">
-                        <i class="fas fa-rocket ml-2"></i>حقن البيانات الحقيقية
-                    </button>
-                    <button onclick="quickLogin()" class="bg-purple-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-purple-700">
-                        <i class="fas fa-key ml-2"></i>دخول سريع كمدير
-                    </button>
-                </div>
-            </div>
-
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="card p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">توزيع العضوية</h3>
-                    <div class="chart-container">
-                        <canvas id="membershipChart"></canvas>
-                    </div>
-                </div>
-                <div class="card p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">النشاط الشهري</h3>
-                    <div class="chart-container">
-                        <canvas id="activityChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Family Section -->
-        <section id="family-section" class="section">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">الشجرة العائلية بالأجيال المترابطة</h2>
-                <div class="flex gap-3">
-                    <button onclick="testSecondGenerationRetrieval()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" title="اختبار استرجاع بيانات الجيل الثاني">
-                        <i class="fas fa-search ml-2"></i>اختبار الجيل الثاني
-                    </button>
-                    <button onclick="loadFounderFamily()" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">
-                        <i class="fas fa-crown ml-2"></i>تحميل العائلة الأساسية
-                    </button>
-                    <button onclick="resetAndReloadFamily()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين + تحميل
-                    </button>
-                    <button onclick="forceLoadRealFamily()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                        <i class="fas fa-rocket ml-2"></i>حقن البيانات
-                    </button>
-                    <button onclick="showFamilyModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                        <i class="fas fa-plus ml-2"></i>إضافة عضو جديد
-                    </button>
-                </div>
-            </div>
-            
-            <!-- حالة البيانات -->
-            <div id="data-status" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-center">
-                <div class="flex items-center justify-center space-x-4 rtl:space-x-reverse">
-                    <div class="text-blue-700">
-                        <span id="member-count-display">📊 لا توجد بيانات</span>
-                    </div>
-                    <div class="text-green-700">
-                        <span id="generation-count-display">🌳 الأجيال: 0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div id="family-tree" class="space-y-6">
-                <!-- Family tree will be displayed here -->
-            </div>
-        </section>
-
-        <!-- Events Section -->
-        <section id="events-section" class="section">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">إدارة الأحداث العائلية</h2>
-                <button onclick="showEventModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                    <i class="fas fa-plus ml-2"></i>إضافة حدث جديد
-                </button>
-            </div>
-
-            <!-- Event Categories -->
-            <div class="card p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">فئات الأحداث</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button onclick="filterEventsByType('wedding')" class="p-4 bg-pink-100 rounded-lg hover:bg-pink-200 transition">
-                        <i class="fas fa-heart text-pink-600 text-2xl mb-2"></i>
-                        <p class="text-pink-700 font-semibold">الأفراح والزواج</p>
-                    </button>
-                    <button onclick="filterEventsByType('birth')" class="p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition">
-                        <i class="fas fa-baby text-blue-600 text-2xl mb-2"></i>
-                        <p class="text-blue-700 font-semibold">المواليد</p>
-                    </button>
-                    <button onclick="filterEventsByType('graduation')" class="p-4 bg-green-100 rounded-lg hover:bg-green-200 transition">
-                        <i class="fas fa-graduation-cap text-green-600 text-2xl mb-2"></i>
-                        <p class="text-green-700 font-semibold">التخرج والإنجازات</p>
-                    </button>
-                    <button onclick="filterEventsByType('gathering')" class="p-4 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition">
-                        <i class="fas fa-users text-yellow-600 text-2xl mb-2"></i>
-                        <p class="text-yellow-700 font-semibold">الاجتماعات العائلية</p>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Events Grid -->
-            <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Events will be displayed here -->
-            </div>
-        </section>
-
-        <!-- Suggestions Section -->
-        <section id="suggestions-section" class="section">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">الاقتراحات والتطوير</h2>
-                <button onclick="showSuggestionModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                    <i class="fas fa-plus ml-2"></i>إضافة اقتراح جديد
-                </button>
-            </div>
-
-            <!-- Filter Bar -->
-            <div class="card p-6 mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Status Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة الاقتراح</label>
-                        <select id="suggestionStatusFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                onchange="filterSuggestionsByStatus(this.value)">
-                            <option value="all">جميع الحالات</option>
-                            <option value="pending">⏳ قيد المراجعة</option>
-                            <option value="approved">✅ مقبول</option>
-                            <option value="rejected">❌ مرفوض</option>
-                            <option value="under_review">🔍 تحت المراجعة</option>
-                        </select>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الفئة</label>
-                        <select id="suggestionCategoryFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                onchange="filterSuggestionsByCategory(this.value)">
-                            <option value="all">جميع الفئات</option>
-                            <option value="technology">🔧 تقني</option>
-                            <option value="events">🎉 فعاليات</option>
-                            <option value="services">🛎️ خدمات</option>
-                            <option value="education">📚 تعليمي</option>
-                            <option value="social">👥 اجتماعي</option>
-                            <option value="business">💼 تجاري</option>
-                            <option value="other">📝 أخرى</option>
-                        </select>
-                    </div>
-
-                    <!-- Priority Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الأولوية</label>
-                        <select id="suggestionPriorityFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                onchange="filterSuggestionsByPriority(this.value)">
-                            <option value="all">جميع الأولويات</option>
-                            <option value="urgent">🚨 عاجل</option>
-                            <option value="high">🔴 عالية</option>
-                            <option value="medium">🟡 متوسطة</option>
-                            <option value="low">🟢 منخفضة</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-blue-600" id="suggestions-total">0</div>
-                        <p class="text-sm text-gray-600">إجمالي الاقتراحات</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-yellow-600" id="suggestions-pending">0</div>
-                        <p class="text-sm text-gray-600">قيد المراجعة</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-green-600" id="suggestions-approved">0</div>
-                        <p class="text-sm text-gray-600">مقبولة</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-red-600" id="suggestions-high-priority">0</div>
-                        <p class="text-sm text-gray-600">أولوية عالية</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="suggestions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Suggestions will be displayed here -->
-            </div>
-        </section>
-
-        <!-- Library Section -->
-        <section id="library-section" class="section">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">المكتبة الرقمية ومكتبة الفيديو</h2>
-                <div class="flex gap-3">
-                    <button onclick="showVideoUploadModal()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
-                        <i class="fas fa-video ml-2"></i>رفع فيديو
-                    </button>
-                    <button onclick="showLibraryModal()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                        <i class="fas fa-plus ml-2"></i>إضافة محتوى
-                    </button>
-                </div>
-            </div>
-
-            <!-- Library Tabs -->
-            <div class="card p-6 mb-8">
-                <div class="flex border-b border-gray-200 mb-6">
-                    <button id="tab-all" onclick="switchLibraryTab('all')" class="library-tab px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
-                        <i class="fas fa-th-large ml-2"></i>جميع المحتويات
-                    </button>
-                    <button id="tab-videos" onclick="switchLibraryTab('videos')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-video ml-2"></i>مكتبة الفيديو
-                    </button>
-                    <button id="tab-photos" onclick="switchLibraryTab('photos')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-image ml-2"></i>الصور والذكريات
-                    </button>
-                    <button id="tab-documents" onclick="switchLibraryTab('documents')" class="library-tab px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-file-alt ml-2"></i>الوثائق
-                    </button>
-                </div>
-                
-                <!-- Video Library Stats -->
-                <div id="video-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div class="text-center p-4 bg-red-50 rounded-lg">
-                        <i class="fas fa-video text-red-600 text-2xl mb-2"></i>
-                        <div class="text-2xl font-bold text-red-600" id="total-videos">0</div>
-                        <p class="text-sm text-gray-600">مقاطع الفيديو</p>
-                    </div>
-                    <div class="text-center p-4 bg-blue-50 rounded-lg">
-                        <i class="fas fa-play text-blue-600 text-2xl mb-2"></i>
-                        <div class="text-2xl font-bold text-blue-600" id="total-views">0</div>
-                        <p class="text-sm text-gray-600">إجمالي المشاهدات</p>
-                    </div>
-                    <div class="text-center p-4 bg-green-50 rounded-lg">
-                        <i class="fas fa-calendar text-green-600 text-2xl mb-2"></i>
-                        <div class="text-2xl font-bold text-green-600" id="recent-uploads">0</div>
-                        <p class="text-sm text-gray-600">رُفع هذا الشهر</p>
-                    </div>
-                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                        <i class="fas fa-star text-yellow-600 text-2xl mb-2"></i>
-                        <div class="text-2xl font-bold text-yellow-600" id="featured-videos">0</div>
-                        <p class="text-sm text-gray-600">فيديوهات مميزة</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search and Filter Bar -->
-            <div class="card p-6 mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Search -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">البحث في المكتبة</label>
-                        <div class="relative">
-                            <input type="text" id="librarySearch" placeholder="ابحث في العناوين، الوصف، المؤلف، أو الكلمات المفتاحية..." 
-                                   class="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   oninput="searchLibrary(this.value)">
-                            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">فلترة حسب الفئة</label>
-                        <select id="libraryCategoryFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                onchange="filterLibraryByCategory(this.value)">
-                            <option value="all">جميع الفئات</option>
-                            <option value="family_history">🏛️ تاريخ العائلة</option>
-                            <option value="genealogy">🌳 الأنساب</option>
-                            <option value="documents">📋 الوثائق الرسمية</option>
-                            <option value="photos">📸 الصور والذكريات</option>
-                            <option value="achievements">🏆 الإنجازات</option>
-                            <option value="stories">📖 القصص والحكايات</option>
-                            <option value="education">🎓 التعليم والمهارات</option>
-                            <option value="business">💼 الأعمال والتجارة</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-blue-600" id="library-total-items">0</div>
-                        <p class="text-sm text-gray-600">إجمالي المحتويات</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-green-600" id="library-featured-items">0</div>
-                        <p class="text-sm text-gray-600">محتوى مميز</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-purple-600" id="library-total-views">0</div>
-                        <p class="text-sm text-gray-600">إجمالي المشاهدات</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-orange-600" id="library-total-downloads">0</div>
-                        <p class="text-sm text-gray-600">إجمالي التحميلات</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Library items will be displayed here -->
-            </div>
-        </section>
-
-        <!-- Profile Section -->
-        <section id="profile-section" class="section">
-            <div class="max-w-4xl mx-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold text-white">الملف الشخصي</h2>
-                    <button onclick="editProfile()" class="btn-primary text-white px-6 py-3 rounded-lg">
-                        <i class="fas fa-edit ml-2"></i>تعديل البيانات
-                    </button>
-                </div>
-                
-                <div id="profileContent" class="space-y-6">
-                    <!-- Profile content will be displayed here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Admin Section -->
-        <section id="admin-section" class="section">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-white">لوحة الإدارة</h2>
-                <div class="flex gap-4">
-                    <button onclick="refreshPendingUsers()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        <i class="fas fa-refresh ml-2"></i>تحديث
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Pending Users Tab -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">طلبات التسجيل المعلقة</h3>
-                <div id="pendingUsersGrid" class="space-y-4">
-                    <!-- Pending users will be displayed here -->
-                </div>
-            </div>
-            
-            <!-- System Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h4 class="text-lg font-bold text-gray-800 mb-2">المستخدمون المفعلون</h4>
-                    <div class="text-3xl font-bold text-green-600" id="activeUsersCount">0</div>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h4 class="text-lg font-bold text-gray-800 mb-2">طلبات معلقة</h4>
-                    <div class="text-3xl font-bold text-orange-600" id="pendingUsersCount">0</div>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h4 class="text-lg font-bold text-gray-800 mb-2">إجمالي المستخدمين</h4>
-                    <div class="text-3xl font-bold text-blue-600" id="totalUsersCount">0</div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Family Member Modal -->
-    <div id="familyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
-        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-screen overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800" id="familyModalTitle">إضافة عضو جديد للعائلة</h3>
-                <button type="button" onclick="hideFamilyModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <form id="familyForm">
-                <!-- معلومات الاسم -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-user ml-2"></i>بيانات الاسم
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأول *</label>
-                            <input type="text" id="familyFirstName" placeholder="مثال: أحمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأوسط</label>
-                            <input type="text" id="familyMiddleName" placeholder="مثال: محمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العائلة *</label>
-                            <input type="text" id="familyLastName" placeholder="مثال: بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                    </div>
-                    <div class="mt-3 p-2 bg-white rounded border">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">الاسم الكامل (معاينة)</label>
-                        <div id="fullNamePreview" class="text-lg font-semibold text-gray-800">سيتم تكوين الاسم تلقائياً...</div>
-                    </div>
-                </div>
-
-                <!-- معلومات الميلاد -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-birthday-cake ml-2"></i>بيانات الميلاد
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
-                            <input type="date" id="familyBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">مكان الميلاد</label>
-                            <input type="text" id="familyBirthPlace" placeholder="مثال: الرياض، المملكة العربية السعودية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات الأجيال -->
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
-                        <i class="fas fa-sitemap ml-2"></i>ربط الأجيال
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الجيل السابق</label>
-                            <select id="familyFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- اختر الوالد --</option>
-                            </select>
-                            <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق لإنشاء الرابط العائلي</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل الحالي</label>
-                            <input type="text" id="familyCurrentGeneration" placeholder="سيتم حسابه تلقائياً" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg" readonly>
-                            <p class="text-sm text-green-600 mt-1">يُحسب تلقائياً بناءً على الوالد المختار</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الزوج/الزوجة (اختياري)</label>
-                            <select id="familySpouseId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- اختر الزوج/الزوجة --</option>
-                            </select>
-                            <p class="text-sm text-gray-500 mt-1">اختر من نفس الجيل أو جيل مقارب لإنشاء رابط الزواج</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات شخصية -->
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-                        <i class="fas fa-id-card ml-2"></i>المعلومات الشخصية
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
-                            <select id="familyGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="">-- اختر الجنس --</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
-                            <select id="familyMembershipType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="">-- اختر نوع العضوية --</option>
-                                <option value="founder">👑 مؤسس</option>
-                                <option value="chairman">🎖️ رئيس مجلس الإدارة</option>
-                                <option value="board_member">👔 عضو مجلس الإدارة</option>
-                                <option value="general_assembly">👥 عضو الجمعية العمومية</option>
-                                <option value="family_member">👨‍👩‍👧‍👦 عضو عائلة</option>
-                                <option value="honorary">🏅 عضو شرفي</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات مهنية -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
-                        <i class="fas fa-briefcase ml-2"></i>المعلومات المهنية
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة</label>
-                            <input type="text" id="familyProfession" placeholder="مثال: مهندس، طبيب، معلم" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص العملي</label>
-                            <input type="text" id="familySpecialization" placeholder="مثال: هندسة الحاسوب، طب الأطفال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات الاتصال -->
-                <div class="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-teal-800 mb-4 flex items-center">
-                        <i class="fas fa-phone ml-2"></i>معلومات التواصل
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال</label>
-                            <input type="tel" id="familyPhone" placeholder="05xxxxxxxx" pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <p class="text-xs text-gray-500 mt-1">يرجى إدخال رقم الجوال بصيغة 05xxxxxxxx</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-                            <input type="email" id="familyEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات إضافية -->
-                <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-rose-800 mb-4 flex items-center">
-                        <i class="fas fa-heart ml-2"></i>المعلومات الإضافية
-                    </h4>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الهوايات والاهتمامات</label>
-                            <textarea id="familyHobbies" rows="3" placeholder="مثال: القراءة، الرياضة، السفر، التصوير، البرمجة..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
-                    <button type="button" onclick="hideFamilyModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetFamilyForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition font-medium shadow-lg">
-                        <i class="fas fa-save ml-2"></i>حفظ العضو
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
-        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">تسجيل الدخول</h3>
-                <button type="button" onclick="hideLoginModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <form id="loginForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهوية أو البريد الإلكتروني *</label>
-                    <input type="text" id="loginIdentifier" placeholder="أدخل رقم الهوية أو البريد الإلكتروني" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور *</label>
-                    <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
-                
-                <div class="flex justify-between items-center mb-6">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="rememberMe" class="mr-2">
-                        <span class="text-sm text-gray-600">تذكرني</span>
-                    </label>
-                    <button type="button" class="text-sm text-blue-600 hover:text-blue-800">نسيت كلمة المرور؟</button>
-                </div>
-                
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse">
-                    <button type="button" onclick="hideLoginModal()" class="px-6 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-                        إلغاء
-                    </button>
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        دخول
-                    </button>
-                </div>
-            </form>
-            
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">ليس لديك حساب؟ 
-                    <button onclick="hideLoginModal(); showRegisterModal()" class="text-blue-600 hover:text-blue-800 font-medium">سجل الآن</button>
-                </p>
-            </div>
-            
-            <!-- تشخيص المدير -->
-            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-                <p class="text-sm font-medium text-gray-700 mb-2">حساب المدير الافتراضي:</p>
-                <div class="text-xs text-gray-600 space-y-1">
-                    <div>البريد الإلكتروني: <code class="bg-gray-200 px-1 rounded">admin@salmansaedan.com</code></div>
-                    <div>كلمة المرور: <code class="bg-gray-200 px-1 rounded">admin123</code></div>
-                    <button onclick="resetDefaultAdmin()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
-                        إعادة تعيين المدير
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal">
-        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-screen overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">تسجيل عضو جديد</h3>
-                <button type="button" onclick="hideRegisterModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
-                    <i class="fas fa-info-circle text-blue-600 ml-2"></i>
-                    <div class="text-blue-800">
-                        <p class="font-medium">ملاحظة هامة:</p>
-                        <p class="text-sm mt-1">سيتم إرسال طلب التسجيل للمراجعة من قبل الإدارة. ستتلقى إشعاراً عند تفعيل حسابك.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <form id="registerForm">
-                <!-- معلومات الاسم -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-user ml-2"></i>بيانات الاسم
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأول *</label>
-                            <input type="text" id="registerFirstName" placeholder="مثال: أحمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأوسط *</label>
-                            <input type="text" id="registerMiddleName" placeholder="مثال: محمد" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العائلة *</label>
-                            <input type="text" id="registerLastName" placeholder="مثال: بن سعيدان" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                    </div>
-                    <div class="mt-3 p-2 bg-white rounded border">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">الاسم الكامل (معاينة)</label>
-                        <div id="registerFullNamePreview" class="text-lg font-semibold text-gray-800">سيتم تكوين الاسم تلقائياً...</div>
-                    </div>
-                </div>
-
-                <!-- معلومات الميلاد والهوية -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-id-card ml-2"></i>البيانات الشخصية
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهوية *</label>
-                            <input type="text" id="registerNationalId" placeholder="1xxxxxxxxx" pattern="[1-2][0-9]{9}" maxlength="10" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                            <p class="text-xs text-gray-500 mt-1">رقم الهوية السعودية (10 أرقام)</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد *</label>
-                            <input type="date" id="registerBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">مكان الميلاد *</label>
-                            <input type="text" id="registerBirthPlace" placeholder="مثال: الرياض، المملكة العربية السعودية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات الأجيال -->
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
-                        <i class="fas fa-sitemap ml-2"></i>ربط الأجيال
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الوالد/الجيل السابق</label>
-                            <select id="registerFatherId" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- اختر الوالد (اختياري) --</option>
-                            </select>
-                            <p class="text-sm text-gray-500 mt-1">اختر من الجيل السابق إذا كان متاحاً</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل المتوقع</label>
-                            <input type="text" id="registerExpectedGeneration" placeholder="سيتم حسابه تلقائياً" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg" readonly>
-                            <p class="text-sm text-green-600 mt-1">يُحسب تلقائياً بناءً على الوالد المختار</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- المعلومات المهنية والعلمية -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
-                        <i class="fas fa-graduation-cap ml-2"></i>المعلومات المهنية والعلمية
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة *</label>
-                            <input type="text" id="registerProfession" placeholder="مثال: مهندس، طبيب، معلم" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص العلمي *</label>
-                            <input type="text" id="registerSpecialization" placeholder="مثال: هندسة الحاسوب، طب الأطفال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات التواصل -->
-                <div class="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-teal-800 mb-4 flex items-center">
-                        <i class="fas fa-phone ml-2"></i>معلومات التواصل
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال *</label>
-                            <input type="tel" id="registerPhone" placeholder="05xxxxxxxx" pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                            <p class="text-xs text-gray-500 mt-1">يرجى إدخال رقم الجوال بصيغة 05xxxxxxxx</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني *</label>
-                            <input type="email" id="registerEmail" placeholder="example@email.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الهوايات وكلمة المرور -->
-                <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-rose-800 mb-4 flex items-center">
-                        <i class="fas fa-key ml-2"></i>معلومات إضافية وأمنية
-                    </h4>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الهوايات والاهتمامات *</label>
-                            <textarea id="registerHobbies" rows="3" placeholder="مثال: القراءة، الرياضة، السفر، التصوير، البرمجة..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical" required></textarea>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور *</label>
-                                <input type="password" id="registerPassword" placeholder="أدخل كلمة مرور قوية" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                <p class="text-xs text-gray-500 mt-1">8 أحرف على الأقل</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">تأكيد كلمة المرور *</label>
-                                <input type="password" id="registerPasswordConfirm" placeholder="أعد إدخال كلمة المرور" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الموافقة والشروط -->
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-                    <label class="flex items-start">
-                        <input type="checkbox" id="registerAgree" class="mt-1 mr-2" required>
-                        <div class="text-sm text-gray-700">
-                            <p class="font-medium">أوافق على الشروط والأحكام:</p>
-                            <ul class="mt-2 space-y-1 text-xs text-gray-600">
-                                <li>• جميع البيانات المدخلة صحيحة ومسؤول عنها</li>
-                                <li>• سيتم مراجعة الطلب من قبل إدارة العائلة</li>
-                                <li>• الالتزام بآداب وقوانين التطبيق</li>
-                                <li>• عدم إساءة استخدام المنصة أو البيانات</li>
-                            </ul>
-                        </div>
-                    </label>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
-                    <button type="button" onclick="hideRegisterModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetRegisterForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition font-medium shadow-lg">
-                        <i class="fas fa-user-plus ml-2"></i>إرسال طلب التسجيل
-                    </button>
-                </div>
-            </form>
-            
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">لديك حساب بالفعل؟ 
-                    <button onclick="hideRegisterModal(); showLoginModal()" class="text-blue-600 hover:text-blue-800 font-medium">سجل دخول</button>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Suggestion Modal -->
-    <div id="suggestionModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-2xl max-h-screen overflow-y-auto mx-4 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">
-                    <i class="fas fa-lightbulb text-yellow-500 ml-2"></i>
-                    إضافة اقتراح جديد
-                </h2>
-                <button onclick="hideSuggestionModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="suggestionForm" onsubmit="handleSuggestionSubmit(event)">
-                <!-- معلومات الاقتراح الأساسية -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-info-circle ml-2"></i>معلومات الاقتراح
-                    </h4>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الاقتراح *</label>
-                            <input type="text" id="suggestionTitle" placeholder="مثال: تطوير تطبيق الجوال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">فئة الاقتراح *</label>
-                            <select id="suggestionCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="">-- اختر الفئة --</option>
-                                <option value="technology">🔧 تقني</option>
-                                <option value="events">🎉 فعاليات</option>
-                                <option value="services">🛎️ خدمات</option>
-                                <option value="education">📚 تعليمي</option>
-                                <option value="social">👥 اجتماعي</option>
-                                <option value="business">💼 تجاري</option>
-                                <option value="other">📝 أخرى</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الأولوية</label>
-                            <select id="suggestionPriority" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="low">🟢 منخفضة</option>
-                                <option value="medium" selected>🟡 متوسطة</option>
-                                <option value="high">🔴 عالية</option>
-                                <option value="urgent">🚨 عاجل</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- وصف تفصيلي -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-edit ml-2"></i>الوصف التفصيلي
-                    </h4>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">شرح الاقتراح *</label>
-                        <textarea id="suggestionDescription" rows="4" placeholder="اشرح اقتراحك بالتفصيل..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الفوائد المتوقعة</label>
-                        <textarea id="suggestionBenefits" rows="3" placeholder="ما هي الفوائد المتوقعة من هذا الاقتراح؟" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- تفاصيل التنفيذ -->
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-                        <i class="fas fa-cogs ml-2"></i>تفاصيل التنفيذ
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الميزانية المقترحة</label>
-                            <input type="text" id="suggestionBudget" placeholder="مثال: 50,000 ريال" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">المدة الزمنية المقترحة</label>
-                            <input type="text" id="suggestionTimeline" placeholder="مثال: 3 أشهر" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الموارد المطلوبة</label>
-                        <textarea id="suggestionResources" rows="2" placeholder="ما هي الموارد والأدوات المطلوبة؟" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
-                    <button type="button" onclick="hideSuggestionModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetSuggestionForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition font-medium shadow-lg">
-                        <i class="fas fa-lightbulb ml-2"></i>إرسال الاقتراح
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Library Modal -->
-    <div id="libraryModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-2xl max-h-screen overflow-y-auto mx-4 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">
-                    <i class="fas fa-book text-blue-500 ml-2"></i>
-                    إضافة محتوى للمكتبة الرقمية
-                </h2>
-                <button onclick="hideLibraryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="libraryForm" onsubmit="handleLibrarySubmit(event)">
-                <!-- معلومات المحتوى الأساسية -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-info-circle ml-2"></i>معلومات المحتوى
-                    </h4>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان المحتوى *</label>
-                            <input type="text" id="libraryTitle" placeholder="مثال: تاريخ العائلة" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">نوع المحتوى *</label>
-                                <select id="libraryType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    <option value="">-- اختر النوع --</option>
-                                    <option value="document">📄 وثيقة</option>
-                                    <option value="book">📚 كتاب</option>
-                                    <option value="article">📝 مقال</option>
-                                    <option value="video">🎥 فيديو</option>
-                                    <option value="audio">🎵 صوتي</option>
-                                    <option value="image">🖼️ صورة</option>
-                                    <option value="presentation">📊 عرض تقديمي</option>
-                                    <option value="research">🔬 بحث</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">الفئة *</label>
-                                <select id="libraryCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    <option value="">-- اختر الفئة --</option>
-                                    <option value="family_history">🏛️ تاريخ العائلة</option>
-                                    <option value="genealogy">🌳 الأنساب</option>
-                                    <option value="documents">📋 الوثائق الرسمية</option>
-                                    <option value="photos">📸 الصور والذكريات</option>
-                                    <option value="achievements">🏆 الإنجازات</option>
-                                    <option value="stories">📖 القصص والحكايات</option>
-                                    <option value="education">🎓 التعليم والمهارات</option>
-                                    <option value="business">💼 الأعمال والتجارة</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">المؤلف/المنشئ</label>
-                            <input type="text" id="libraryAuthor" placeholder="اسم المؤلف أو المنشئ" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الوصف والمحتوى -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-edit ml-2"></i>الوصف والمحتوى
-                    </h4>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">وصف المحتوى *</label>
-                            <textarea id="libraryDescription" rows="4" placeholder="وصف تفصيلي للمحتوى..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الكلمات المفتاحية</label>
-                            <input type="text" id="libraryKeywords" placeholder="فصل الكلمات بفواصل، مثال: تاريخ، عائلة، وثائق" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <p class="text-xs text-gray-500 mt-1">استخدم الفواصل لفصل الكلمات المفتاحية</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- تفاصيل إضافية -->
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-                        <i class="fas fa-cogs ml-2"></i>تفاصيل إضافية
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
-                            <input type="date" id="libraryDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اللغة</label>
-                            <select id="libraryLanguage" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="arabic">العربية</option>
-                                <option value="english">الإنجليزية</option>
-                                <option value="other">أخرى</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">رابط المحتوى (اختياري)</label>
-                        <input type="url" id="libraryUrl" placeholder="https://example.com/file.pdf" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">رابط مباشر للملف أو المحتوى على الإنترنت</p>
-                    </div>
-                </div>
-
-                <!-- خصائص الوصول -->
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                    <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center">
-                        <i class="fas fa-lock ml-2"></i>خصائص الوصول
-                    </h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">مستوى الوصول</label>
-                            <select id="libraryAccess" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="public">🌍 عام - متاح للجميع</option>
-                                <option value="family" selected>👨‍👩‍👧‍👦 عائلي - أعضاء العائلة فقط</option>
-                                <option value="admin">🔒 إداري - المديرين فقط</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="libraryFeatured" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="libraryFeatured" class="mr-2 block text-sm text-gray-900">
-                                محتوى مميز (يظهر في المقدمة)
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200">
-                    <button type="button" onclick="hideLibraryModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetLibraryForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition font-medium shadow-lg">
-                        <i class="fas fa-book ml-2"></i>إضافة للمكتبة
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Video Upload Modal -->
-    <div id="videoUploadModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-video text-red-600 ml-3"></i>
-                    رفع فيديو جديد
-                </h2>
-                <button onclick="hideVideoUploadModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="videoUploadForm" onsubmit="handleVideoUpload(event)">
-                <!-- معلومات الفيديو الأساسية -->
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 mx-6 mt-6">
-                    <h4 class="text-lg font-semibold text-red-800 mb-4 flex items-center">
-                        <i class="fas fa-info-circle ml-2"></i>
-                        معلومات الفيديو
-                    </h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">عنوان الفيديو</label>
-                            <input type="text" id="videoTitle" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="مثال: لقاء عائلي 2024">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ التصوير</label>
-                            <input type="date" id="videoDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">وصف الفيديو</label>
-                        <textarea id="videoDescription" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="وصف مختصر للفيديو والمناسبة..."></textarea>
-                    </div>
-                </div>
-
-                <!-- رفع الفيديو -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 mx-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-upload ml-2"></i>
-                        رفع الفيديو
-                    </h4>
-                    
-                    <div class="text-center">
-                        <div class="border-2 border-dashed border-blue-300 rounded-lg p-8 mb-4">
-                            <i class="fas fa-video text-blue-500 text-4xl mb-4"></i>
-                            <p class="text-gray-600 mb-2">اسحب الفيديو هنا أو انقر للاختيار</p>
-                            <p class="text-sm text-gray-500">يدعم: MP4, MOV, AVI (حد أقصى: 100MB)</p>
-                            <input type="file" id="videoFile" accept="video/*" class="hidden" onchange="handleVideoFileSelect(this)">
-                            <button type="button" onclick="document.getElementById('videoFile').click()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                اختيار فيديو
-                            </button>
-                        </div>
-                        <div id="videoPreview" class="hidden">
-                            <video id="previewVideo" controls class="w-full max-w-md mx-auto rounded-lg">
-                                <source id="videoSource" type="video/mp4">
-                            </video>
-                            <p id="videoFileName" class="text-sm text-gray-600 mt-2"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- تصنيف الفيديو -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 mx-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-tags ml-2"></i>
-                        تصنيف الفيديو
-                    </h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع المناسبة</label>
-                            <select id="videoCategory" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <option value="family_gathering">تجمع عائلي</option>
-                                <option value="wedding">زفاف</option>
-                                <option value="celebration">احتفال</option>
-                                <option value="graduation">تخرج</option>
-                                <option value="birthday">عيد ميلاد</option>
-                                <option value="religious">مناسبة دينية</option>
-                                <option value="travel">سفر ورحلات</option>
-                                <option value="other">أخرى</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">مستوى الخصوصية</label>
-                            <select id="videoPrivacy" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <option value="family">العائلة فقط</option>
-                                <option value="close_family">العائلة المقربة</option>
-                                <option value="public">عام لجميع الأعضاء</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">الكلمات المفتاحية</label>
-                        <input type="text" id="videoTags" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="مثال: عائلة، احتفال، 2024 (افصل بالفواصل)">
-                    </div>
-
-                    <div class="mt-4 flex items-center">
-                        <input type="checkbox" id="videoFeatured" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
-                        <label for="videoFeatured" class="ml-2 text-sm text-gray-700">فيديو مميز (سيظهر في المقدمة)</label>
-                    </div>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200 mx-6 mb-6">
-                    <button type="button" onclick="hideVideoUploadModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetVideoForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:from-red-600 hover:to-pink-700 transition font-medium shadow-lg">
-                        <i class="fas fa-upload ml-2"></i>رفع الفيديو
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Event Modal -->
-    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-calendar-plus text-blue-600 ml-3"></i>
-                    إضافة حدث عائلي جديد
-                </h2>
-                <button onclick="hideEventModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <form id="eventForm" onsubmit="handleEventSubmit(event)">
-                <!-- معلومات الحدث الأساسية -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 mx-6 mt-6">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-info-circle ml-2"></i>
-                        تفاصيل الحدث
-                    </h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم الحدث</label>
-                            <input type="text" id="eventTitle" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: اجتماع عائلي شهري">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع الحدث</label>
-                            <select id="eventType" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">اختر نوع الحدث</option>
-                                <option value="wedding">💒 زفاف</option>
-                                <option value="birth">👶 مولود جديد</option>
-                                <option value="graduation">🎓 تخرج</option>
-                                <option value="gathering">👨‍👩‍👧‍👦 تجمع عائلي</option>
-                                <option value="celebration">🎉 احتفال</option>
-                                <option value="religious">🕌 مناسبة دينية</option>
-                                <option value="travel">✈️ رحلة/سفر</option>
-                                <option value="business">💼 حدث تجاري</option>
-                                <option value="other">📝 أخرى</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الحدث</label>
-                            <input type="date" id="eventDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">وقت الحدث</label>
-                            <input type="time" id="eventTime" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">موقع الحدث</label>
-                        <input type="text" id="eventLocation" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="مثال: قاعة الأفراح، المنزل، الحديقة العامة">
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">وصف الحدث</label>
-                        <textarea id="eventDescription" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="وصف مفصل للحدث والترتيبات..."></textarea>
-                    </div>
-                </div>
-
-                <!-- تفاصيل التنظيم -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 mx-6">
-                    <h4 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-users ml-2"></i>
-                        تفاصيل التنظيم والحضور
-                    </h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">المنظم/المسؤول</label>
-                            <input type="text" id="eventOrganizer" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="اسم المنظم">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">العدد المتوقع للحضور</label>
-                            <input type="number" id="eventCapacity" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="50">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">رقم التواصل للاستفسارات</label>
-                        <input type="tel" id="eventContact" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="05xxxxxxxx">
-                    </div>
-
-                    <div class="mt-4 space-y-2">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="eventRSVP" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
-                            <label for="eventRSVP" class="ml-2 text-sm text-gray-700">يتطلب تأكيد الحضور (RSVP)</label>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" id="eventPublic" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" checked>
-                            <label for="eventPublic" class="ml-2 text-sm text-gray-700">حدث عام لجميع أفراد العائلة</label>
-                        </div>
-
-                        <div class="flex items-center">
-                            <input type="checkbox" id="eventReminder" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" checked>
-                            <label for="eventReminder" class="ml-2 text-sm text-gray-700">إرسال تذكير قبل الموعد</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- أزرار التحكم -->
-                <div class="flex justify-end space-x-4 rtl:space-x-reverse pt-4 border-t border-gray-200 mx-6 mb-6">
-                    <button type="button" onclick="hideEventModal()" class="px-8 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-medium">
-                        <i class="fas fa-times ml-2"></i>إلغاء
-                    </button>
-                    <button type="button" onclick="resetEventForm()" class="px-8 py-3 text-amber-600 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200 transition font-medium">
-                        <i class="fas fa-refresh ml-2"></i>إعادة تعيين
-                    </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-green-600 text-white rounded-lg hover:from-blue-600 hover:to-green-700 transition font-medium shadow-lg">
-                        <i class="fas fa-calendar-plus ml-2"></i>إضافة الحدث
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
         // بيانات العائلة الأساسية
         const SAMPLE_FAMILY_DATA = {
             familyMembers: [
@@ -2980,15 +1210,15 @@
                         if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
                     }
                 } else {
-                    // المستخدم غير مسجل دخول - إظهار الأقسام العامة وإخفاء المحمية فقط
+                    // المستخدم غير مسجل دخول - إخفاء عناصر المستخدمين
                     // سطح المكتب
-                    if (mainNavigation) mainNavigation.classList.remove('hidden'); // إظهار الأقسام العامة
+                    if (mainNavigation) mainNavigation.classList.add('hidden');
                     if (userProfileMenu) userProfileMenu.classList.add('hidden');
                     if (authButtons) authButtons.classList.remove('hidden');
                     if (adminButton) adminButton.classList.add('hidden');
                     
                     // الجوال
-                    if (mainNavigationMobile) mainNavigationMobile.classList.remove('hidden'); // إظهار الأقسام العامة
+                    if (mainNavigationMobile) mainNavigationMobile.classList.add('hidden');
                     if (userMenuMobile) userMenuMobile.classList.add('hidden');
                     if (authButtonsMobile) authButtonsMobile.classList.remove('hidden');
                     if (adminButtonMobile) adminButtonMobile.classList.add('hidden');
@@ -3367,7 +1597,11 @@
                     this.showToast(`مرحباً ${user.first_name}! تم تسجيل الدخول بنجاح`, 'success');
                     
                     // إخفاء النموذج بطريقة محسنة
-                    hideLoginModal(); // استخدام الدالة المخصصة لضمان الإخفاء الكامل
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.classList.add('hidden');
+                        document.getElementById('loginForm').reset();
+                    }
                     
                     // تحديث الواجهة وتحديث البيانات
                     this.updateAuthUI();
@@ -3464,7 +1698,12 @@
                     this.showToast(`تم إرسال طلب التسجيل بنجاح! سيتم مراجعة طلبك من قبل الإدارة.`, 'success');
                     
                     // إخفاء النموذج بطريقة محسنة
-                    hideRegisterModal(); // استخدام الدالة المخصصة لضمان الإخفاء الكامل
+                    const registerModal = document.getElementById('registerModal');
+                    if (registerModal) {
+                        registerModal.classList.add('hidden');
+                        document.getElementById('registerForm').reset();
+                        updateRegisterFullNamePreview();
+                    }
                     
                     // تحديث لوحة التحكم إذا كان المستخدم الحالي أدمن
                     if (this.userManager.currentUser && this.userManager.currentUser.role === 'admin') {
@@ -4763,49 +3002,13 @@
 
             // عرض لوحة الإدارة
             displayAdminPanel() {
-                console.log('📊 displayAdminPanel() - بدء العرض...');
-                
                 if (!this.userManager.currentUser || this.userManager.currentUser.role !== 'admin') {
-                    console.log('❌ المستخدم ليس مديراً أو غير مسجل دخول');
                     return;
                 }
 
-                console.log('✅ المستخدم مدير - متابعة العرض');
-                
                 const pendingUsers = this.userManager.getPendingUsers();
                 const allUsers = this.userManager.getActiveUsers();
-                
-                console.log(`📊 عدد المستخدمين المعلقين: ${pendingUsers.length}`);
-                console.log(`📊 عدد المستخدمين المفعلين: ${allUsers.length}`);
-                
-                if (pendingUsers.length > 0) {
-                    console.log('📋 المستخدمون المعلقون:');
-                    pendingUsers.forEach((user, i) => {
-                        console.log(`   ${i+1}. ${user.full_name} - ${user.email} - ${user.status}`);
-                    });
-                }
-                
-                // البحث عن حاوي لوحة الإدارة (عدة محاولات)
-                let adminContainer = document.getElementById('admin-content');
-                
-                if (!adminContainer) {
-                    adminContainer = document.getElementById('pendingUsersGrid');
-                    console.log('📦 استخدام pendingUsersGrid كحاوي بديل');
-                }
-                
-                if (!adminContainer) {
-                    console.log('⚠️ لم يتم العثور على admin-content، إنشاء حاوي جديد...');
-                    const adminSection = document.getElementById('admin-section');
-                    if (adminSection) {
-                        adminContainer = document.createElement('div');
-                        adminContainer.id = 'admin-content';
-                        adminContainer.className = 'admin-content-container';
-                        adminSection.appendChild(adminContainer);
-                        console.log('✅ تم إنشاء حاوي admin-content جديد');
-                    }
-                }
-                
-                console.log('📦 حاوي لوحة الإدارة:', adminContainer ? 'موجود' : 'غير موجود');
+                const adminContainer = document.getElementById('admin-content');
                 
                 if (adminContainer) {
                     adminContainer.innerHTML = `
@@ -7436,111 +5639,6 @@
             }
         }
 
-        // إضافة مستخدم تجريبي معلق إذا كان هناك معامل في URL
-        function checkAndAddTestPendingUser() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('add_pending_user') === 'true' || urlParams.get('test_pending') === 'true') {
-                console.log('🧪 إضافة مستخدم تجريبي معلق للاختبار...');
-                
-                try {
-                    const testUser = {
-                        id: 'test_pending_' + Date.now(),
-                        national_id: '1234567890',
-                        first_name: 'أحمد',
-                        middle_name: 'علي',
-                        last_name: 'السعيدان',
-                        full_name: 'أحمد علي السعيدان',
-                        email: 'ahmed.test@example.com',
-                        phone: '0501234567',
-                        password: app.userManager.hashPassword('test123'),
-                        role: 'user',
-                        status: 'pending', // حالة الانتظار
-                        birth_date: '1990-05-15',
-                        birth_place: 'الرياض',
-                        profession: 'مهندس برمجيات',
-                        specialization: 'تطوير الويب',
-                        hobbies: 'القراءة، البرمجة، الرياضة',
-                        father_id: null,
-                        generation: 3,
-                        created_at: new Date().toISOString(),
-                        approved_at: null,
-                        approved_by: null
-                    };
-                    
-                    // التحقق من عدم وجود المستخدم مسبقاً
-                    const existing = app.userManager.users.find(u => 
-                        u.email === testUser.email || u.national_id === testUser.national_id
-                    );
-                    
-                    if (!existing) {
-                        app.userManager.users.push(testUser);
-                        app.userManager.saveUsers();
-                        console.log('✅ تم إضافة المستخدم التجريبي المعلق:', testUser.full_name);
-                        console.log('   الحالة:', testUser.status);
-                        console.log('   البريد:', testUser.email);
-                        
-                        app.showToast('✅ تم إضافة مستخدم تجريبي معلق للاختبار', 'success');
-                        
-                        // تحديث لوحة الإدارة إذا كانت مفتوحة
-                        if (app.userManager.currentUser && app.userManager.currentUser.role === 'admin') {
-                            setTimeout(() => {
-                                app.displayAdminPanel();
-                            }, 1000);
-                        }
-                    } else {
-                        console.log('⚠️ المستخدم التجريبي موجود بالفعل');
-                    }
-                } catch (error) {
-                    console.error('❌ خطأ في إضافة المستخدم التجريبي:', error);
-                    app.showToast('خطأ في إضافة المستخدم التجريبي: ' + error.message, 'error');
-                }
-            }
-        }
-        
-        // دخول تلقائي كمدير للاختبار
-        function autoLoginAdmin() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('auto_login') === 'admin') {
-                console.log('🔐 دخول تلقائي كمدير للاختبار...');
-                
-                setTimeout(() => {
-                    try {
-                        // تسجيل الدخول كمدير
-                        const adminUser = app.userManager.login('admin@salmansaedan.com', 'admin123');
-                        console.log('✅ تم تسجيل الدخول كمدير:', adminUser.full_name);
-                        
-                        // تحديث واجهة المستخدم
-                        app.updateAuthUI();
-                        
-                        // الانتقال إلى قسم الإدارة
-                        if (urlParams.get('show_admin') === 'true' || window.location.hash === '#admin') {
-                            setTimeout(() => {
-                                console.log('📊 عرض لوحة الإدارة...');
-                                showSection('admin');
-                                app.displayAdminPanel();
-                            }, 1000);
-                        }
-                        
-                        app.showToast('✅ تم تسجيل الدخول كمدير تلقائياً', 'success');
-                        
-                    } catch (error) {
-                        console.error('❌ خطأ في الدخول التلقائي:', error);
-                        app.showToast('خطأ في الدخول التلقائي: ' + error.message, 'error');
-                    }
-                }, 3000); // انتظار 3 ثوان لضمان تحميل التطبيق
-            }
-        }
-
-        // تشغيل إضافة المستخدم التجريبي بعد تحميل التطبيق
-        setTimeout(() => {
-            checkAndAddTestPendingUser();
-        }, 2000);
-        
-        // تشغيل الدخول التلقائي
-        setTimeout(() => {
-            autoLoginAdmin();
-        }, 2500);
-
         // تعطيل مؤقت لمستمعي الإغلاق للاختبار
         console.log('⚠️ تم تعطيل event listeners للاختبار');
         
@@ -7571,6 +5669,4 @@
             });
         }, 1000); // تأخير ثانية واحدة لتفعيل المستمعي
         */
-    </script>
-</body>
-</html>
+    

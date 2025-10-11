@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار لوحة الإدارة</title>
+</head>
+<body>
+    <h1>اختبار لوحة الإدارة</h1>
+    <div id="results">
+        <p>جاري التحقق من المستخدمين المعلقين...</p>
+    </div>
+    
+    <script>
+        setTimeout(() => {
+            // التحقق من المستخدمين المحفوظين
+            console.log("=== فحص المستخدمين في localStorage ===");
+            const stored = localStorage.getItem('al_saedan_users_v1');
+            
+            if (stored) {
+                const users = JSON.parse(stored);
+                const pendingUsers = users.filter(u => u.status === 'pending');
+                const activeUsers = users.filter(u => u.status === 'active');
+                
+                console.log(`إجمالي المستخدمين: ${users.length}`);
+                console.log(`المستخدمون المعلقون: ${pendingUsers.length}`);
+                console.log(`المستخدمون المفعلون: ${activeUsers.length}`);
+                
+                if (pendingUsers.length > 0) {
+                    console.log("المستخدمون المعلقون:");
+                    pendingUsers.forEach((user, i) => {
+                        console.log(`${i+1}. ${user.full_name} - ${user.email} - ${user.status}`);
+                    });
+                }
+                
+                document.getElementById('results').innerHTML = `
+                    <h2>نتائج الفحص:</h2>
+                    <p>إجمالي المستخدمين: ${users.length}</p>
+                    <p>المستخدمون المعلقون: ${pendingUsers.length}</p>
+                    <p>المستخدمون المفعلون: ${activeUsers.length}</p>
+                    ${pendingUsers.length > 0 ? `
+                        <h3>المستخدمون المعلقون:</h3>
+                        <ul>
+                            ${pendingUsers.map(u => `<li>${u.full_name} - ${u.email}</li>`).join('')}
+                        </ul>
+                    ` : '<p>✅ لا يوجد مستخدمون معلقون</p>'}
+                    
+                    <p><a href="/index.html#admin" style="color: blue;">انتقال إلى لوحة الإدارة</a></p>
+                    <p><strong>معلومات الدخول للمدير:</strong></p>
+                    <p>البريد: admin@salmansaedan.com</p>
+                    <p>كلمة المرور: admin123</p>
+                `;
+            } else {
+                document.getElementById('results').innerHTML = `
+                    <p>❌ لا توجد بيانات مستخدمين</p>
+                    <p><a href="/index.html?test_pending=true">إضافة مستخدم تجريبي أولاً</a></p>
+                `;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

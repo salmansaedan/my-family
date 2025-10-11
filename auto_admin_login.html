@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل دخول المدير التلقائي</title>
+</head>
+<body>
+    <script>
+        // إعادة توجيه إلى الصفحة الأساسية مع معاملات خاصة
+        const params = new URLSearchParams();
+        params.set('test_pending', 'true');
+        params.set('auto_login', 'admin');
+        params.set('show_admin', 'true');
+        
+        window.location.href = `/index.html?${params.toString()}#admin`;
+    </script>
+</body>
+</html>
