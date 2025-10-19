@@ -2302,6 +2302,143 @@
         </div>
     </div>
 
+    <!-- Admin Member Edit Modal -->
+    <div id="memberEditModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-user-edit text-blue-600 ml-2"></i>
+                    تعديل بيانات العضو
+                </h2>
+                <button type="button" onclick="hideMemberEditModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="memberEditForm" class="p-6">
+                <input type="hidden" id="editMemberId" value="">
+                
+                <!-- معلومات الاسم -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-id-card ml-2"></i>بيانات الاسم
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأول *</label>
+                            <input type="text" id="editFirstName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الأوسط</label>
+                            <input type="text" id="editMiddleName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العائلة *</label>
+                            <input type="text" id="editLastName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات الاتصال -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                        <i class="fas fa-address-book ml-2"></i>معلومات الاتصال
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني *</label>
+                            <input type="email" id="editEmail" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                            <input type="tel" id="editPhone" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات الموقع -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                        <i class="fas fa-map-marker-alt ml-2"></i>معلومات الموقع
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المدينة</label>
+                            <input type="text" id="editCity" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">المنطقة/الحي</label>
+                            <input type="text" id="editDistrict" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الدولة</label>
+                            <input type="text" id="editCountry" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات العضوية -->
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-orange-800 mb-4 flex items-center">
+                        <i class="fas fa-crown ml-2"></i>معلومات العضوية
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية</label>
+                            <select id="editRole" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                <option value="user">عضو عادي</option>
+                                <option value="admin">مدير</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">حالة العضوية</label>
+                            <select id="editStatus" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                <option value="active">مفعل</option>
+                                <option value="pending">معلق</option>
+                                <option value="suspended">موقوف</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات إضافية -->
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle ml-2"></i>معلومات إضافية
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
+                            <input type="date" id="editBirthDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">الجنس</label>
+                            <select id="editGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500">
+                                <option value="">اختر الجنس</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ملاحظات إضافية</label>
+                        <textarea id="editNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500" placeholder="ملاحظات أو معلومات إضافية عن العضو..."></textarea>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                    <button type="button" onclick="hideMemberEditModal()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-times ml-2"></i>إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save ml-2"></i>حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Profile Edit Modal -->
     <div id="profileEditModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -3362,6 +3499,108 @@
                 
                 return defaultAdmin;
             }
+
+            // === وظائف إدارة الأعضاء الجديدة ===
+
+            // الحصول على مستخدم بواسطة المعرف
+            getUserById(userId) {
+                return this.users.find(u => u.id === userId) || null;
+            }
+
+            // حذف مستخدم (للإدمن فقط)
+            deleteUser(userId) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                const userToDelete = this.users[userIndex];
+                
+                if (userIndex === -1) {
+                    throw new Error('المستخدم غير موجود');
+                }
+
+                // التحقق من الصلاحيات
+                if (!this.currentUser || this.currentUser.role !== 'admin') {
+                    throw new Error('ليس لديك صلاحية لحذف المستخدمين');
+                }
+
+                // منع حذف المدير الوحيد
+                const activeAdmins = this.users.filter(u => u.role === 'admin' && u.status === 'active');
+                if (userToDelete.role === 'admin' && activeAdmins.length === 1) {
+                    throw new Error('لا يمكن حذف المدير الوحيد في النظام');
+                }
+
+                // حذف المستخدم
+                this.users.splice(userIndex, 1);
+                this.saveUsers();
+                
+                console.log(`✅ تم حذف المستخدم: ${userToDelete.full_name} (${userToDelete.email})`);
+                return true;
+            }
+
+            // تحديث بيانات مستخدم (نسخة محسنة مع دعم الإدارة)
+            updateUser(userId, updateData) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                
+                if (userIndex === -1) {
+                    throw new Error('المستخدم غير موجود');
+                }
+
+                const originalUser = this.users[userIndex];
+
+                // التحقق من الصلاحيات
+                if (this.currentUser.id !== userId && this.currentUser.role !== 'admin') {
+                    throw new Error('ليس لديك صلاحية لتعديل هذا المستخدم');
+                }
+
+                // التحقق من تكرار البريد الإلكتروني
+                if (updateData.email && updateData.email !== originalUser.email) {
+                    const existingUser = this.users.find(u => u.email === updateData.email && u.id !== userId);
+                    if (existingUser) {
+                        throw new Error('البريد الإلكتروني مستخدم بالفعل');
+                    }
+                }
+
+                // منع تغيير بيانات حساسة للمستخدمين العاديين
+                const restrictedFields = ['id', 'created_at', 'approved_at', 'approved_by'];
+                if (this.currentUser.role !== 'admin') {
+                    restrictedFields.push('role', 'status');
+                }
+                
+                restrictedFields.forEach(field => delete updateData[field]);
+
+                // تحديث البيانات
+                const updatedUser = {
+                    ...originalUser,
+                    ...updateData,
+                    updated_at: new Date().toISOString()
+                };
+
+                this.users[userIndex] = updatedUser;
+                this.saveUsers();
+                
+                // تحديث المستخدم الحالي إذا كان هو نفسه
+                if (this.currentUser.id === userId) {
+                    this.saveCurrentUser(updatedUser);
+                    this.currentUser = updatedUser;
+                }
+
+                console.log(`✅ تم تحديث بيانات المستخدم: ${updatedUser.full_name}`);
+                return updatedUser;
+            }
+
+            // إحصائيات إدارية
+            getAdminStats() {
+                const totalUsers = this.users.length;
+                const activeUsers = this.users.filter(u => u.status === 'active').length;
+                const pendingUsers = this.users.filter(u => u.status === 'pending').length;
+                const adminUsers = this.users.filter(u => u.role === 'admin').length;
+
+                return {
+                    total: totalUsers,
+                    active: activeUsers,
+                    pending: pendingUsers,
+                    admins: adminUsers,
+                    suspended: this.users.filter(u => u.status === 'suspended').length
+                };
+            }
         }
 
         // نظام إدارة البيانات المحسن
@@ -4278,6 +4517,12 @@
                         e.preventDefault();
                         this.handleRegister();
                     });
+                }
+
+                // مستمع نموذج تعديل العضو (للأدمن)
+                const memberEditForm = document.getElementById('memberEditForm');
+                if (memberEditForm) {
+                    memberEditForm.addEventListener('submit', saveMemberChanges);
                 }
 
                 // مستمعات حقول النموذج المحسن
@@ -5877,18 +6122,55 @@
                                     <i class="fas fa-users text-green-600 ml-2"></i>
                                     الأعضاء النشطين (${allUsers.length})
                                 </h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${allUsers.map(user => `
-                                        <div class="p-3 border border-gray-200 rounded-lg">
-                                            <h4 class="font-semibold text-gray-800">${user.full_name}</h4>
-                                            <p class="text-sm text-gray-600">${user.email}</p>
-                                            <p class="text-xs text-gray-500">انضم: ${new Date(user.created_at).toLocaleDateString('ar-SA')}</p>
-                                            <span class="inline-block mt-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                                                ${user.role === 'admin' ? '👑 مدير' : '👤 عضو'}
-                                            </span>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                                ${allUsers.length === 0 ? 
+                                    '<p class="text-gray-500">لا يوجد أعضاء مفعلين حالياً</p>' :
+                                    `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        ${allUsers.map(user => `
+                                            <div class="p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                                                <div class="flex justify-between items-start mb-3">
+                                                    <div class="flex-grow">
+                                                        <h4 class="font-semibold text-gray-800 text-lg">${user.full_name}</h4>
+                                                        <p class="text-sm text-gray-600">${user.email}</p>
+                                                        <p class="text-xs text-gray-500">انضم: ${new Date(user.created_at).toLocaleDateString('ar-SA')}</p>
+                                                    </div>
+                                                    <span class="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                                                        ${user.role === 'admin' ? '👑 مدير' : '👤 عضو'}
+                                                    </span>
+                                                </div>
+                                                
+                                                <!-- معلومات إضافية -->
+                                                <div class="text-xs text-gray-500 mb-3 space-y-1">
+                                                    ${user.phone ? `<p><i class="fas fa-phone ml-1"></i>${user.phone}</p>` : ''}
+                                                    ${user.city ? `<p><i class="fas fa-map-marker-alt ml-1"></i>${user.city}</p>` : ''}
+                                                    <p><i class="fas fa-id-badge ml-1"></i>ID: ${user.id}</p>
+                                                </div>
+                                                
+                                                <!-- أزرار التحكم -->
+                                                <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                                                    <button onclick="editActiveMember('${user.id}')" 
+                                                            class="flex-1 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                                                        <i class="fas fa-edit"></i>
+                                                        تعديل
+                                                    </button>
+                                                    ${user.role !== 'admin' || allUsers.filter(u => u.role === 'admin').length > 1 ? `
+                                                        <button onclick="deleteActiveMember('${user.id}', '${user.full_name}')" 
+                                                                class="flex-1 bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                                                            <i class="fas fa-trash"></i>
+                                                            حذف
+                                                        </button>
+                                                    ` : `
+                                                        <button disabled 
+                                                                class="flex-1 bg-gray-300 text-gray-500 px-3 py-2 rounded-lg text-sm cursor-not-allowed flex items-center justify-center gap-2"
+                                                                title="لا يمكن حذف المدير الوحيد">
+                                                            <i class="fas fa-shield-alt"></i>
+                                                            محمي
+                                                        </button>
+                                                    `}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>`
+                                }
                             </div>
                         </div>
                     `;
@@ -8638,6 +8920,202 @@
             if (app) {
                 app.displayAdminPanel();
                 app.showToast('تم تحديث قائمة الطلبات', 'success');
+            }
+        }
+
+        // === وظائف إدارة الأعضاء النشطين ===
+        
+        // حذف عضو نشط
+        function deleteActiveMember(userId, userName) {
+            if (!app || !app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                app.showToast('غير مسموح لك بهذا الإجراء', 'error');
+                return;
+            }
+
+            // التأكد من عدم حذف المدير الوحيد
+            const activeUsers = app.userManager.getActiveUsers();
+            const admins = activeUsers.filter(user => user.role === 'admin');
+            const userToDelete = activeUsers.find(user => user.id === userId);
+            
+            if (userToDelete && userToDelete.role === 'admin' && admins.length === 1) {
+                app.showToast('لا يمكن حذف المدير الوحيد في النظام', 'error');
+                return;
+            }
+
+            // تأكيد الحذف مع أمان إضافي
+            const confirmMessage = `⚠️ تحذير: عملية حذف العضو نهائية ولا يمكن التراجع عنها!\n\n` +
+                                 `العضو المراد حذفه: ${userName}\n` +
+                                 `معرف العضو: ${userId}\n\n` +
+                                 `هل أنت متأكد من المتابعة؟`;
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            // تأكيد إضافي للأمان
+            const doubleConfirm = `هذا هو التأكيد الأخير!\n\n` +
+                                `سيتم حذف العضو "${userName}" نهائياً.\n\n` +
+                                `اكتب "حذف" للمتابعة:`;
+            
+            const userInput = prompt(doubleConfirm);
+            if (userInput !== 'حذف') {
+                app.showToast('تم إلغاء عملية الحذف', 'info');
+                return;
+            }
+
+            try {
+                // حذف العضو
+                const success = app.userManager.deleteUser(userId);
+                
+                if (success) {
+                    app.showToast(`✅ تم حذف العضو "${userName}" بنجاح`, 'success');
+                    
+                    // تحديث لوحة الإدارة
+                    app.displayAdminPanel();
+                    
+                    // إنشاء نسخة احتياطية بعد التغيير
+                    app.dataManager.createBackup();
+                } else {
+                    throw new Error('فشل في حذف العضو من قاعدة البيانات');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في حذف العضو:', error);
+                app.showToast(`❌ خطأ في حذف العضو: ${error.message}`, 'error');
+            }
+        }
+
+        // تعديل بيانات عضو نشط
+        function editActiveMember(userId) {
+            if (!app || !app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                app.showToast('غير مسموح لك بهذا الإجراء', 'error');
+                return;
+            }
+
+            const user = app.userManager.getUserById(userId);
+            if (!user) {
+                app.showToast('لم يتم العثور على العضو المطلوب', 'error');
+                return;
+            }
+
+            // تعبئة بيانات النموذج
+            populateMemberEditForm(user);
+            
+            // إظهار النموذج
+            showMemberEditModal();
+        }
+
+        // تعبئة نموذج تعديل العضو
+        function populateMemberEditForm(user) {
+            document.getElementById('editMemberId').value = user.id || '';
+            document.getElementById('editFirstName').value = user.first_name || '';
+            document.getElementById('editMiddleName').value = user.middle_name || '';
+            document.getElementById('editLastName').value = user.last_name || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editCity').value = user.city || '';
+            document.getElementById('editDistrict').value = user.district || '';
+            document.getElementById('editCountry').value = user.country || '';
+            document.getElementById('editRole').value = user.role || 'user';
+            document.getElementById('editStatus').value = user.status || 'active';
+            document.getElementById('editBirthDate').value = user.birth_date || '';
+            document.getElementById('editGender').value = user.gender || '';
+            document.getElementById('editNotes').value = user.notes || '';
+        }
+
+        // إظهار نموذج تعديل العضو
+        function showMemberEditModal() {
+            const modal = document.getElementById('memberEditModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // إخفاء نموذج تعديل العضو
+        function hideMemberEditModal() {
+            const modal = document.getElementById('memberEditModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                
+                // إعادة تعيين النموذج
+                document.getElementById('memberEditForm').reset();
+            }
+        }
+
+        // حفظ تعديلات العضو
+        function saveMemberChanges(event) {
+            event.preventDefault();
+
+            if (!app || !app.userManager.currentUser || app.userManager.currentUser.role !== 'admin') {
+                app.showToast('غير مسموح لك بهذا الإجراء', 'error');
+                return;
+            }
+
+            const userId = document.getElementById('editMemberId').value;
+            if (!userId) {
+                app.showToast('معرف العضو مفقود', 'error');
+                return;
+            }
+
+            try {
+                // جمع البيانات الجديدة
+                const updatedData = {
+                    id: userId,
+                    first_name: document.getElementById('editFirstName').value.trim(),
+                    middle_name: document.getElementById('editMiddleName').value.trim(),
+                    last_name: document.getElementById('editLastName').value.trim(),
+                    email: document.getElementById('editEmail').value.trim(),
+                    phone: document.getElementById('editPhone').value.trim(),
+                    city: document.getElementById('editCity').value.trim(),
+                    district: document.getElementById('editDistrict').value.trim(),
+                    country: document.getElementById('editCountry').value.trim(),
+                    role: document.getElementById('editRole').value,
+                    status: document.getElementById('editStatus').value,
+                    birth_date: document.getElementById('editBirthDate').value,
+                    gender: document.getElementById('editGender').value,
+                    notes: document.getElementById('editNotes').value.trim()
+                };
+
+                // التحقق من الحقول المطلوبة
+                if (!updatedData.first_name || !updatedData.last_name || !updatedData.email) {
+                    app.showToast('يرجى ملء جميع الحقول المطلوبة', 'warning');
+                    return;
+                }
+
+                // التحقق من صحة البريد الإلكتروني
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(updatedData.email)) {
+                    app.showToast('البريد الإلكتروني غير صحيح', 'warning');
+                    return;
+                }
+
+                // تحديث الاسم الكامل
+                updatedData.full_name = [updatedData.first_name, updatedData.middle_name, updatedData.last_name]
+                    .filter(name => name)
+                    .join(' ');
+
+                // حفظ التحديثات
+                const success = app.userManager.updateUser(userId, updatedData);
+                
+                if (success) {
+                    app.showToast(`✅ تم تحديث بيانات العضو "${updatedData.full_name}" بنجاح`, 'success');
+                    
+                    // إخفاء النموذج
+                    hideMemberEditModal();
+                    
+                    // تحديث لوحة الإدارة
+                    app.displayAdminPanel();
+                    
+                    // إنشاء نسخة احتياطية بعد التحديث
+                    app.dataManager.createBackup();
+                } else {
+                    throw new Error('فشل في تحديث بيانات العضو');
+                }
+
+            } catch (error) {
+                console.error('❌ خطأ في تحديث بيانات العضو:', error);
+                app.showToast(`❌ خطأ في تحديث البيانات: ${error.message}`, 'error');
             }
         }
 
