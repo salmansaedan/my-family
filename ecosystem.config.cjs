@@ -2,9 +2,9 @@
 module.exports = {
   apps: [
     {
-      name: 'al-saedan-family-app',
+      name: 'saedan-family-realtime',
       script: 'npx',
-      args: 'wrangler pages dev dist --d1=al-saedan-family-db --local --ip 0.0.0.0 --port 3000',
+      args: 'wrangler pages dev dist --d1=saedan-family-realtime --local --ip 0.0.0.0 --port 3000',
       env: {
         NODE_ENV: 'development',
         PORT: 3000

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار عرض الأحداث</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-center mb-8">
+                <i class="fas fa-calendar-alt text-green-600 ml-2"></i>
+                اختبار عرض الأحداث
+            </h1>
+            
+            <div class="text-center mb-6">
+                <button onclick="loadEventsTest()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-sync ml-2"></i>تحميل الأحداث
+                </button>
+            </div>
+            
+            <!-- Events Display Area -->
+            <div id="events-container">
+                <!-- Loading State -->
+                <div id="events-loading" class="text-center py-12">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-500">جاري تحميل الأحداث...</p>
+                </div>
+                
+                <!-- Events List -->
+                <div id="events-list" class="hidden space-y-4"></div>
+                
+                <!-- Empty State -->
+                <div id="events-empty" class="hidden text-center py-12">
+                    <i class="fas fa-calendar-plus text-gray-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد أحداث حالياً</h3>
+                    <p class="text-gray-500 mb-6">ابدأ بإضافة أول حدث للعائلة</p>
+                </div>
+            </div>
+            
+            <!-- Events Statistics -->
+            <div id="events-stats" class="hidden mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="total-events">0</div>
+                    <div class="text-sm text-blue-700">إجمالي الأحداث</div>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-600" id="upcoming-events">0</div>
+                    <div class="text-sm text-green-700">أحداث قادمة</div>
+                </div>
+                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-yellow-600" id="this-month-events">0</div>
+                    <div class="text-sm text-yellow-700">هذا الشهر</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="high-priority-events">0</div>
+                    <div class="text-sm text-purple-700">أولوية عالية</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        // تحميل وعرض الأحداث
+        async function loadEventsTest() {
+            console.log('🔄 بدء تحميل الأحداث...');
+            
+            try {
+                // إظهار حالة التحميل
+                const loadingEl = document.getElementById('events-loading');
+                const listEl = document.getElementById('events-list');
+                const emptyEl = document.getElementById('events-empty');
+                const statsEl = document.getElementById('events-stats');
+                
+                if (loadingEl) loadingEl.classList.remove('hidden');
+                if (listEl) listEl.classList.add('hidden');
+                if (emptyEl) emptyEl.classList.add('hidden');
+                if (statsEl) statsEl.classList.add('hidden');
+                
+                // جلب البيانات من API
+                const response = await fetch('/api/events');
+                const result = await response.json();
+                
+                console.log('📊 نتيجة API:', result);
+                
+                if (result.status === 'success' && result.data) {
+                    const events = result.data;
+                    console.log(\`✅ تم تحميل \${events.length} حدث\`);
+                    
+                    // إخفاء حالة التحميل
+                    if (loadingEl) loadingEl.classList.add('hidden');
+                    
+                    if (events.length === 0) {
+                        // عرض حالة فارغة
+                        if (emptyEl) emptyEl.classList.remove('hidden');
+                    } else {
+                        // عرض قائمة الأحداث
+                        if (listEl) {
+                            listEl.innerHTML = '';
+                            events.forEach(event => {
+                                listEl.appendChild(createEventCard(event));
+                            });
+                            listEl.classList.remove('hidden');
+                        }
+                        
+                        // تحديث الإحصائيات
+                        updateEventsStats(events);
+                        if (statsEl) statsEl.classList.remove('hidden');
+                    }
+                } else {
+                    throw new Error(result.message || 'خطأ في جلب البيانات');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الأحداث:', error);
+                
+                // إخفاء التحميل وإظهار رسالة خطأ
+                const loadingEl = document.getElementById('events-loading');
+                if (loadingEl) {
+                    loadingEl.innerHTML = \`
+                        <div class="text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                            <p class="text-red-600 font-semibold">خطأ في تحميل الأحداث</p>
+                            <p class="text-gray-500 text-sm mt-1">\${error.message}</p>
+                            <button onclick="loadEventsTest()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                <i class="fas fa-redo ml-1"></i>إعادة المحاولة
+                            </button>
+                        </div>
+                    \`;
+                }
+            }
+        }
+
+        // إنشاء بطاقة حدث
+        function createEventCard(event) {
+            console.log('🎯 إنشاء بطاقة للحدث:', event.title);
+            
+            const card = document.createElement('div');
+            card.className = 'bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all';
+            
+            // تحديد لون الأولوية
+            const priorityColors = {
+                'low': 'text-gray-500 bg-gray-100',
+                'medium': 'text-blue-600 bg-blue-100', 
+                'high': 'text-orange-600 bg-orange-100',
+                'urgent': 'text-red-600 bg-red-100'
+            };
+            
+            const priorityLabels = {
+                'low': 'منخفضة',
+                'medium': 'متوسطة',
+                'high': 'عالية', 
+                'urgent': 'عاجلة'
+            };
+            
+            // تحديد أيقونة النوع
+            const typeIcons = {
+                'meeting': 'fas fa-users',
+                'celebration': 'fas fa-birthday-cake',
+                'educational': 'fas fa-graduation-cap',
+                'recreational': 'fas fa-gamepad',
+                'business': 'fas fa-briefcase',
+                'religious': 'fas fa-mosque',
+                'general': 'fas fa-calendar'
+            };
+            
+            const typeLabels = {
+                'meeting': 'اجتماع عائلي',
+                'celebration': 'احتفال ومناسبة',
+                'educational': 'فعالية تعليمية',
+                'recreational': 'فعالية ترفيهية',
+                'business': 'فعالية تجارية',
+                'religious': 'مناسبة دينية',
+                'general': 'عام'
+            };
+            
+            // تنسيق التاريخ
+            const eventDate = new Date(event.event_date);
+            const formattedDate = eventDate.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+            });
+            const formattedTime = eventDate.toLocaleTimeString('ar-SA', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            card.innerHTML = \`
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">
+                            <i class="\${typeIcons[event.event_type] || 'fas fa-calendar'} text-green-600 ml-2"></i>
+                            \${event.title || 'حدث بدون عنوان'}
+                        </h3>
+                        <p class="text-gray-600 text-sm">\${typeLabels[event.event_type] || 'نوع غير محدد'}</p>
+                    </div>
+                    <div class="text-left">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold \${priorityColors[event.priority] || priorityColors['medium']}">
+                            \${priorityLabels[event.priority] || 'متوسطة'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-calendar-day text-blue-500 ml-3 w-5"></i>
+                        <span class="font-medium">\${formattedDate}</span>
+                    </div>
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-clock text-green-500 ml-3 w-5"></i>
+                        <span>\${formattedTime}</span>
+                    </div>
+                    \${event.location ? \`
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-map-marker-alt text-red-500 ml-3 w-5"></i>
+                            <span>\${event.location}</span>
+                        </div>
+                    \` : ''}
+                    \${event.organizer_name ? \`
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-user-tie text-purple-500 ml-3 w-5"></i>
+                            <span>المنظم: \${event.organizer_name}</span>
+                            \${event.organizer_phone ? \`<span class="text-gray-500 mr-2">(\${event.organizer_phone})</span>\` : ''}
+                        </div>
+                    \` : ''}
+                </div>
+                
+                \${event.description ? \`
+                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                        <p class="text-gray-700 text-sm">\${event.description}</p>
+                    </div>
+                \` : ''}
+                
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <div class="flex space-x-2 space-x-reverse">
+                        \${event.max_attendees ? \`
+                            <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                                <i class="fas fa-users ml-1"></i>
+                                حد أقصى: \${event.max_attendees}
+                            </span>
+                        \` : ''}
+                        \${event.estimated_cost ? \`
+                            <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                                <i class="fas fa-money-bill ml-1"></i>
+                                \${event.estimated_cost} ريال
+                            </span>
+                        \` : ''}
+                    </div>
+                    <div class="flex space-x-2 space-x-reverse">
+                        <button onclick="alert('تعديل الحدث: ' + '\${event.title}')" class="text-blue-600 hover:text-blue-800 p-2 rounded" title="تعديل">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="alert('حذف الحدث: ' + '\${event.title}')" class="text-red-600 hover:text-red-800 p-2 rounded" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            \`;
+            
+            return card;
+        }
+
+        // تحديث إحصائيات الأحداث
+        function updateEventsStats(events) {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // إجمالي الأحداث
+            const totalEvents = events.length;
+            
+            // الأحداث القادمة
+            const upcomingEvents = events.filter(event => {
+                const eventDate = new Date(event.event_date);
+                return eventDate > now;
+            }).length;
+            
+            // أحداث هذا الشهر
+            const thisMonthEvents = events.filter(event => {
+                const eventDate = new Date(event.event_date);
+                return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+            }).length;
+            
+            // أحداث بأولوية عالية
+            const highPriorityEvents = events.filter(event => 
+                event.priority === 'high' || event.priority === 'urgent'
+            ).length;
+            
+            console.log(\`📊 الإحصائيات: المجموع=\${totalEvents}, القادمة=\${upcomingEvents}, هذا الشهر=\${thisMonthEvents}, عالية الأولوية=\${highPriorityEvents}\`);
+            
+            // تحديث العناصر
+            const totalEl = document.getElementById('total-events');
+            const upcomingEl = document.getElementById('upcoming-events');
+            const thisMonthEl = document.getElementById('this-month-events');
+            const highPriorityEl = document.getElementById('high-priority-events');
+            
+            if (totalEl) totalEl.textContent = totalEvents;
+            if (upcomingEl) upcomingEl.textContent = upcomingEvents;
+            if (thisMonthEl) thisMonthEl.textContent = thisMonthEvents;
+            if (highPriorityEl) highPriorityEl.textContent = highPriorityEvents;
+        }
+        
+        // تحميل الأحداث عند تحميل الصفحة
+        window.onload = function() {
+            console.log('🚀 تم تحميل صفحة اختبار الأحداث');
+            loadEventsTest();
+        };
+    </script>
+</body>
+</html>

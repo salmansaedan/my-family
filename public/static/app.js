@@ -3,6 +3,386 @@
 // إعداد العامة
 const API_BASE_URL = '/api';
 
+// ================== نظام إدارة قاعدة البيانات مع المزامنة الفورية ==================
+
+class DatabaseManager {
+  constructor() {
+    this.isOnline = navigator.onLine;
+    this.syncQueue = [];
+    this.lastSyncTime = Date.now();
+    this.eventListeners = new Map();
+    
+    // مراقبة حالة الاتصال
+    this.setupConnectionMonitoring();
+    
+    // تحديث تلقائي كل 30 ثانية
+    this.setupPeriodicSync();
+    
+    console.log('📡 DatabaseManager - تم تهيئة نظام المزامنة الفورية');
+  }
+  
+  // ================= مراقبة الاتصال والمزامنة =================
+  
+  setupConnectionMonitoring() {
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      console.log('🟢 DatabaseManager - تم استعادة الاتصال');
+      this.syncPendingOperations();
+    });
+    
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      console.log('🔴 DatabaseManager - انقطع الاتصال - سيتم المزامنة عند العودة');
+    });
+  }
+  
+  setupPeriodicSync() {
+    setInterval(() => {
+      if (this.isOnline) {
+        this.syncLatestChanges();
+      }
+    }, 30000); // كل 30 ثانية
+  }
+  
+  // ================= إدارة المستمعين للتحديثات الفورية =================
+  
+  addEventListener(eventType, callback) {
+    if (!this.eventListeners.has(eventType)) {
+      this.eventListeners.set(eventType, []);
+    }
+    this.eventListeners.get(eventType).push(callback);
+  }
+  
+  removeEventListener(eventType, callback) {
+    if (this.eventListeners.has(eventType)) {
+      const listeners = this.eventListeners.get(eventType);
+      const index = listeners.indexOf(callback);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+  
+  notifyListeners(eventType, data) {
+    if (this.eventListeners.has(eventType)) {
+      this.eventListeners.get(eventType).forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error('خطأ في تنفيذ مستمع الحدث:', error);
+        }
+      });
+    }
+  }
+  
+  // ================= العمليات الأساسية على API =================
+  
+  async apiCall(method, endpoint, data = null, options = {}) {
+    const config = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    };
+    
+    if (data && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+      config.body = JSON.stringify(data);
+    }
+    
+    try {
+      console.log(`🌐 API ${method.toUpperCase()}: ${endpoint}`);
+      
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
+      
+      console.log(`✅ API Success: ${endpoint}`);
+      
+      // إشعار بالنجاح
+      this.notifyListeners('api_success', { method, endpoint, data: result });
+      
+      return result;
+    } catch (error) {
+      console.error(`❌ API Error ${method} ${endpoint}:`, error);
+      
+      // إضافة للقائمة في حالة فقدان الاتصال
+      if (!this.isOnline || error.message.includes('fetch')) {
+        this.queueOperation(method, endpoint, data);
+      }
+      
+      // إشعار بالخطأ
+      this.notifyListeners('api_error', { method, endpoint, error: error.message });
+      
+      throw error;
+    }
+  }
+  
+  queueOperation(method, endpoint, data) {
+    this.syncQueue.push({ method, endpoint, data, timestamp: Date.now() });
+    console.log('📥 تمت إضافة عملية للقائمة المؤجلة:', { method, endpoint });
+  }
+  
+  async syncPendingOperations() {
+    if (this.syncQueue.length === 0) return;
+    
+    console.log(`🔄 مزامنة ${this.syncQueue.length} عمليات مؤجلة...`);
+    
+    const operations = [...this.syncQueue];
+    this.syncQueue = [];
+    
+    for (const operation of operations) {
+      try {
+        await this.apiCall(operation.method, operation.endpoint, operation.data);
+        console.log('✅ تمت مزامنة العملية:', operation);
+      } catch (error) {
+        console.error('❌ فشلت مزامنة العملية:', operation, error);
+        // إعادة إضافة للقائمة
+        this.syncQueue.push(operation);
+      }
+    }
+  }
+  
+  // ================= مزامنة التحديثات الجديدة =================
+  
+  async syncLatestChanges() {
+    try {
+      const response = await this.apiCall('GET', `/activity?since=${this.lastSyncTime}`);
+      
+      if (response.success && response.data.length > 0) {
+        console.log(`🔄 تم اكتشاف ${response.data.length} تحديث جديد`);
+        
+        // إشعار بالتحديثات الجديدة
+        this.notifyListeners('data_updated', response.data);
+        
+        // تحديث آخر وقت مزامنة
+        this.lastSyncTime = Date.now();
+      }
+    } catch (error) {
+      console.error('❌ خطأ في مزامنة التحديثات:', error);
+    }
+  }
+  
+  // ================= إدارة أعضاء العائلة =================
+  
+  async getFamilyMembers(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/family-members${queryParams ? '?' + queryParams : ''}`;
+    
+    const result = await this.apiCall('GET', endpoint);
+    return result.data || [];
+  }
+  
+  async getFamilyMember(memberId) {
+    const result = await this.apiCall('GET', `/family-members/${memberId}`);
+    return result.data;
+  }
+  
+  async createFamilyMember(memberData) {
+    const result = await this.apiCall('POST', '/family-members', memberData);
+    
+    // إشعار بإضافة عضو جديد
+    this.notifyListeners('member_added', result.data);
+    
+    return result;
+  }
+  
+  async updateFamilyMember(memberId, memberData) {
+    const result = await this.apiCall('PUT', `/family-members/${memberId}`, memberData);
+    
+    // إشعار بتحديث العضو
+    this.notifyListeners('member_updated', { id: memberId, data: result.data });
+    
+    return result;
+  }
+  
+  async deleteFamilyMember(memberId) {
+    const result = await this.apiCall('DELETE', `/family-members/${memberId}`);
+    
+    // إشعار بحذف العضو
+    this.notifyListeners('member_deleted', { id: memberId });
+    
+    return result;
+  }
+  
+  // ================= إدارة الفعاليات =================
+  
+  async getEvents(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/events${queryParams ? '?' + queryParams : ''}`;
+    
+    const result = await this.apiCall('GET', endpoint);
+    return result.data || [];
+  }
+  
+  async getEvent(eventId) {
+    const result = await this.apiCall('GET', `/events/${eventId}`);
+    return result.data;
+  }
+  
+  async createEvent(eventData) {
+    const result = await this.apiCall('POST', '/events', eventData);
+    
+    // إشعار بإضافة فعالية جديدة
+    this.notifyListeners('event_added', result.data);
+    
+    return result;
+  }
+  
+  async updateEvent(eventId, eventData) {
+    const result = await this.apiCall('PUT', `/events/${eventId}`, eventData);
+    
+    // إشعار بتحديث الفعالية
+    this.notifyListeners('event_updated', { id: eventId, data: result.data });
+    
+    return result;
+  }
+  
+  async deleteEvent(eventId) {
+    const result = await this.apiCall('DELETE', `/events/${eventId}`);
+    
+    // إشعار بحذف الفعالية
+    this.notifyListeners('event_deleted', { id: eventId });
+    
+    return result;
+  }
+  
+  // ================= إدارة دعوات الفعاليات =================
+  
+  async getEventInvitations(eventId) {
+    const result = await this.apiCall('GET', `/events/${eventId}/invitations`);
+    return result.data || [];
+  }
+  
+  async sendEventInvitations(eventId, invitationData) {
+    const result = await this.apiCall('POST', `/events/${eventId}/send-invitations`, invitationData);
+    
+    // إشعار بإرسال الدعوات
+    this.notifyListeners('invitations_sent', { eventId, data: result.data });
+    
+    return result;
+  }
+  
+  async getInvitationStats(eventId) {
+    const result = await this.apiCall('GET', `/events/${eventId}/invitation-stats`);
+    return result.data;
+  }
+  
+  // ================= إدارة المقترحات =================
+  
+  async getSuggestions(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/suggestions${queryParams ? '?' + queryParams : ''}`;
+    
+    const result = await this.apiCall('GET', endpoint);
+    return result.data || [];
+  }
+  
+  async createSuggestion(suggestionData) {
+    const result = await this.apiCall('POST', '/suggestions', suggestionData);
+    
+    // إشعار بإضافة مقترح جديد
+    this.notifyListeners('suggestion_added', result.data);
+    
+    return result;
+  }
+  
+  async updateSuggestion(suggestionId, suggestionData) {
+    const result = await this.apiCall('PUT', `/suggestions/${suggestionId}`, suggestionData);
+    
+    // إشعار بتحديث المقترح
+    this.notifyListeners('suggestion_updated', { id: suggestionId, data: result.data });
+    
+    return result;
+  }
+  
+  // ================= إدارة مكتبة التجارب =================
+  
+  async getLibraryItems(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/library${queryParams ? '?' + queryParams : ''}`;
+    
+    const result = await this.apiCall('GET', endpoint);
+    return result.data || [];
+  }
+  
+  async getFeaturedLibraryItems() {
+    const result = await this.apiCall('GET', '/library/featured');
+    return result.data || [];
+  }
+  
+  async getLibraryCategories() {
+    const result = await this.apiCall('GET', '/library/categories');
+    return result.data || [];
+  }
+  
+  async viewLibraryItem(itemId) {
+    const result = await this.apiCall('POST', `/library/view/${itemId}`);
+    
+    // إشعار بمشاهدة المحتوى
+    this.notifyListeners('content_viewed', { id: itemId });
+    
+    return result;
+  }
+  
+  // ================= إدارة سجل الأنشطة =================
+  
+  async getActivityLog(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/activity${queryParams ? '?' + queryParams : ''}`;
+    
+    const result = await this.apiCall('GET', endpoint);
+    return result.data || [];
+  }
+  
+  // ================= اختبار الاتصال =================
+  
+  async testConnection() {
+    try {
+      const result = await this.apiCall('GET', '/test');
+      console.log('✅ اختبار الاتصال ناجح:', result);
+      return true;
+    } catch (error) {
+      console.error('❌ فشل اختبار الاتصال:', error);
+      return false;
+    }
+  }
+  
+  // ================= وظائف المساعدة =================
+  
+  // إزالة جميع المستمعين
+  clearAllListeners() {
+    this.eventListeners.clear();
+  }
+  
+  // إحصائيات المزامنة
+  getSyncStats() {
+    return {
+      isOnline: this.isOnline,
+      pendingOperations: this.syncQueue.length,
+      lastSyncTime: this.lastSyncTime,
+      listeners: Array.from(this.eventListeners.keys())
+    };
+  }
+  
+  // فرض المزامنة الفورية
+  async forcSync() {
+    console.log('🔄 فرض المزامنة الفورية...');
+    
+    await this.syncPendingOperations();
+    await this.syncLatestChanges();
+    
+    console.log('✅ تمت المزامنة الفورية');
+  }
+}
+
+// إنشاء instance عامة لـ DatabaseManager
+const dbManager = new DatabaseManager();
+
 // وظائف مساعدة
 class AlSaedanApp {
   constructor() {
@@ -168,35 +548,17 @@ class AlSaedanApp {
     }
   }
 
-  // API وظائف
+  // API وظائف - تم استبدالها بـ DatabaseManager
   async fetchFamilyMembers() {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/family-members`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching family members:', error);
-      throw error;
-    }
+    return await dbManager.getFamilyMembers();
   }
 
   async fetchEvents() {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/events`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      throw error;
-    }
+    return await dbManager.getEvents();
   }
 
   async fetchSuggestions() {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/suggestions`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      throw error;
-    }
+    return await dbManager.getSuggestions();
   }
 
   // وظائف إضافية للتطبيق
@@ -226,13 +588,35 @@ class AlSaedanApp {
   }
 }
 
-// تهيئة التطبيق عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
+// تهيئة التطبيق عند تحميل الصفحة - محدّث مع DatabaseManager
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 تهيئة تطبيق آل سعيدان مع المزامنة الفورية...');
+  
   const app = new AlSaedanApp();
   app.exportUtils();
   
+  // إعداد مراقبة التحديثات العامة
+  setupGlobalNotifications();
+  
+  // اختبار الاتصال بقاعدة البيانات
+  try {
+    const isConnected = await dbManager.testConnection();
+    if (isConnected) {
+      console.log('✅ الاتصال بقاعدة البيانات ناجح');
+      showConnectionStatus(true);
+    } else {
+      console.log('❌ فشل الاتصال بقاعدة البيانات');
+      showConnectionStatus(false);
+    }
+  } catch (error) {
+    console.error('❌ خطأ في اختبار الاتصال:', error);
+    showConnectionStatus(false);
+  }
+  
   // تحديد نوع الصفحة وتحميل البيانات المناسبة
   const currentPath = window.location.pathname;
+  
+  console.log(`📍 تحميل صفحة: ${currentPath}`);
   
   if (currentPath === '/family') {
     loadFamilyTree();
@@ -245,29 +629,236 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLibraryContent();
     setupLibraryFilters();
   }
+  
+  console.log('✅ تم تهيئة التطبيق بنجاح');
 });
+
+// ================= نظام الإشعارات الفورية =================
+
+// إعداد مراقبة التحديثات العامة
+function setupGlobalNotifications() {
+  // إشعارات النجاح
+  dbManager.addEventListener('api_success', (data) => {
+    console.log('✨ API Success:', data.endpoint);
+    updateLastSyncTime();
+  });
+  
+  // إشعارات الخطأ
+  dbManager.addEventListener('api_error', (data) => {
+    console.error('❌ API Error:', data.endpoint, data.error);
+    showConnectionStatus(false);
+  });
+  
+  // إشعارات التحديثات الجديدة
+  dbManager.addEventListener('data_updated', (activities) => {
+    console.log(`🔄 تحديثات جديدة: ${activities.length}`);
+    
+    // إظهار إشعار للمستخدم
+    activities.forEach(activity => {
+      showUpdateNotification(activity);
+    });
+    
+    updateLastSyncTime();
+  });
+  
+  // مراقبة حالة الاتصال
+  window.addEventListener('online', () => {
+    console.log('🟢 عودة الاتصال');
+    showConnectionStatus(true);
+    AlSaedanUtils.showAlert('success', 'تم استعادة الاتصال بقاعدة البيانات');
+  });
+  
+  window.addEventListener('offline', () => {
+    console.log('🔴 انقطاع الاتصال');
+    showConnectionStatus(false);
+    AlSaedanUtils.showAlert('warning', 'انقطع الاتصال - سيتم المزامنة عند العودة');
+  });
+}
+
+// عرض إشعار تحديث
+function showUpdateNotification(activity) {
+  const messages = {
+    'family_members': 'تم تحديث بيانات العائلة',
+    'events': 'تم تحديث الفعاليات',
+    'suggestions': 'تم تحديث المقترحات',
+    'library_items': 'تم تحديث مكتبة التجارب'
+  };
+  
+  const message = messages[activity.table_name] || `تحديث جديد: ${activity.action}`;
+  
+  // إظهار إشعار بسيط
+  const notification = document.createElement('div');
+  notification.className = 'fixed top-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+  notification.innerHTML = `
+    <div class="flex items-center">
+      <i class="fas fa-sync-alt animate-spin mr-2"></i>
+      <span>${message}</span>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // إزالة تلقائية بعد 5 ثوان
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+// عرض حالة الاتصال
+function showConnectionStatus(isConnected) {
+  let statusIndicator = document.getElementById('connection-status');
+  
+  if (!statusIndicator) {
+    statusIndicator = document.createElement('div');
+    statusIndicator.id = 'connection-status';
+    statusIndicator.className = 'fixed bottom-4 right-4 px-3 py-2 rounded-full text-sm font-medium z-40 transition-all duration-300';
+    document.body.appendChild(statusIndicator);
+  }
+  
+  if (isConnected) {
+    statusIndicator.className = statusIndicator.className.replace(/bg-\w+-\d+/, '') + ' bg-green-500 text-white';
+    statusIndicator.innerHTML = '<i class="fas fa-check-circle mr-1"></i>متصل';
+  } else {
+    statusIndicator.className = statusIndicator.className.replace(/bg-\w+-\d+/, '') + ' bg-red-500 text-white';
+    statusIndicator.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>غير متصل';
+  }
+}
+
+// تحديث آخر وقت مزامنة
+function updateLastSyncTime() {
+  const syncTimeElement = document.getElementById('last-sync-time');
+  if (syncTimeElement) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ar-SA', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    syncTimeElement.textContent = `آخر مزامنة: ${timeString}`;
+  }
+}
+
+// ================= وظائف مساعدة للمزامنة اليدوية =================
+
+// فرض مزامنة فورية
+async function forceRefresh() {
+  try {
+    console.log('🔄 فرض المزامنة الفورية...');
+    AlSaedanUtils.showLoading(true);
+    
+    await dbManager.forcSync();
+    
+    // إعادة تحميل الصفحة الحالية
+    const currentPath = window.location.pathname;
+    if (currentPath === '/family') {
+      await loadFamilyTree();
+    } else if (currentPath === '/events') {
+      await loadEvents();
+    } else if (currentPath === '/suggestions') {
+      await loadSuggestions();
+    } else if (currentPath === '/library') {
+      await loadLibraryContent();
+    }
+    
+    AlSaedanUtils.showAlert('success', 'تمت المزامنة بنجاح!');
+  } catch (error) {
+    console.error('❌ خطأ في المزامنة:', error);
+    AlSaedanUtils.showAlert('error', 'حدث خطأ في المزامنة');
+  } finally {
+    AlSaedanUtils.showLoading(false);
+  }
+}
+
+// عرض إحصائيات المزامنة
+function showSyncStats() {
+  const stats = dbManager.getSyncStats();
+  const statsHtml = `
+    <div class="bg-white rounded-lg p-6 shadow-lg max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">إحصائيات المزامنة</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span>حالة الاتصال:</span>
+          <span class="${stats.isOnline ? 'text-green-600' : 'text-red-600'}">
+            ${stats.isOnline ? 'متصل' : 'غير متصل'}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span>عمليات مؤجلة:</span>
+          <span>${stats.pendingOperations}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>آخر مزامنة:</span>
+          <span>${new Date(stats.lastSyncTime).toLocaleTimeString('ar-SA')}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>مراقبي نشطين:</span>
+          <span>${stats.listeners.length}</span>
+        </div>
+      </div>
+      <button onclick="forceRefresh()" class="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+        فرض مزامنة فورية
+      </button>
+    </div>
+  `;
+  
+  AlSaedanUtils.showAlert('info', statsHtml);
+}
+
+// إتاحة الوظائف عبر window للوصول إليها من HTML
+window.forceRefresh = forceRefresh;
+window.showSyncStats = showSyncStats;
+window.dbManager = dbManager; // للتطوير والاختبار
 
 // متغيرات عامة لإدارة العائلة
 let isEditMode = false;
 let familyMembers = [];
 let memberToDelete = null;
 
-// تحميل شجرة العائلة مع إدارة الأعضاء
+// تحميل شجرة العائلة مع إدارة الأعضاء - محدّث لـ DatabaseManager
 async function loadFamilyTree() {
   try {
-    const response = await axios.get('/api/family-members');
-    familyMembers = response.data.data;
+    console.log('🌳 تحميل شجرة العائلة...');
+    
+    // استخدام DatabaseManager لاسترجاع البيانات
+    familyMembers = await dbManager.getFamilyMembers();
+    
+    console.log(`✅ تم تحميل ${familyMembers.length} عضو`);
     
     displayFamilyTree(familyMembers);
     setupFamilyManagement();
+    
+    // إعداد مستمع التحديثات الفورية
+    dbManager.addEventListener('member_added', () => {
+      console.log('🆕 تم إضافة عضو جديد - إعادة تحميل الشجرة');
+      setTimeout(() => loadFamilyTree(), 1000);
+    });
+    
+    dbManager.addEventListener('member_updated', () => {
+      console.log('🔄 تم تحديث عضو - إعادة تحميل الشجرة');
+      setTimeout(() => loadFamilyTree(), 1000);
+    });
+    
+    dbManager.addEventListener('member_deleted', () => {
+      console.log('🗑️ تم حذف عضو - إعادة تحميل الشجرة');
+      setTimeout(() => loadFamilyTree(), 1000);
+    });
+    
     document.getElementById('family-loading').classList.add('hidden');
     document.getElementById('family-tree').classList.remove('hidden');
   } catch (error) {
-    console.error('Error loading family tree:', error);
+    console.error('❌ خطأ في تحميل شجرة العائلة:', error);
     document.getElementById('family-loading').innerHTML = `
       <div class="text-center py-12">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <p class="text-red-600">حدث خطأ في تحميل شجرة العائلة</p>
+        <button onclick="loadFamilyTree()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          إعادة المحاولة
+        </button>
       </div>
     `;
   }
@@ -361,22 +952,41 @@ function displayFamilyTree(members) {
   container.innerHTML = html;
 }
 
-// تحميل الفعاليات
+// تحميل الفعاليات - محدّث لـ DatabaseManager
 async function loadEvents() {
   try {
-    const response = await axios.get('/api/events');
-    const events = response.data.data;
+    console.log('🎉 تحميل الفعاليات...');
+    
+    // استخدام DatabaseManager
+    const events = await dbManager.getEvents();
+    
+    console.log(`✅ تم تحميل ${events.length} فعالية`);
     
     displayEvents(events);
     setupEventManagement();
+    
+    // إعداد مستمع التحديثات الفورية
+    dbManager.addEventListener('event_added', () => {
+      console.log('🆕 تم إضافة فعالية جديدة - إعادة تحميل الفعاليات');
+      setTimeout(() => loadEvents(), 1000);
+    });
+    
+    dbManager.addEventListener('event_updated', () => {
+      console.log('🔄 تم تحديث فعالية - إعادة تحميل الفعاليات');
+      setTimeout(() => loadEvents(), 1000);
+    });
+    
     document.getElementById('events-loading').classList.add('hidden');
     document.getElementById('events-list').classList.remove('hidden');
   } catch (error) {
-    console.error('Error loading events:', error);
+    console.error('❌ خطأ في تحميل الفعاليات:', error);
     document.getElementById('events-loading').innerHTML = `
       <div class="text-center py-12">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <p class="text-red-600">حدث خطأ في تحميل الفعاليات</p>
+        <button onclick="loadEvents()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          إعادة المحاولة
+        </button>
       </div>
     `;
   }
@@ -474,21 +1084,40 @@ function displayEvents(events) {
   container.innerHTML = html;
 }
 
-// تحميل المقترحات
+// تحميل المقترحات - محدّث لـ DatabaseManager
 async function loadSuggestions() {
   try {
-    const response = await axios.get('/api/suggestions');
-    const suggestions = response.data.data;
+    console.log('💡 تحميل المقترحات...');
+    
+    // استخدام DatabaseManager
+    const suggestions = await dbManager.getSuggestions();
+    
+    console.log(`✅ تم تحميل ${suggestions.length} مقترح`);
     
     displaySuggestions(suggestions);
+    
+    // إعداد مستمع التحديثات الفورية
+    dbManager.addEventListener('suggestion_added', () => {
+      console.log('🆕 تم إضافة مقترح جديد - إعادة تحميل المقترحات');
+      setTimeout(() => loadSuggestions(), 1000);
+    });
+    
+    dbManager.addEventListener('suggestion_updated', () => {
+      console.log('🔄 تم تحديث مقترح - إعادة تحميل المقترحات');
+      setTimeout(() => loadSuggestions(), 1000);
+    });
+    
     document.getElementById('suggestions-loading').classList.add('hidden');
     document.getElementById('suggestions-list').classList.remove('hidden');
   } catch (error) {
-    console.error('Error loading suggestions:', error);
+    console.error('❌ خطأ في تحميل المقترحات:', error);
     document.getElementById('suggestions-loading').innerHTML = `
       <div class="text-center py-12">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <p class="text-red-600">حدث خطأ في تحميل المقترحات</p>
+        <button onclick="loadSuggestions()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          إعادة المحاولة
+        </button>
       </div>
     `;
   }
@@ -570,15 +1199,13 @@ function setupSuggestionForm() {
     try {
       AlSaedanUtils.showLoading(true);
       
-      const response = await axios.post('/api/suggestions', data);
+      // استخدام DatabaseManager بدلاً من axios
+      const response = await dbManager.createSuggestion(data);
       
-      if (response.data.success) {
+      if (response.success) {
         AlSaedanUtils.showAlert('success', 'تم إرسال مقترحك بنجاح! شكراً لمساهمتك');
         form.reset();
-        // إعادة تحميل المقترحات
-        setTimeout(() => {
-          loadSuggestions();
-        }, 1000);
+        // المزامنة التلقائية عبر مستمع الأحداث - لا حاجة لإعادة التحميل يدوياً
       } else {
         AlSaedanUtils.showAlert('error', 'حدث خطأ في إرسال المقترح');
       }
@@ -652,43 +1279,52 @@ function getPriorityBadgeClass(priority) {
 
 // =================== مكتبة التجارب والخبرات ===================
 
-// تحميل محتوى المكتبة
+// تحميل محتوى المكتبة - محدّث لـ DatabaseManager
 async function loadLibraryContent() {
   try {
-    // تحميل المحتوى المميز
-    const featuredResponse = await axios.get('/api/library/featured');
-    if (featuredResponse.data.success) {
-      displayFeaturedContent(featuredResponse.data.data);
-      document.getElementById('featured-loading').classList.add('hidden');
-      document.getElementById('featured-content').classList.remove('hidden');
-    }
+    console.log('📚 تحميل محتوى المكتبة...');
+    
+    // تحميل المحتوى المميز باستخدام DatabaseManager
+    const featuredContent = await dbManager.getFeaturedLibraryItems();
+    displayFeaturedContent(featuredContent);
+    document.getElementById('featured-loading').classList.add('hidden');
+    document.getElementById('featured-content').classList.remove('hidden');
 
     // تحميل جميع المحتوى
-    const allResponse = await axios.get('/api/library');
-    if (allResponse.data.success) {
-      displayLibraryContent(allResponse.data.data);
-      document.getElementById('content-loading').classList.add('hidden');
-      document.getElementById('content-list').classList.remove('hidden');
-    }
+    const allContent = await dbManager.getLibraryItems();
+    displayLibraryContent(allContent);
+    document.getElementById('content-loading').classList.add('hidden');
+    document.getElementById('content-list').classList.remove('hidden');
 
     // تحميل إحصائيات الفئات
-    const categoriesResponse = await axios.get('/api/library/categories');
-    if (categoriesResponse.data.success) {
-      displayCategoryStats(categoriesResponse.data.data);
-    }
+    const categories = await dbManager.getLibraryCategories();
+    displayCategoryStats(categories);
+    
+    console.log('✅ تم تحميل محتوى المكتبة بنجاح');
+    
+    // إعداد مستمع التحديثات الفورية
+    dbManager.addEventListener('content_viewed', () => {
+      console.log('👁️ تمت مشاهدة محتوى - تحديث العدادات');
+    });
 
   } catch (error) {
-    console.error('Error loading library content:', error);
+    console.error('❌ خطأ في تحميل محتوى المكتبة:', error);
     document.getElementById('featured-loading').innerHTML = `
       <div class="text-center py-8">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <p class="text-red-600">حدث خطأ في تحميل محتوى المكتبة</p>
+        <button onclick="loadLibraryContent()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          إعادة المحاولة
+        </button>
       </div>
     `;
     document.getElementById('content-loading').innerHTML = `
       <div class="text-center py-8">
         <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
         <p class="text-red-600">حدث خطأ في تحميل المحتوى</p>
+        <button onclick="loadLibraryContent()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          إعادة المحاولة
+        </button>
       </div>
     `;
   }
@@ -874,11 +1510,8 @@ async function filterLibraryContent() {
       url += '?' + params.toString();
     }
     
-    const response = await axios.get(url);
-    
-    if (response.data.success) {
-      displayLibraryContent(response.data.data);
-    }
+    const content = await dbManager.getLibraryItems(Object.fromEntries(params));
+    displayLibraryContent(content);
     
   } catch (error) {
     console.error('Error filtering content:', error);
@@ -891,8 +1524,8 @@ async function filterLibraryContent() {
 // عرض محتوى معين
 async function viewContent(contentId) {
   try {
-    // تحديث عدد المشاهدات
-    await axios.post(`/api/library/view/${contentId}`);
+    // تحديث عدد المشاهدات باستخدام DatabaseManager
+    await dbManager.viewLibraryItem(contentId);
     
     // في التطبيق الحقيقي، هنا سنفتح صفحة المحتوى أو modal
     AlSaedanUtils.showAlert('info', 'سيتم فتح المحتوى قريباً...');
@@ -1066,17 +1699,15 @@ async function handleCreateEvent(e) {
   try {
     AlSaedanUtils.showLoading(true);
     
-    const response = await axios.post('/api/events', eventData);
+    // استخدام DatabaseManager بدلاً من axios
+    const response = await dbManager.createEvent(eventData);
     
-    if (response.data.success) {
+    if (response.success) {
       AlSaedanUtils.showAlert('success', 'تم إنشاء الفعالية بنجاح!');
       document.getElementById('event-modal').classList.add('hidden');
       e.target.reset();
       
-      // إعادة تحميل الفعاليات
-      setTimeout(() => {
-        loadEvents();
-      }, 1000);
+      // المزامنة التلقائية عبر مستمع الأحداث - لا حاجة لإعادة التحميل يدوياً
     } else {
       AlSaedanUtils.showAlert('error', 'حدث خطأ في إنشاء الفعالية');
     }
@@ -1088,11 +1719,10 @@ async function handleCreateEvent(e) {
   }
 }
 
-// تحميل الفعاليات لقائمة الدعوات
+// تحميل الفعاليات لقائمة الدعوات - محدّث لـ DatabaseManager
 async function loadEventsForInvitation() {
   try {
-    const response = await axios.get('/api/events');
-    const events = response.data.data;
+    const events = await dbManager.getEvents();
     
     const select = document.getElementById('selected-event');
     select.innerHTML = '<option value="">اختر الفعالية للدعوة...</option>';
@@ -1135,11 +1765,10 @@ async function handleEventSelection() {
   await loadInvitationStats(eventId);
 }
 
-// تحميل الأعضاء للاختيار الفردي
+// تحميل الأعضاء للاختيار الفردي - محدّث لـ DatabaseManager
 async function loadMembersForSelection() {
   try {
-    const response = await axios.get('/api/family-members');
-    const members = response.data.data;
+    const members = await dbManager.getFamilyMembers();
     
     const container = document.getElementById('individual-members');
     container.innerHTML = '';
@@ -1158,16 +1787,12 @@ async function loadMembersForSelection() {
   }
 }
 
-// تحميل إحصائيات الدعوات
+// تحميل إحصائيات الدعوات - محدّث لـ DatabaseManager
 async function loadInvitationStats(eventId) {
   try {
-    const response = await axios.get(`/api/events/${eventId}/invitation-stats`);
-    
-    if (response.data.success) {
-      const stats = response.data.data;
-      displayInvitationStats(stats);
-      document.getElementById('invitation-stats').classList.remove('hidden');
-    }
+    const stats = await dbManager.getInvitationStats(eventId);
+    displayInvitationStats(stats);
+    document.getElementById('invitation-stats').classList.remove('hidden');
   } catch (error) {
     console.error('Error loading invitation stats:', error);
   }
@@ -1234,10 +1859,11 @@ async function handleSendInvitations() {
   try {
     AlSaedanUtils.showLoading(true);
     
-    const response = await axios.post(`/api/events/${eventId}/send-invitations`, invitationData);
+    // استخدام DatabaseManager بدلاً من axios
+    const response = await dbManager.sendEventInvitations(eventId, invitationData);
     
-    if (response.data.success) {
-      AlSaedanUtils.showAlert('success', response.data.message);
+    if (response.success) {
+      AlSaedanUtils.showAlert('success', response.message || 'تم إرسال الدعوات بنجاح');
       
       // تنظيف النموذج
       document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -1246,7 +1872,7 @@ async function handleSendInvitations() {
       // إعادة تحميل الإحصائيات
       await loadInvitationStats(eventId);
     } else {
-      AlSaedanUtils.showAlert('error', response.data.error || 'حدث خطأ في إرسال الدعوات');
+      AlSaedanUtils.showAlert('error', response.error || 'حدث خطأ في إرسال الدعوات');
     }
   } catch (error) {
     console.error('Error sending invitations:', error);
@@ -1256,15 +1882,11 @@ async function handleSendInvitations() {
   }
 }
 
-// عرض دعوات فعالية معينة
+// عرض دعوات فعالية معينة - محدّث لـ DatabaseManager
 async function viewEventInvitations(eventId) {
   try {
-    const response = await axios.get(`/api/events/${eventId}/invitations`);
-    
-    if (response.data.success) {
-      const invitations = response.data.data;
-      displayInvitationsModal(invitations, eventId);
-    }
+    const invitations = await dbManager.getEventInvitations(eventId);
+    displayInvitationsModal(invitations, eventId);
   } catch (error) {
     console.error('Error loading event invitations:', error);
     AlSaedanUtils.showAlert('error', 'حدث خطأ في تحميل الدعوات');
@@ -1539,21 +2161,18 @@ async function handleMemberFormSubmit(e) {
     
     let response;
     if (isEditing) {
-      response = await axios.put(`/api/family-members/${memberId}`, memberData);
+      response = await dbManager.updateFamilyMember(memberId, memberData);
     } else {
-      response = await axios.post('/api/family-members', memberData);
+      response = await dbManager.createFamilyMember(memberData);
     }
     
-    if (response.data.success) {
-      AlSaedanUtils.showAlert('success', response.data.message);
+    if (response.success) {
+      AlSaedanUtils.showAlert('success', response.message || 'تم حفظ بيانات العضو بنجاح');
       closeMemberModalHandler();
       
-      // إعادة تحميل شجرة العائلة
-      setTimeout(() => {
-        loadFamilyTree();
-      }, 1000);
+      // المزامنة التلقائية عبر مستمع الأحداث - لا حاجة لإعادة التحميل يدوياً
     } else {
-      AlSaedanUtils.showAlert('error', response.data.error);
+      AlSaedanUtils.showAlert('error', response.error || 'حدث خطأ في الحفظ');
     }
   } catch (error) {
     console.error('Error saving member:', error);
@@ -1563,16 +2182,11 @@ async function handleMemberFormSubmit(e) {
   }
 }
 
-// تعديل عضو
+// تعديل عضو - محدّث لـ DatabaseManager
 async function editMember(memberId) {
   try {
-    const response = await axios.get(`/api/family-members/${memberId}`);
-    
-    if (response.data.success) {
-      openMemberModal(response.data.data);
-    } else {
-      AlSaedanUtils.showAlert('error', 'لم يتم العثور على بيانات العضو');
-    }
+    const member = await dbManager.getFamilyMember(memberId);
+    openMemberModal(member);
   } catch (error) {
     console.error('Error loading member for editing:', error);
     AlSaedanUtils.showAlert('error', 'حدث خطأ في تحميل بيانات العضو');
@@ -1593,17 +2207,14 @@ async function confirmDeleteMember() {
   try {
     AlSaedanUtils.showLoading(true);
     
-    const response = await axios.delete(`/api/family-members/${memberToDelete}`);
+    const response = await dbManager.deleteFamilyMember(memberToDelete);
     
-    if (response.data.success) {
-      AlSaedanUtils.showAlert('success', response.data.message);
+    if (response.success) {
+      AlSaedanUtils.showAlert('success', response.message || 'تم حذف العضو بنجاح');
       
-      // إعادة تحميل شجرة العائلة
-      setTimeout(() => {
-        loadFamilyTree();
-      }, 1000);
+      // المزامنة التلقائية عبر مستمع الأحداث - لا حاجة لإعادة التحميل يدوياً
     } else {
-      AlSaedanUtils.showAlert('error', response.data.error);
+      AlSaedanUtils.showAlert('error', response.error || 'حدث خطأ في الحذف');
     }
   } catch (error) {
     console.error('Error deleting member:', error);

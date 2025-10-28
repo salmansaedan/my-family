@@ -1,6 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "saedan-family-tree",
+  "main": "src/index.tsx",
   "compatibility_date": "2024-01-01",
-  "pages_build_output_dir": "./dist"
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+  
+  // قاعدة البيانات للمزامنة الفورية
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "saedan-family-realtime",
+      "database_id": "placeholder-will-be-updated-after-creation"
+    }
+  ]
 }
