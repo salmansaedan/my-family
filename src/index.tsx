@@ -4139,7 +4139,7 @@ class DatabaseManager {
       if (this.isOnline) {
         this.syncLatestChanges();
       }
-    }, 30000); // كل 30 ثانية
+    }, 10000); // كل 10 ثوان للمزامنة السريعة
   }
   
   // ================= إدارة المستمعين للتحديثات الفورية =================
@@ -4244,13 +4244,110 @@ class DatabaseManager {
   
   async syncLatestChanges() {
     try {
-      const response = await this.apiCall('GET', '/activity?since=' + this.lastSyncTime);
+      // مزامنة بيانات العائلة
+      const familyResponse = await fetch('/api/family-members');
+      const familyResult = await familyResponse.json();
       
-      if (response.success && response.data.length > 0) {
-        console.log('🔄 تم اكتشاف', response.data.length, 'تحديث جديد');
-        this.notifyListeners('data_updated', response.data);
-        this.lastSyncTime = Date.now();
+      if (familyResult.status === 'success') {
+        // تخزين عدد الأعضاء الحالي للمقارنة
+        if (!this.lastFamilyCount) {
+          this.lastFamilyCount = familyResult.count;
+        } else if (this.lastFamilyCount !== familyResult.count) {
+          console.log('🔄 تم اكتشاف تحديث في أعضاء العائلة:', familyResult.count, 'vs', this.lastFamilyCount);
+          this.lastFamilyCount = familyResult.count;
+          
+          // إظهار إشعار للمستخدم
+          if (typeof showNotification === 'function') {
+            showNotification('🔄 تم تحديث بيانات أعضاء العائلة تلقائياً', 'success');
+          }
+          
+          // تحديث واجهة العائلة
+          if (typeof loadFamilyData === 'function') {
+            loadFamilyData();
+          }
+          if (typeof loadDashboardStats === 'function') {
+            loadDashboardStats();
+          }
+          
+          this.notifyListeners('family_updated', familyResult.data);
+        }
       }
+      
+      // مزامنة الأحداث
+      const eventsResponse = await fetch('/api/events');
+      const eventsResult = await eventsResponse.json();
+      
+      if (eventsResult.status === 'success') {
+        if (!this.lastEventsCount) {
+          this.lastEventsCount = eventsResult.count;
+        } else if (this.lastEventsCount !== eventsResult.count) {
+          console.log('🔄 تم اكتشاف تحديث في الأحداث:', eventsResult.count, 'vs', this.lastEventsCount);
+          this.lastEventsCount = eventsResult.count;
+          
+          // إظهار إشعار للمستخدم
+          if (typeof showNotification === 'function') {
+            showNotification('📅 تم تحديث بيانات الأحداث تلقائياً', 'info');
+          }
+          
+          // تحديث واجهة الأحداث
+          if (typeof loadEventsData === 'function') {
+            loadEventsData();
+          }
+          
+          this.notifyListeners('events_updated', eventsResult.data);
+        }
+      }
+      
+      // مزامنة الاقتراحات
+      const suggestionsResponse = await fetch('/api/suggestions');
+      const suggestionsResult = await suggestionsResponse.json();
+      
+      if (suggestionsResult.status === 'success') {
+        if (!this.lastSuggestionsCount) {
+          this.lastSuggestionsCount = suggestionsResult.count;
+        } else if (this.lastSuggestionsCount !== suggestionsResult.count) {
+          console.log('🔄 تم اكتشاف تحديث في الاقتراحات:', suggestionsResult.count, 'vs', this.lastSuggestionsCount);
+          this.lastSuggestionsCount = suggestionsResult.count;
+          
+          // إظهار إشعار للمستخدم
+          if (typeof showNotification === 'function') {
+            showNotification('💡 تم تحديث بيانات الاقتراحات تلقائياً', 'info');
+          }
+          
+          // تحديث واجهة الاقتراحات
+          if (typeof loadSuggestionsData === 'function') {
+            loadSuggestionsData();
+          }
+          
+          this.notifyListeners('suggestions_updated', suggestionsResult.data);
+        }
+      }
+      
+      // مزامنة المكتبة الرقمية
+      const libraryResponse = await fetch('/api/library');
+      const libraryResult = await libraryResponse.json();
+      
+      if (libraryResult.status === 'success') {
+        if (!this.lastLibraryCount) {
+          this.lastLibraryCount = libraryResult.count;
+        } else if (this.lastLibraryCount !== libraryResult.count) {
+          console.log('🔄 تم اكتشاف تحديث في المكتبة الرقمية:', libraryResult.count, 'vs', this.lastLibraryCount);
+          this.lastLibraryCount = libraryResult.count;
+          
+          // إظهار إشعار للمستخدم
+          if (typeof showNotification === 'function') {
+            showNotification('📚 تم تحديث بيانات المكتبة الرقمية تلقائياً', 'info');
+          }
+          
+          // تحديث واجهة المكتبة
+          if (typeof loadLibraryData === 'function') {
+            loadLibraryData();
+          }
+          
+          this.notifyListeners('library_updated', libraryResult.data);
+        }
+      }
+      
     } catch (error) {
       console.error('❌ خطأ في مزامنة التحديثات:', error);
     }
@@ -5473,8 +5570,8 @@ app.post('/api/family-members', async (c) => {
       memberData.member_type || 'founder'
     ).run()
     
-    // تسجيل النشاط
-    await logActivity(env.DB, 'family_members', id, 'insert', null, memberData)
+    // تسجيل النشاط - معطل مؤقتاً لحل مشكلة الخطأ
+    // await logActivity(env.DB, 'family_members', id, 'insert', null, memberData)
     
     return c.json({
       status: 'success',
@@ -5564,8 +5661,8 @@ app.put('/api/family-members/:id', async (c) => {
       id
     ).run()
     
-    // تسجيل النشاط
-    await logActivity(env.DB, 'family_members', id, 'update', null, memberData)
+    // تسجيل النشاط - معطل مؤقتاً لحل مشكلة الخطأ
+    // await logActivity(env.DB, 'family_members', id, 'update', null, memberData)
     
     return c.json({
       status: 'success',
@@ -5611,8 +5708,8 @@ app.delete('/api/family-members/:id', async (c) => {
     // حذف العضو
     await env.DB.prepare('DELETE FROM family_members WHERE id = ?').bind(id).run()
     
-    // تسجيل النشاط
-    await logActivity(env.DB, 'family_members', id, 'delete', null, member)
+    // تسجيل النشاط - معطل مؤقتاً لحل مشكلة الخطأ
+    // await logActivity(env.DB, 'family_members', id, 'delete', null, member)
     
     return c.json({
       status: 'success',
