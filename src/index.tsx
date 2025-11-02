@@ -313,8 +313,13 @@ app.get('/login', (c) => {
                         localStorage.setItem('authToken', response.data.data.session.token);
                         localStorage.setItem('user', JSON.stringify(response.data.data.user));
                         
+                        // Update UI buttons after successful login
+                        if (typeof updateAuthButtonsAfterLogin === 'function') {
+                            updateAuthButtonsAfterLogin();
+                        }
+                        
                         // Redirect to main app
-                        window.location.href = '/app';
+                        window.location.href = '/';
                     } else {
                         throw new Error(response.data.message);
                     }
@@ -1003,7 +1008,7 @@ app.get('/app', (c) => {
                             شجرة العائلة
                         </h2>
                         <div class="flex space-x-2 space-x-reverse">
-                            <button onclick="addTestMember()" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all">
+                            <button id="addMemberBtn" onclick="addTestMember()" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all">
                                 <i class="fas fa-user-plus ml-2"></i>إضافة عضو
                             </button>
                             <button onclick="refreshFamilyData()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all">
@@ -1487,6 +1492,19 @@ app.get('/app', (c) => {
                                     <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                                         عضو عائلة
                                     </span>
+                                    <!-- أزرار التحكم للمديرين -->
+                                    <div class="mt-2 flex space-x-1 space-x-reverse justify-center">
+                                        <button onclick="editFamilyMember('\${member.id}')" 
+                                                class="hidden admin-only bg-blue-500 hover:bg-blue-600 text-white p-1 rounded text-xs transition-colors" 
+                                                title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteFamilyMember('\${member.id}', '\${(member.full_name || 'عضو').replace(/'/g, '\\'')}')" 
+                                                class="hidden admin-only bg-red-500 hover:bg-red-600 text-white p-1 rounded text-xs transition-colors" 
+                                                title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1495,28 +1513,625 @@ app.get('/app', (c) => {
                 
                 html += '</div>';
                 content.innerHTML = html;
+                
+                // إظهار أزرار التحكم للمديرين
+                setTimeout(() => {
+                    checkAdminAccessInline();
+                }, 100);
             }
             
-            async function addTestMember() {
+            function addTestMember() {
+                console.log('🎯 تم النقر على زر إضافة عضو');
+                
+                // فحص حالة المصادقة أولاً
+                if (!checkAuthenticationState()) {
+                    showNotification('يجب تسجيل الدخول أولاً لإضافة أعضاء جدد', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                    return;
+                }
+                
+                createAdvancedMemberModal();
+            }
+            
+            // نافذة إضافة عضو العائلة المتقدمة
+            function createAdvancedMemberModal() {
+                showSimpleAlert('فتح نافذة إضافة عضو...', 'info');
+                
+                // إنشاء النافذة المنبثقة
+                const modalHtml = \`
+                    <div id="memberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="direction: rtl;">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                            <div class="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-t-xl">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-2xl font-bold">
+                                        <i class="fas fa-user-plus ml-2"></i>
+                                        إضافة عضو جديد للعائلة
+                                    </h3>
+                                    <button onclick="closeMemberModal()" class="text-white hover:text-gray-200">
+                                        <i class="fas fa-times text-2xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <form id="memberForm" class="p-6 space-y-6">
+                                <!-- معلومات أساسية -->
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h4 class="text-lg font-bold text-blue-800 mb-4 flex items-center">
+                                        <i class="fas fa-id-card ml-2"></i>
+                                        المعلومات الأساسية
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
+                                            <input type="text" id="fullName" required 
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                   placeholder="مثال: أحمد محمد السعيدان">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل *</label>
+                                            <select id="generation" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر الجيل</option>
+                                                <option value="1">الجيل الأول (المؤسسين)</option>
+                                                <option value="2">الجيل الثاني (الأبناء)</option>
+                                                <option value="3">الجيل الثالث (الأحفاد)</option>
+                                                <option value="4">الجيل الرابع (أحفاد الأحفاد)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
+                                            <select id="gender" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر الجنس</option>
+                                                <option value="male">ذكر</option>
+                                                <option value="female">أنثى</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                                            <select id="memberType" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر نوع العضوية</option>
+                                                <option value="founder">مؤسس</option>
+                                                <option value="chairman">رئيس مجلس إدارة</option>
+                                                <option value="board_member">عضو مجلس إدارة</option>
+                                                <option value="assembly_member">عضو جمعية عمومية</option>
+                                                <option value="family_member">عضو عائلة</option>
+                                                <option value="son">ابن</option>
+                                                <option value="daughter">ابنة</option>
+                                                <option value="member">عضو</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- معلومات التواصل -->
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="text-lg font-bold text-green-800 mb-4 flex items-center">
+                                        <i class="fas fa-phone ml-2"></i>
+                                        معلومات التواصل
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                                            <input type="tel" id="phone" 
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                   placeholder="مثال: 0501234567">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                                            <input type="email" id="email" 
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                   placeholder="مثال: ahmed@example.com">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- معلومات شخصية -->
+                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <h4 class="text-lg font-bold text-purple-800 mb-4 flex items-center">
+                                        <i class="fas fa-calendar ml-2"></i>
+                                        المعلومات الشخصية
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
+                                            <input type="date" id="birthDate" 
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة/التخصص</label>
+                                            <input type="text" id="profession" 
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                                   placeholder="مثال: مهندس، طبيب، مدرس">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">نبذة تعريفية</label>
+                                        <textarea id="bio" rows="3" 
+                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                                  placeholder="نبذة مختصرة عن العضو، إنجازاته، أو أي معلومات إضافية..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- أزرار التحكم -->
+                                <div class="flex flex-col md:flex-row gap-4 pt-6 border-t border-gray-200">
+                                    <button type="submit" 
+                                            class="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg">
+                                        <i class="fas fa-plus ml-2"></i>
+                                        إضافة العضو
+                                    </button>
+                                    <button type="button" onclick="closeMemberModal()" 
+                                            class="flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-all">
+                                        <i class="fas fa-times ml-2"></i>
+                                        إلغاء
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                \`;
+                
+                // إضافة النافذة للصفحة
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // إضافة معالج الإرسال
+                const memberForm = document.getElementById('memberForm');
+                if (memberForm) {
+                    memberForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        await submitMemberForm();
+                    });
+                }
+            }
+            
+            // إرسال بيانات العضو الجديد
+            async function submitMemberForm() {
                 try {
-                    if (typeof dbManager !== 'undefined') {
-                        const testMember = {
-                            full_name: 'عضو تجريبي ' + Math.floor(Math.random() * 1000),
-                            generation: Math.floor(Math.random() * 3) + 1,
-                            phone: '05' + Math.floor(Math.random() * 100000000),
-                            email: 'test' + Math.floor(Math.random() * 1000) + '@example.com'
-                        };
-                        
-                        await dbManager.createFamilyMember(testMember);
-                        showNotification('تم إضافة عضو تجريبي بنجاح!', 'success');
+                    const submitBtn = document.querySelector('#memberForm button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>جاري الإضافة...';
+                    
+                    const memberData = {
+                        full_name: document.getElementById('fullName').value,
+                        generation: parseInt(document.getElementById('generation').value),
+                        gender: document.getElementById('gender').value,
+                        member_type: document.getElementById('memberType').value,
+                        phone: document.getElementById('phone').value || null,
+                        email: document.getElementById('email').value || null,
+                        birth_date: document.getElementById('birthDate').value || null,
+                        field_of_excellence: document.getElementById('profession').value || null,
+                        achievements: document.getElementById('bio').value || null
+                    };
+                    
+                    console.log('🔄 إرسال بيانات العضو:', memberData);
+                    
+                    const response = await fetch('/api/family-members', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(memberData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        showNotification('✅ تم إضافة العضو بنجاح!', 'success');
+                        closeMemberModal();
                         
                         // إعادة تحميل البيانات
-                        setTimeout(loadFamilyData, 1000);
-                        setTimeout(loadDashboardStats, 1000);
+                        setTimeout(() => {
+                            if (typeof loadFamilyData === 'function') {
+                                loadFamilyData();
+                            }
+                            if (typeof loadDashboardStats === 'function') {
+                                loadDashboardStats();
+                            }
+                        }, 500);
+                    } else {
+                        throw new Error(result.message || 'خطأ في إضافة العضو');
                     }
+                    
                 } catch (error) {
-                    console.error('خطأ في إضافة العضو التجريبي:', error);
-                    showNotification('خطأ في إضافة العضو: ' + error.message, 'error');
+                    console.error('❌ خطأ في إضافة العضو:', error);
+                    showNotification('❌ فشل في إضافة العضو: ' + error.message, 'error');
+                } finally {
+                    const submitBtn = document.querySelector('#memberForm button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }
+            }
+            
+            // إغلاق نافذة إضافة العضو
+            function closeMemberModal() {
+                const modal = document.getElementById('memberModal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+            
+            // تعديل عضو العائلة (مع فحص الصلاحيات)
+            function editFamilyMember(memberId) {
+                console.log('🔄 طلب تعديل العضو:', memberId);
+                
+                // فحص حالة المصادقة والصلاحيات
+                if (!checkAuthenticationState()) {
+                    showNotification('يجب تسجيل الدخول أولاً للتعديل', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                    return;
+                }
+                
+                if (!checkAdminAccessInline()) {
+                    showNotification('ليس لديك صلاحية لتعديل أعضاء العائلة', 'error');
+                    return;
+                }
+                
+                console.log('✅ تم التحقق من الصلاحيات - المتابعة مع التعديل');
+                
+                // جلب بيانات العضو أولاً
+                fetch('/api/family-members/' + memberId)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.status === 'success') {
+                            const member = result.data;
+                            createEditMemberModal(member);
+                        } else {
+                            showNotification('❌ خطأ في جلب بيانات العضو: ' + result.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ خطأ في جلب بيانات العضو:', error);
+                        showNotification('❌ خطأ في الاتصال: ' + error.message, 'error');
+                    });
+            }
+            
+            // إنشاء نافذة تعديل العضو مع البيانات المُحملة مسبقاً
+            function createEditMemberModal(member) {
+                showSimpleAlert('فتح نافذة تعديل العضو...', 'info');
+                
+                // إنشاء النافذة المنبثقة مع البيانات المُحملة مسبقاً
+                const modalHtml = \`
+                    <div id="editMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="direction: rtl;">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-t-xl">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-2xl font-bold">
+                                        <i class="fas fa-user-edit ml-2"></i>
+                                        تعديل بيانات العضو
+                                    </h3>
+                                    <button onclick="closeEditMemberModal()" class="text-white hover:text-gray-200">
+                                        <i class="fas fa-times text-2xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <form id="editMemberForm" class="p-6 space-y-6">
+                                <!-- معلومات أساسية -->
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h4 class="text-lg font-bold text-blue-800 mb-4 flex items-center">
+                                        <i class="fas fa-id-card ml-2"></i>
+                                        المعلومات الأساسية
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
+                                            <input type="text" id="editFullName" required value="\${member.full_name || ''}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                   placeholder="مثال: أحمد محمد السعيدان">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الجيل *</label>
+                                            <select id="editGeneration" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر الجيل</option>
+                                                <option value="1" \${member.generation === 1 ? 'selected' : ''}>الجيل الأول (المؤسسين)</option>
+                                                <option value="2" \${member.generation === 2 ? 'selected' : ''}>الجيل الثاني (الأبناء)</option>
+                                                <option value="3" \${member.generation === 3 ? 'selected' : ''}>الجيل الثالث (الأحفاد)</option>
+                                                <option value="4" \${member.generation === 4 ? 'selected' : ''}>الجيل الرابع (أحفاد الأحفاد)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">الجنس *</label>
+                                            <select id="editGender" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر الجنس</option>
+                                                <option value="male" \${member.gender === 'male' ? 'selected' : ''}>ذكر</option>
+                                                <option value="female" \${member.gender === 'female' ? 'selected' : ''}>أنثى</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع العضوية *</label>
+                                            <select id="editMemberType" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">اختر نوع العضوية</option>
+                                                <option value="founder" \${member.member_type === 'founder' ? 'selected' : ''}>مؤسس</option>
+                                                <option value="chairman" \${member.member_type === 'chairman' ? 'selected' : ''}>رئيس مجلس إدارة</option>
+                                                <option value="board_member" \${member.member_type === 'board_member' ? 'selected' : ''}>عضو مجلس إدارة</option>
+                                                <option value="assembly_member" \${member.member_type === 'assembly_member' ? 'selected' : ''}>عضو جمعية عمومية</option>
+                                                <option value="family_member" \${member.member_type === 'family_member' ? 'selected' : ''}>عضو عائلة</option>
+                                                <option value="son" \${member.member_type === 'son' ? 'selected' : ''}>ابن</option>
+                                                <option value="daughter" \${member.member_type === 'daughter' ? 'selected' : ''}>ابنة</option>
+                                                <option value="member" \${member.member_type === 'member' ? 'selected' : ''}>عضو</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- معلومات التواصل -->
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="text-lg font-bold text-green-800 mb-4 flex items-center">
+                                        <i class="fas fa-phone ml-2"></i>
+                                        معلومات التواصل
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                                            <input type="tel" id="editPhone" value="\${member.phone || ''}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                   placeholder="مثال: 0501234567">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+                                            <input type="email" id="editEmail" value="\${member.email || ''}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                   placeholder="مثال: ahmed@example.com">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- معلومات شخصية -->
+                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <h4 class="text-lg font-bold text-purple-800 mb-4 flex items-center">
+                                        <i class="fas fa-calendar ml-2"></i>
+                                        المعلومات الشخصية
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الميلاد</label>
+                                            <input type="date" id="editBirthDate" value="\${member.birth_date || ''}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">المهنة/التخصص</label>
+                                            <input type="text" id="editProfession" value="\${member.profession || ''}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                                   placeholder="مثال: مهندس، طبيب، مدرس">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">نبذة تعريفية</label>
+                                        <textarea id="editBio" rows="3" 
+                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                                  placeholder="نبذة مختصرة عن العضو، إنجازاته، أو أي معلومات إضافية...">\${member.bio || ''}</textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- أزرار التحكم -->
+                                <div class="flex flex-col md:flex-row gap-4 pt-6 border-t border-gray-200">
+                                    <button type="submit" 
+                                            class="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg">
+                                        <i class="fas fa-save ml-2"></i>
+                                        حفظ التعديلات
+                                    </button>
+                                    <button type="button" onclick="closeEditMemberModal()" 
+                                            class="flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-all">
+                                        <i class="fas fa-times ml-2"></i>
+                                        إلغاء
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                \`;
+                
+                // إضافة النافذة للصفحة
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // إضافة معالج الإرسال
+                const editForm = document.getElementById('editMemberForm');
+                if (editForm) {
+                    editForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        await submitEditMemberForm(member.id);
+                    });
+                }
+            }
+            
+            // إغلاق نافذة تعديل العضو
+            function closeEditMemberModal() {
+                const modal = document.getElementById('editMemberModal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+            
+            // إرسال بيانات تعديل العضو
+            async function submitEditMemberForm(memberId) {
+                try {
+                    const submitBtn = document.querySelector('#editMemberForm button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>جاري الحفظ...';
+                    
+                    const memberData = {
+                        full_name: document.getElementById('editFullName').value,
+                        generation: parseInt(document.getElementById('editGeneration').value),
+                        gender: document.getElementById('editGender').value,
+                        member_type: document.getElementById('editMemberType').value,
+                        phone: document.getElementById('editPhone').value || null,
+                        email: document.getElementById('editEmail').value || null,
+                        birth_date: document.getElementById('editBirthDate').value || null,
+                        profession: document.getElementById('editProfession').value || null,
+                        bio: document.getElementById('editBio').value || null
+                    };
+                    
+                    console.log('🔄 إرسال بيانات التعديل:', memberData);
+                    
+                    const response = await fetch('/api/family-members/' + memberId, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(memberData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        showNotification('✅ تم تحديث بيانات العضو بنجاح!', 'success');
+                        closeEditMemberModal();
+                        
+                        // إعادة تحميل البيانات
+                        setTimeout(() => {
+                            if (typeof loadFamilyData === 'function') {
+                                loadFamilyData();
+                            }
+                            if (typeof loadDashboardStats === 'function') {
+                                loadDashboardStats();
+                            }
+                        }, 500);
+                    } else {
+                        throw new Error(result.message || 'خطأ في تحديث العضو');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ خطأ في تحديث العضو:', error);
+                    showNotification('❌ فشل في تحديث العضو: ' + error.message, 'error');
+                } finally {
+                    const submitBtn = document.querySelector('#editMemberForm button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-save ml-2"></i>حفظ التعديلات';
+                    }
+                }
+            }
+            
+            // حذف عضو العائلة (مع فحص الصلاحيات)
+            function deleteFamilyMember(memberId, memberName) {
+                console.log('🗑️ طلب حذف العضو:', memberId, memberName);
+                
+                // فحص حالة المصادقة والصلاحيات
+                if (!checkAuthenticationState()) {
+                    showNotification('يجب تسجيل الدخول أولاً للحذف', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                    return;
+                }
+                
+                if (!checkAdminAccessInline()) {
+                    showNotification('ليس لديك صلاحية لحذف أعضاء العائلة', 'error');
+                    return;
+                }
+                
+                console.log('✅ تم التحقق من الصلاحيات - المتابعة مع الحذف');
+                
+                // إظهار نافذة تأكيد مخصصة
+                const confirmHtml = \`
+                    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="direction: rtl;">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+                            <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-t-xl">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xl font-bold">
+                                        <i class="fas fa-trash-alt ml-2"></i>
+                                        تأكيد حذف العضو
+                                    </h3>
+                                    <button onclick="closeDeleteModal()" class="text-white hover:text-gray-200">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-800">هل أنت متأكد؟</h4>
+                                        <p class="text-gray-600">هذا الإجراء لا يمكن التراجع عنه</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                    <p class="text-gray-700">
+                                        <strong>سيتم حذف العضو:</strong> \${memberName || 'غير محدد'}
+                                    </p>
+                                    <p class="text-red-600 text-sm mt-2">
+                                        ⚠️ تحذير: سيتم حذف جميع بيانات العضو نهائياً
+                                    </p>
+                                </div>
+                                
+                                <div class="flex flex-col md:flex-row gap-3">
+                                    <button onclick="confirmDeleteMember('\${memberId}')" 
+                                            class="flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all">
+                                        <i class="fas fa-trash ml-2"></i>
+                                        نعم، احذف العضو
+                                    </button>
+                                    <button onclick="closeDeleteModal()" 
+                                            class="flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-all">
+                                        <i class="fas fa-times ml-2"></i>
+                                        إلغاء
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+                
+                // إضافة النافذة للصفحة
+                document.body.insertAdjacentHTML('beforeend', confirmHtml);
+            }
+            
+            // إغلاق نافذة تأكيد الحذف
+            function closeDeleteModal() {
+                const modal = document.getElementById('deleteConfirmModal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+            
+            // تأكيد حذف العضو
+            async function confirmDeleteMember(memberId) {
+                try {
+                    const deleteBtn = document.querySelector('#deleteConfirmModal button[onclick*="confirmDeleteMember"]');
+                    const originalText = deleteBtn.innerHTML;
+                    deleteBtn.disabled = true;
+                    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>جاري الحذف...';
+                    
+                    console.log('🔄 تنفيذ حذف العضو:', memberId);
+                    
+                    const response = await fetch('/api/family-members/' + memberId, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        showNotification('✅ تم حذف العضو بنجاح!', 'success');
+                        closeDeleteModal();
+                        
+                        // إعادة تحميل البيانات
+                        setTimeout(() => {
+                            if (typeof loadFamilyData === 'function') {
+                                loadFamilyData();
+                            }
+                            if (typeof loadDashboardStats === 'function') {
+                                loadDashboardStats();
+                            }
+                        }, 500);
+                    } else {
+                        throw new Error(result.message || 'خطأ في حذف العضو');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ خطأ في حذف العضو:', error);
+                    showNotification('❌ فشل في حذف العضو: ' + error.message, 'error');
+                    closeDeleteModal();
                 }
             }
             
@@ -3082,8 +3697,33 @@ app.get('/app', (c) => {
 
             // ================= التهيئة =================
             
+            // فحص حالة المصادقة عند التحميل
+            function checkInitialAuthState() {
+                console.log('🔍 فحص حالة المصادقة عند التحميل...');
+                
+                const isAuthenticated = checkAuthenticationState();
+                
+                if (isAuthenticated) {
+                    console.log('✅ المستخدم مصادق - عرض أزرار الخروج');
+                    
+                    // فحص صلاحية المدير
+                    const isAdmin = checkAdminAccessInline();
+                    
+                    // فة checkAdminAccessInline تتعامل مع عرض/إخفاء أزرار المدير
+                } else {
+                    console.log('❌ المستخدم غير مصادق - تحويل أزرار الخروج');
+                    updateAuthButtons();
+                    hideAdminControls();
+                }
+                
+                console.log('✅ تم فحص حالة المصادقة عند التحميل');
+            }
+            
             document.addEventListener('DOMContentLoaded', async () => {
                 console.log('🚀 تطبيق آل سعيدان - تم التحميل');
+                
+                // فحص حالة المصادقة وتحديث الواجهة عند التحميل الأولي
+                checkInitialAuthState();
                 
                 // تهيئة التنقل المحمول
                 const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -3121,6 +3761,82 @@ app.get('/app', (c) => {
             setInterval(updateSyncStatus, 5000);
             
 
+            // فحص صلاحية المدير وإظهار أزرار التحكم (النسخة المحسّنة)
+            function checkAdminAccessInline() {
+                try {
+                    // فحص حالة المصادقة أولاً
+                    if (!checkAuthenticationState()) {
+                        console.log('❌ المستخدم غير مصادق - إخفاء أزرار المدير');
+                        hideAdminControls();
+                        return false;
+                    }
+                    
+                    const userData = localStorage.getItem('user');
+                    let isAdmin = false;
+                    
+                    if (userData) {
+                        try {
+                            const user = JSON.parse(userData);
+                            // فحص صلاحية المدير بناءً على الدور أو البريد الإلكتروني
+                            isAdmin = user.role === 'admin' || 
+                                     user.role === 'super_admin' || 
+                                     user.email === 'admin@salmansaedan.com' || 
+                                     user.email === 'info@salmansaedan.com';
+                                     
+                            console.log('🔐 فحص صلاحية المدير:', {
+                                email: user.email,
+                                role: user.role,
+                                isAdmin: isAdmin
+                            });
+                        } catch (e) {
+                            console.error('خطأ في تحليل بيانات المستخدم:', e);
+                            isAdmin = false;
+                        }
+                    }
+                    
+                    if (isAdmin) {
+                        // إظهار أزرار التحكم للمديرين فقط
+                        document.querySelectorAll('.admin-only').forEach(button => {
+                            button.classList.remove('hidden');
+                        });
+                        
+                        // إضافة مؤشر بصري لحالة المدير
+                        showAdminIndicator();
+                        
+                        console.log('✅ تم تفعيل وضع المدير');
+                    } else {
+                        // إخفاء أزرار التحكم للمستخدمين العاديين
+                        document.querySelectorAll('.admin-only').forEach(button => {
+                            button.classList.add('hidden');
+                        });
+                        
+                        removeAdminIndicator();
+                        
+                        console.log('ℹ️ مستخدم عادي - أزرار التحكم مخفية');
+                    }
+                    
+                    return isAdmin;
+                } catch (error) {
+                    console.error('خطأ في فحص صلاحية المدير:', error);
+                    hideAdminControls();
+                    return false;
+                }
+            }
+            
+            // إظهار مؤشر المدير
+            function showAdminIndicator() {
+                // إزالة المؤشر السابق إن وجد
+                removeAdminIndicator();
+                
+                const adminIndicator = document.createElement('div');
+                adminIndicator.id = 'admin-indicator';
+                adminIndicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium z-50';
+                adminIndicator.innerHTML = '<i class="fas fa-user-shield mr-1"></i>وضع المدير';
+                
+                document.body.appendChild(adminIndicator);
+                
+                console.log('✅ تم إضافة مؤشر المدير');
+            }
             
             // وظائف مساعدة للنوافذ المنبثقة
             function showSimpleAlert(message, type) {
@@ -3976,26 +4692,118 @@ async function loadFamilyData() {
       }
       
       // عرض الأعضاء
-      const treeContainer = document.getElementById('family-tree-container');
+      const treeContainer = document.getElementById('family-content');
       if (treeContainer) {
-        let htmlContent = '<div class="grid gap-4">';
-        
+        // تنظيم البيانات حسب الأجيال
+        const generations = {};
         members.forEach(member => {
+          const gen = member.generation || 1;
+          if (!generations[gen]) generations[gen] = [];
+          generations[gen].push(member);
+        });
+        
+        let htmlContent = '<div class="space-y-8">';
+        
+        // عرض الأجيال مرتبة
+        Object.keys(generations).sort((a, b) => a - b).forEach(gen => {
           htmlContent += \`
-            <div class="bg-white rounded-lg p-4 shadow-sm border">
-              <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                  \${member.first_name.charAt(0)}
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+              <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">
+                <i class="fas fa-layer-group ml-2"></i>
+                الجيل \${gen} (\${generations[gen].length} أعضاء)
+              </h3>
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          \`;
+          
+          generations[gen].forEach(member => {
+            const memberTypeColors = {
+              'founder': 'bg-gradient-to-r from-yellow-400 to-orange-500',
+              'chairman': 'bg-gradient-to-r from-purple-500 to-indigo-600',
+              'board_member': 'bg-gradient-to-r from-green-500 to-teal-600',
+              'assembly_member': 'bg-gradient-to-r from-blue-500 to-cyan-600',
+              'family_member': 'bg-gradient-to-r from-gray-500 to-gray-600',
+              'son': 'bg-gradient-to-r from-emerald-500 to-green-600',
+              'member': 'bg-gradient-to-r from-indigo-500 to-purple-600'
+            };
+            
+            const bgColor = memberTypeColors[member.member_type] || 'bg-gradient-to-r from-gray-500 to-gray-600';
+            
+            htmlContent += \`
+              <div class="bg-white rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-all">
+                <div class="flex items-center space-x-3 space-x-reverse mb-3">
+                  <div class="w-14 h-14 \${bgColor} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    \${member.first_name ? member.first_name.charAt(0) : '؟'}
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-gray-900 text-lg">\${member.full_name || 'غير محدد'}</h4>
+                    <p class="text-sm text-blue-600 font-medium">\${member.profession || 'لا توجد مهنة'}</p>
+                  </div>
+                  
+                  <!-- أزرار التحكم للمديرين فقط -->
+                  <div class="flex space-x-1 space-x-reverse admin-controls" id="admin-controls-\${member.id}">
+                    <button onclick="editFamilyMember('\${member.id}')" 
+                            class="hidden admin-only bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors" 
+                            title="تعديل العضو">
+                      <i class="fas fa-edit text-sm"></i>
+                    </button>
+                    <button onclick="deleteFamilyMember('\${member.id}', '\${(member.full_name || 'عضو').replace(/'/g, '\\'')}\')" 
+                            class="hidden admin-only bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors" 
+                            title="حذف العضو">
+                      <i class="fas fa-trash text-sm"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <h4 class="font-semibold text-gray-900">\${member.full_name}</h4>
-                  <p class="text-sm text-gray-600">الجيل \${member.generation}</p>
-                  \${member.profession ? '<p class="text-xs text-blue-600">' + member.profession + '</p>' : ''}
+                
+                <div class="space-y-2 text-sm">
+                  \${member.phone ? '<p class="flex items-center text-gray-600"><i class="fas fa-phone text-green-500 ml-2 w-4"></i>' + member.phone + '</p>' : ''}
+                  \${member.email ? '<p class="flex items-center text-gray-600"><i class="fas fa-envelope text-blue-500 ml-2 w-4"></i>' + member.email + '</p>' : ''}
+                  \${member.birth_date ? '<p class="flex items-center text-gray-600"><i class="fas fa-birthday-cake text-pink-500 ml-2 w-4"></i>' + member.birth_date + '</p>' : ''}
+                  
+                  <div class="mt-3 pt-2 border-t border-gray-200">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <i class="fas fa-user-tag ml-1"></i>
+                      \${member.member_type || 'عضو'}
+                    </span>
+                    \${member.gender === 'female' ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 mr-2"><i class="fas fa-venus ml-1"></i>أنثى</span>' : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2"><i class="fas fa-mars ml-1"></i>ذكر</span>'}
+                  </div>
                 </div>
+              </div>
+            \`;
+          });
+          
+          htmlContent += \`
               </div>
             </div>
           \`;
         });
+        
+        // إضافة إحصائيات شاملة
+        htmlContent += \`
+          <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-xl border border-emerald-200">
+            <h3 class="text-xl font-bold text-emerald-800 mb-4 text-center">
+              <i class="fas fa-chart-pie ml-2"></i>
+              إحصائيات شجرة العائلة
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div class="bg-white p-4 rounded-lg border border-emerald-200">
+                <div class="text-2xl font-bold text-emerald-600">\${members.length}</div>
+                <div class="text-sm text-gray-600">إجمالي الأعضاء</div>
+              </div>
+              <div class="bg-white p-4 rounded-lg border border-emerald-200">
+                <div class="text-2xl font-bold text-blue-600">\${Object.keys(generations).length}</div>
+                <div class="text-sm text-gray-600">عدد الأجيال</div>
+              </div>
+              <div class="bg-white p-4 rounded-lg border border-emerald-200">
+                <div class="text-2xl font-bold text-purple-600">\${members.filter(m => m.gender === 'male').length}</div>
+                <div class="text-sm text-gray-600">الذكور</div>
+              </div>
+              <div class="bg-white p-4 rounded-lg border border-emerald-200">
+                <div class="text-2xl font-bold text-pink-600">\${members.filter(m => m.gender === 'female').length}</div>
+                <div class="text-sm text-gray-600">الإناث</div>
+              </div>
+            </div>
+          </div>
+        \`;
         
         htmlContent += '</div>';
         treeContainer.innerHTML = htmlContent;
@@ -4008,6 +4816,9 @@ async function loadFamilyData() {
       const familyCountEl = document.getElementById('family-count');
       if (familyCountEl) familyCountEl.textContent = members.length;
       
+      // إظهار أزرار التحكم للمديرين
+      checkAdminAccess();
+      
     } else {
       throw new Error('خطأ في تحميل البيانات');
     }
@@ -4018,6 +4829,74 @@ async function loadFamilyData() {
       emptyEl.innerHTML = '<div class="text-center p-8"><i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i><p class="text-red-600">خطأ في تحميل بيانات العائلة</p></div>';
       emptyEl.classList.remove('hidden');
     }
+  }
+}
+
+// فحص صلاحية المدير وإظهار أزرار التحكم
+function checkAdminAccess() {
+  try {
+    // محاكاة فحص دور المستخدم - في التطبيق الحقيقي، سيتم جلب هذا من localStorage أو API
+    const userData = localStorage.getItem('user');
+    let isAdmin = false;
+    
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        // فحص إذا كان المستخدم مديراً
+        isAdmin = user.role === 'admin' || user.role === 'super_admin' || 
+                 user.email === 'admin@salmansaedan.com' || 
+                 user.email === 'info@salmansaedan.com';
+      } catch (e) {
+        console.log('Error parsing user data:', e);
+      }
+    }
+    
+    // للتطوير: السماح للجميع برؤية أزرار التحكم
+    // يمكن تعديل هذا لاحقاً لتقييد الوصول
+    isAdmin = true; // مؤقت للتطوير
+    
+    console.log('🔐 فحص صلاحية المدير:', isAdmin);
+    
+    if (isAdmin) {
+      // إظهار جميع أزرار التحكم للمديرين
+      document.querySelectorAll('.admin-only').forEach(button => {
+        button.classList.remove('hidden');
+      });
+      
+      // إضافة مؤشر بصري لحالة المدير
+      const adminIndicator = document.createElement('div');
+      adminIndicator.id = 'admin-indicator';
+      adminIndicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium z-50';
+      adminIndicator.innerHTML = '<i class="fas fa-user-shield mr-1"></i>وضع المدير';
+      
+      // إزالة المؤشر السابق إن وجد
+      const existingIndicator = document.getElementById('admin-indicator');
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+      
+      document.body.appendChild(adminIndicator);
+      
+      console.log('✅ تم تفعيل وضع المدير - أزرار التحكم مرئية');
+    } else {
+      // إخفاء أزرار التحكم للمستخدمين العاديين
+      document.querySelectorAll('.admin-only').forEach(button => {
+        button.classList.add('hidden');
+      });
+      
+      // إزالة مؤشر المدير
+      const adminIndicator = document.getElementById('admin-indicator');
+      if (adminIndicator) {
+        adminIndicator.remove();
+      }
+      
+      console.log('ℹ️ المستخدم عادي - أزرار التحكم مخفية');
+    }
+    
+    return isAdmin;
+  } catch (error) {
+    console.error('خطأ في فحص صلاحية المدير:', error);
+    return false;
   }
 }
 
@@ -4389,35 +5268,171 @@ class DatabaseManager {
   }
 }
 
-// وظيفة تسجيل الخروج
-async function logout() {
+// وظيفة تسجيل الخروج مع تحديث حالة الواجهة
+function logout() {
   try {
-    // استدعاء API تسجيل الخروج
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
+    console.log('🔐 بدء عملية تسجيل الخروج...');
     
     // مسح بيانات المصادقة من localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
     
-    // إعادة توجيه لصفحة تسجيل الدخول أو إعادة تحميل الصفحة
-    window.location.reload();
+    console.log('✅ تم مسح بيانات المصادقة من localStorage');
     
-    console.log('✅ تم تسجيل الخروج بنجاح');
+    // تحديث حالة الواجهة فوراً
+    updateUIAfterLogout();
+    
+    // إظهار رسالة نجح تسجيل الخروج
+    showNotification('تم تسجيل الخروج بنجاح', 'success');
+    
+    // الإرجاع للشاشة الرئيسية بعد ثانيتين
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+    
+    console.log('✅ تم تسجيل الخروج بنجاح وتحديث الواجهة');
   } catch (error) {
     console.error('خطأ في تسجيل الخروج:', error);
-    // حتى لو فشل الطلب، امسح البيانات المحلية
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
-    window.location.reload();
+    // حتى لو حدث خطأ، امسح البيانات وحدث الواجهة
+    localStorage.clear();
+    updateUIAfterLogout();
+  }
+}
+
+// تحديث الواجهة بعد تسجيل الخروج
+function updateUIAfterLogout() {
+  console.log('🔄 تحديث الواجهة بعد تسجيل الخروج...');
+  
+  // 1. تحويل أزرار الخروج إلى أزرار تسجيل الدخول
+  updateAuthButtons();
+  
+  // 2. إخفاء جميع أزرار التحكم الخاصة بالمديرين
+  hideAdminControls();
+  
+  // 3. إخفاء مؤشر المدير إن وجد
+  removeAdminIndicator();
+  
+  // 4. إعادة فحص الصلاحيات
+  checkAuthenticationState();
+  
+  console.log('✅ تم تحديث الواجهة بنجاح');
+}
+
+// تحديث أزرار المصادقة
+function updateAuthButtons() {
+  console.log('🔄 بدء تحديث أزرار المصادقة...');
+  
+  // 1. تحديث أزرار الخروج في الهيدر (ديسكتوب وموبايل)
+  const desktopLogoutBtn = document.querySelector('nav .hidden.md\\:flex button[onclick="logout()"]');
+  const mobileLogoutBtn = document.querySelector('#mobile-menu button[onclick="logout()"]');
+  
+  [desktopLogoutBtn, mobileLogoutBtn].forEach(button => {
+    if (button && (button.textContent.includes('تسجيل الخروج') || button.textContent.includes('خروج'))) {
+      // تغيير النص والأيقونة
+      button.innerHTML = '<i class="fas fa-sign-in-alt ml-2"></i>تسجيل الدخول';
+      
+      // تغيير الوظيفة واللون
+      button.onclick = () => window.location.href = '/login';
+      button.className = button.className
+        .replace('bg-red-600', 'bg-green-600')
+        .replace('hover:bg-red-700', 'hover:bg-green-700');
+      button.title = 'انتقال إلى صفحة تسجيل الدخول';
+      
+      console.log('✅ تم تحويل زر الخروج إلى تسجيل الدخول');
+    }
+  });
+  
+  // 2. إخفاء زر إضافة عضو للمستخدمين غير المصادقين
+  const addMemberBtn = document.getElementById('addMemberBtn');
+  if (addMemberBtn) {
+    // تغيير النص ليوضح أن التسجيل مطلوب
+    addMemberBtn.innerHTML = '<i class="fas fa-user-plus ml-2"></i>تسجيل الدخول لإضافة عضو';
+    addMemberBtn.className = 'bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all';
+    addMemberBtn.onclick = () => {
+      showNotification('يجب تسجيل الدخول أولاً لإضافة أعضاء جدد', 'info');
+      setTimeout(() => window.location.href = '/login', 2000);
+    };
+    
+    console.log('✅ تم تحويل زر إضافة عضو إلى زر تسجيل الدخول');
+  }
+  
+  console.log('✅ تم تحديث أزرار المصادقة للخروج');
+}
+
+// تحديث أزرار المصادقة - تحويل الدخول إلى الخروج
+function updateAuthButtonsAfterLogin() {
+  console.log('🔄 بدء تحديث أزرار المصادقة للدخول...');
+  
+  // 1. تحديث أزرار الدخول إلى الخروج في الهيدر
+  const desktopLoginBtn = document.querySelector('nav .hidden.md\\:flex button');
+  const mobileLoginBtn = document.querySelector('#mobile-menu button');
+  
+  [desktopLoginBtn, mobileLoginBtn].forEach(button => {
+    if (button && (button.textContent.includes('تسجيل الدخول') || button.textContent.includes('دخول'))) {
+      // تغيير النص والأيقونة
+      button.innerHTML = '<i class="fas fa-sign-out-alt ml-2"></i>تسجيل الخروج';
+      
+      // تغيير الوظيفة واللون
+      button.onclick = logout;
+      button.className = button.className
+        .replace('bg-green-600', 'bg-red-600')
+        .replace('hover:bg-green-700', 'hover:bg-red-700');
+      button.title = 'تسجيل الخروج من النظام';
+      
+      console.log('✅ تم تحويل زر الدخول إلى تسجيل الخروج');
+    }
+  });
+  
+  // 2. إرجاع زر إضافة عضو لوظيفته الأصلية
+  const addMemberBtn = document.getElementById('addMemberBtn');
+  if (addMemberBtn) {
+    addMemberBtn.innerHTML = '<i class="fas fa-user-plus ml-2"></i>إضافة عضو جديد';
+    addMemberBtn.className = 'bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all';
+    addMemberBtn.onclick = addTestMember;
+    
+    console.log('✅ تم إرجاع زر إضافة عضو لوظيفته الأصلية');
+  }
+  
+  console.log('✅ تم تحديث أزرار المصادقة للدخول');
+}
+
+// إخفاء أزرار التحكم الخاصة بالمديرين
+function hideAdminControls() {
+  document.querySelectorAll('.admin-only').forEach(element => {
+    element.classList.add('hidden');
+  });
+  
+  console.log('✅ تم إخفاء أزرار التحكم الخاصة بالمديرين');
+}
+
+// إزالة مؤشر المدير
+function removeAdminIndicator() {
+  const adminIndicator = document.getElementById('admin-indicator');
+  if (adminIndicator) {
+    adminIndicator.remove();
+    console.log('✅ تم إزالة مؤشر المدير');
+  }
+}
+
+// فحص حالة المصادقة
+function checkAuthenticationState() {
+  const userData = localStorage.getItem('user');
+  const authToken = localStorage.getItem('authToken');
+  
+  if (!userData || !authToken) {
+    console.log('❌ المستخدم غير مصادق');
+    return false;
+  }
+  
+  try {
+    const user = JSON.parse(userData);
+    console.log('✅ المستخدم مصادق:', user.email);
+    return true;
+  } catch (error) {
+    console.error('خطأ في تحليل بيانات المستخدم:', error);
+    return false;
   }
 }
 
@@ -4761,6 +5776,11 @@ window.loadSuggestionsData = loadSuggestionsData;
 window.loadLibraryData = loadLibraryData;
 window.dbManager = new DatabaseManager();
 window.logout = logout;
+window.checkAuthenticationState = checkAuthenticationState;
+window.updateAuthButtons = updateAuthButtons;
+window.hideAdminControls = hideAdminControls;
+window.removeAdminIndicator = removeAdminIndicator;
+window.updateUIAfterLogout = updateUIAfterLogout;
 window.addFamilyMember = addFamilyMember;
 window.editFamilyMember = editFamilyMember;
 window.deleteFamilyMember = deleteFamilyMember;
@@ -4773,6 +5793,256 @@ window.deleteSuggestion = deleteSuggestion;
 window.addLibraryItem = addLibraryItem;
 window.editLibraryItem = editLibraryItem;
 window.deleteLibraryItem = deleteLibraryItem;
+
+// وظائف إضافية للمصادقة والصلاحيات
+window.checkAuthenticationState = checkAuthenticationState;
+window.updateAuthButtons = updateAuthButtons;
+window.hideAdminControls = hideAdminControls;
+window.removeAdminIndicator = removeAdminIndicator;
+window.updateUIAfterLogout = updateUIAfterLogout;
+window.updateAuthButtonsAfterLogin = updateAuthButtonsAfterLogin;
+window.showAdminIndicator = showAdminIndicator;
+window.checkInitialAuthState = checkInitialAuthState;
+
+// إضافة showNotification للنافذة العامة أيضاً
+if (typeof showNotification !== 'undefined') {
+  window.showNotification = showNotification;
+} else {
+  // إنشاء وظيفة showNotification بسيطة كبديل
+  window.showNotification = function(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
+    
+    const colors = {
+      'success': 'bg-green-500 text-white',
+      'error': 'bg-red-500 text-white',
+      'info': 'bg-blue-500 text-white',
+      'warning': 'bg-yellow-500 text-white'
+    };
+    
+    notification.className += ' ' + colors[type];
+    notification.innerHTML = message;
+    
+    document.body.appendChild(notification);
+    
+    // Animation
+    setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+    setTimeout(() => {
+      notification.classList.add('translate-x-full');
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  };
+}
+
+// إضافة وظائف المصادقة الجديدة
+
+// وظيفة تسجيل الخروج مع تحديث حالة الواجهة
+function logout() {
+  try {
+    console.log('🔐 بدء عملية تسجيل الخروج...');
+    
+    // مسح بيانات المصادقة من localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
+    
+    console.log('✅ تم مسح بيانات المصادقة من localStorage');
+    
+    // تحديث حالة الواجهة فوراً
+    updateUIAfterLogout();
+    
+    // إظهار رسالة نجح تسجيل الخروج
+    showNotification('تم تسجيل الخروج بنجاح', 'success');
+    
+    // الإرجاع للشاشة الرئيسية بعد ثانيتين
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+    
+    console.log('✅ تم تسجيل الخروج بنجاح وتحديث الواجهة');
+  } catch (error) {
+    console.error('خطأ في تسجيل الخروج:', error);
+    // حتى لو حدث خطأ، امسح البيانات وحدث الواجهة
+    localStorage.clear();
+    updateUIAfterLogout();
+  }
+}
+
+// تحديث الواجهة بعد تسجيل الخروج
+function updateUIAfterLogout() {
+  console.log('🔄 تحديث الواجهة بعد تسجيل الخروج...');
+  
+  // 1. تحويل أزرار الخروج إلى أزرار تسجيل الدخول
+  updateAuthButtons();
+  
+  // 2. إخفاء جميع أزرار التحكم الخاصة بالمديرين
+  hideAdminControls();
+  
+  // 3. إخفاء مؤشر المدير إن وجد
+  removeAdminIndicator();
+  
+  // 4. إعادة فحص الصلاحيات
+  checkAuthenticationState();
+  
+  console.log('✅ تم تحديث الواجهة بنجاح');
+}
+
+// تحديث أزرار المصادقة
+function updateAuthButtons() {
+  console.log('🔄 بدء تحديث أزرار المصادقة...');
+  
+  // 1. تحديث أزرار الخروج في الهيدر (ديسكتوب وموبايل)
+  const desktopLogoutBtn = document.querySelector('nav .hidden.md\\:flex button[onclick="logout()"]');
+  const mobileLogoutBtn = document.querySelector('#mobile-menu button[onclick="logout()"]');
+  
+  [desktopLogoutBtn, mobileLogoutBtn].forEach(button => {
+    if (button && (button.textContent.includes('تسجيل الخروج') || button.textContent.includes('خروج'))) {
+      // تغيير النص والأيقونة
+      button.innerHTML = '<i class="fas fa-sign-in-alt ml-2"></i>تسجيل الدخول';
+      
+      // تغيير الوظيفة واللون
+      button.onclick = () => window.location.href = '/login';
+      button.className = button.className
+        .replace('bg-red-600', 'bg-green-600')
+        .replace('hover:bg-red-700', 'hover:bg-green-700');
+      button.title = 'انتقال إلى صفحة تسجيل الدخول';
+      
+      console.log('✅ تم تحويل زر الخروج إلى تسجيل الدخول');
+    }
+  });
+  
+  // 2. إخفاء زر إضافة عضو للمستخدمين غير المصادقين
+  const addMemberBtn = document.getElementById('addMemberBtn');
+  if (addMemberBtn) {
+    // تغيير النص ليوضح أن التسجيل مطلوب
+    addMemberBtn.innerHTML = '<i class="fas fa-user-plus ml-2"></i>تسجيل الدخول لإضافة عضو';
+    addMemberBtn.className = 'bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all';
+    addMemberBtn.onclick = () => {
+      showNotification('يجب تسجيل الدخول أولاً لإضافة أعضاء جدد', 'info');
+      setTimeout(() => window.location.href = '/login', 2000);
+    };
+    
+    console.log('✅ تم تحويل زر إضافة عضو إلى زر تسجيل الدخول');
+  }
+  
+  console.log('✅ تم تحديث أزرار المصادقة للخروج');
+}
+
+// تحديث أزرار المصادقة - تحويل الدخول إلى الخروج
+function updateAuthButtonsAfterLogin() {
+  console.log('🔄 بدء تحديث أزرار المصادقة للدخول...');
+  
+  // 1. تحديث أزرار الدخول إلى الخروج في الهيدر
+  const desktopLoginBtn = document.querySelector('nav .hidden.md\\:flex button');
+  const mobileLoginBtn = document.querySelector('#mobile-menu button');
+  
+  [desktopLoginBtn, mobileLoginBtn].forEach(button => {
+    if (button && (button.textContent.includes('تسجيل الدخول') || button.textContent.includes('دخول'))) {
+      // تغيير النص والأيقونة
+      button.innerHTML = '<i class="fas fa-sign-out-alt ml-2"></i>تسجيل الخروج';
+      
+      // تغيير الوظيفة واللون
+      button.onclick = logout;
+      button.className = button.className
+        .replace('bg-green-600', 'bg-red-600')
+        .replace('hover:bg-green-700', 'hover:bg-red-700');
+      button.title = 'تسجيل الخروج من النظام';
+      
+      console.log('✅ تم تحويل زر الدخول إلى تسجيل الخروج');
+    }
+  });
+  
+  // 2. إرجاع زر إضافة عضو لوظيفته الأصلية
+  const addMemberBtn = document.getElementById('addMemberBtn');
+  if (addMemberBtn) {
+    addMemberBtn.innerHTML = '<i class="fas fa-user-plus ml-2"></i>إضافة عضو جديد';
+    addMemberBtn.className = 'bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all';
+    addMemberBtn.onclick = addTestMember;
+    
+    console.log('✅ تم إرجاع زر إضافة عضو لوظيفته الأصلية');
+  }
+  
+  console.log('✅ تم تحديث أزرار المصادقة للدخول');
+}
+
+// إخفاء أزرار التحكم الخاصة بالمديرين
+function hideAdminControls() {
+  document.querySelectorAll('.admin-only').forEach(element => {
+    element.classList.add('hidden');
+  });
+  
+  console.log('✅ تم إخفاء أزرار التحكم الخاصة بالمديرين');
+}
+
+// إزالة مؤشر المدير
+function removeAdminIndicator() {
+  const adminIndicator = document.getElementById('admin-indicator');
+  if (adminIndicator) {
+    adminIndicator.remove();
+    console.log('✅ تم إزالة مؤشر المدير');
+  }
+}
+
+// فحص حالة المصادقة
+function checkAuthenticationState() {
+  const userData = localStorage.getItem('user');
+  const authToken = localStorage.getItem('authToken');
+  
+  if (!userData || !authToken) {
+    console.log('❌ المستخدم غير مصادق');
+    return false;
+  }
+  
+  try {
+    const user = JSON.parse(userData);
+    console.log('✅ المستخدم مصادق:', user.email);
+    return true;
+  } catch (error) {
+    console.error('خطأ في تحليل بيانات المستخدم:', error);
+    return false;
+  }
+}
+
+// فحص حالة المصادقة عند التحميل
+function checkInitialAuthState() {
+  console.log('🔍 فحص حالة المصادقة عند التحميل...');
+  
+  const isAuthenticated = checkAuthenticationState();
+  
+  if (isAuthenticated) {
+    console.log('✅ المستخدم مصادق - عرض أزرار الخروج');
+    
+    // تحديث الأزرار لإظهار أزرار الخروج
+    updateAuthButtonsAfterLogin();
+    
+    // فحص صلاحية المدير
+    const isAdmin = checkAdminAccessInline();
+    
+    // وظيفة checkAdminAccessInline تتعامل مع عرض/إخفاء أزرار المدير
+  } else {
+    console.log('❌ المستخدم غير مصادق - تحويل أزرار الخروج');
+    updateAuthButtons();
+    hideAdminControls();
+  }
+  
+  console.log('✅ تم فحص حالة المصادقة عند التحميل');
+}
+
+// إظهار مؤشر المدير
+function showAdminIndicator() {
+  // إزالة المؤشر السابق إن وجد
+  removeAdminIndicator();
+  
+  const adminIndicator = document.createElement('div');
+  adminIndicator.id = 'admin-indicator';
+  adminIndicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium z-50';
+  adminIndicator.innerHTML = '<i class="fas fa-user-shield mr-1"></i>وضع المدير';
+  
+  document.body.appendChild(adminIndicator);
+  
+  console.log('✅ تم إضافة مؤشر المدير');
+}
 
 console.log('🚀 تم تحميل JavaScript بنجاح');
 `;
